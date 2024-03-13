@@ -1,0 +1,103 @@
+.container-signup {
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f3f6f9;
+    overflow-y: auto;
+  }
+  
+  .container-innerBox {
+    margin: 5vh auto;
+    width: 40%;
+    background-color: #ffffff;
+    border-radius: 5px;
+  }
+  
+  .container-innerBox-form {
+    padding: 5vh;
+  }
+  
+  .container-innerBox-headings h3 {
+    font-family: Montserrat, sans-serif;
+    color: #6691e7;
+    font-size: 1.03125rem;
+  }
+  
+  .container-innerBox-headings p {
+    margin-bottom: 1rem;
+    margin-top: 0;
+    color: #898c9b;
+  }
+  
+  .form-input-password {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .form-input-password input {
+    width: 100%;
+  }
+  
+  .container-innerBox-headings {
+    text-align: center;
+    align-items: center;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form label {
+    font-weight: 400;
+  }
+  
+  input:focus {
+    outline: none;
+  }
+  
+  .form label,
+  input,
+  form-input-password {
+    margin-bottom: 10px;
+  }
+  
+  
+  .form-input-password {
+    display: flex;
+    align-items: center;
+  }
+  
+  span {
+    margin-left: 2vh;
+  }
+  
+  .inputClass
+  {
+    padding: 2%;
+  }
+  
+  .form-button-div button {
+    width: 100%;
+    padding: 2%;
+    background-color: #13c56b;
+    border-radius: 5px;
+    border: 0px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .footer {
+    text-align: center;
+  }
+  
+  .inputErrors{
+    border: 1px solid #ed5e5e;
+  }
+  
+  .errors {
+    font-size: 0.875em;
+    margin-bottom: 10px;
+    color: #ed5e5e;
+  }
+  

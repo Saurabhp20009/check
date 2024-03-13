@@ -1,0 +1,187 @@
+.settings-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.setting-outerbox {
+  background-color: #f1f4f7;
+  height: 100vh;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.userIcon {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+.username {
+  margin: 0;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+@media (min-width: 768px) {
+  .buttons-container {
+    flex-direction: row;
+  }
+
+  .button {
+    margin-right: 10px;
+    margin-bottom: 0;
+  }
+}
+
+.user-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  align-items: center;
+  text-align: center;
+  background-color: white;
+  width: auto;
+  box-shadow: 0 0 1px #f1f4f7;
+}
+
+.user-card-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.user-card h4 {
+  margin: 5vh auto;
+  font-family: Montserrat, sans-serif;
+  font-size: 16px !important;
+  color: #555b62;
+}
+
+.card-user-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-right: 15px;
+  color: #38454a;
+}
+
+.username {
+  margin: 0;
+  font-size: 18px;
+}
+
+.card-button {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  align-items: center;
+  text-align: center;
+}
+
+
+.google-sign-in-button {
+  margin: auto;
+  width: fit-content;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f3f6f9;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: 2px solid #f3f6f9 ;
+}
+
+.google-sign-in-button:hover{
+  box-shadow: 0 0 2px;
+}
+
+
+.google-icon-wrapper {
+  width: 30px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  
+}
+
+.google-icon {
+  width: 100%;
+  height: auto;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #3c3c3c;
+  cursor: pointer;
+  padding: 0;
+  text-transform: none;
+}
+
+
+.aweber-link-button {
+  margin: auto;
+  width: fit-content;
+  padding: 9px;
+  border-radius: 5px;
+  border: 2px solid #f3f6f9 ;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: #f3f6f9;
+}
+
+
+.aweber-link-button:hover{
+  box-shadow: 0 0 2px;
+}
+
+
+.aweber-icon-wrapper {
+  width: 30px;
+  margin-right: 15px;
+}
+
+.aweber-icon {
+  width: 100%;
+  height: auto;
+}
+
+.aweber-btn-text {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #3c3c3c;
+  cursor: pointer;
+  padding: 0;
+  text-transform: none;
+}
+
+

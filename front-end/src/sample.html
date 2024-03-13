@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Signup & Dashboard</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <div id="login-signup-container">
+        <!-- Login Form -->
+        <div id="login-form">
+            <h2>Login</h2>
+            <form id="login-form-fields">
+                <input type="text" placeholder="Email" id="login-email">
+                <input type="password" placeholder="Password" id="login-password">
+                <button type="submit">Login</button>
+            </form>
+        </div>
+        <!-- Signup Form -->
+        <div id="signup-form">
+            <h2>Sign Up</h2>
+            <form id="signup-form-fields">
+                <input type="text" placeholder="Email" id="signup-email">
+                <input type="password" placeholder="Password" id="signup-password">
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard" style="display: none;">
+        <h1>Dashboard</h1>
+        <div id="google-sheets-list">
+            <h3>Google Sheets</h3>
+            <!-- Display Google Sheets here -->
+        </div>
+        <div id="aweber-lists">
+            <h3>AWeber Lists</h3>
+            <!-- Display AWeber lists here -->
+        </div>
+        <button id="start-automation">Start Automation</button>
+        <button id="pause-automation">Pause Automation</button>
+        <div id="progress">
+            <h3>Progress</h3>
+            <p>Total Synced: <span id="total-synced"></span></p>
+            <p>Last Time Triggered: <span id="last-triggered"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Add JavaScript functionality here
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const dashboard = document.getElementById('dashboard');
+            const startButton = document.getElementById('start-automation');
+            const pauseButton = document.getElementById('pause-automation');
+            
+            // Show dashboard and hide login/signup forms
+            function showDashboard() {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'none';
+                dashboard.style.display = 'block';
+            }
+
+            // Event listener for login form submission
+            document.getElementById('login-form-fields').addEventListener('submit', function(event) {
+                event.preventDefault();
+                // Add login logic here
+                showDashboard();
+            });
+
+            // Event listener for signup form submission
+            document.getElementById('signup-form-fields').addEventListener('submit', function(event) {
+                event.preventDefault();
+                // Add signup logic here
+                showDashboard();
+            });
+
+            // Event listener for start button click
+            startButton.addEventListener('click', function() {
+                // Add logic to start automation workflow
+            });
+
+            // Event listener for pause button click
+            pauseButton.addEventListener('click', function() {
+                // Add logic to pause automation workflow
+            });
+        });
+    </script>
+</body>
+</html>

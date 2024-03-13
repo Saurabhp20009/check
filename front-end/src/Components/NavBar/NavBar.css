@@ -1,0 +1,74 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+}
+
+.navbar__left h1 {
+  margin: 0;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.navbar__right{
+  margin-right: 5vh;
+}
+
+h6 {
+  color: #9a9ca9;
+  margin: 5vh auto 1vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  font-size: small;
+}
+
+.user {
+  cursor: pointer;
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: -35px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  text-align: center;
+}
+
+.dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown ul li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown li {
+  color: black;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.link {
+  text-decoration: none;
+  color: inherit;
+  display: contents;
+  align-items: center;
+}
+
+.dropdown ul li:hover {
+  background-color: #f4f4f4;
+}
+
+.user-icon {
+  font-size: 5vh;
+}

@@ -1,0 +1,172 @@
+.automation-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 0 1px #f3f6f9;
+  margin: 5vh;
+}
+
+.accordions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f3f6f9;
+  padding: 2vh;
+  width: 80%;
+  color: #adb0bb;
+}
+
+.accordions_dropdown {
+  margin-top: 5vh;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.NameInput {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 380;
+  background-color: #f3f6f9;
+  color: #9d9fac;
+}
+
+select {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: 400;
+}
+
+.span {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: 300;
+}
+
+.input-group label {
+  margin-bottom: 8px;
+  color: #4e545b;
+  font-weight: 500;
+}
+
+.input-group input,
+.input-group select {
+  width: 80%;
+  padding: 10px;
+  border: 0px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-group select {
+  border: 1px solid #dadee3;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #4b4f52;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: #007bff;
+}
+
+.label-group {
+  margin-bottom: 20px;
+}
+
+.last-triggered-label {
+  color: #666;
+}
+
+.start-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+select {
+  background-color: #333333;
+  color: white;
+  border-radius: 20px;
+}
+
+.start-button:hover {
+  background-color: #0056b3;
+}
+
+.label-group label {
+  color: #4e545b;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.delete-button {
+  background-color: #ff6347; /* Tomato color */
+  color: #fff; /* White text color */
+  border: none;
+  border-radius: 5px;
+  /* Makes the button round */
+  padding: 2vh; /* Adjust padding as needed */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 2vh;
+}
+
+.delete-button:hover {
+  background-color: #d6341c; /* Darker red color on hover */
+}
+.delete-icon {
+  margin-right: 5px;
+}
+
+.start-button {
+  background-color: #4caf50; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  margin: 4px 2px;
+  cursor: pointer;
+  transition-duration: 0.4s;
+}
+
+.start-button:hover {
+  background-color: #45a049; /* Darker green */
+}
+
+.start-icon {
+  margin-right: 5px;
+  display: flex;
+  align-items: center; /* Adjust the spacing between the icon and the text */
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive styles */
+@media only screen and (max-width: 600px) {
+}
+
+/* Media query for responsiveness */
+@media screen and (max-width: 768px) {
+}
+
+@media screen and (max-width: 480px) {
+  input-group label {
+    font-size: 8px;
+  }
+}
