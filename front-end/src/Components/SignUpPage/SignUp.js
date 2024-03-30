@@ -10,10 +10,10 @@ import axios from "axios";
 const Signup = ({ handelLogin, handleSignUp }) => {
   const [passwordVisibility, setPasswordVisibilty] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-    confirm_password: "",
+    email: null,
+    username: null,
+    password: null,
+    confirm_password: null,
   });
   const [errors, setErrors] = useState({
     emailError: "Please Enter Your Email",
@@ -83,7 +83,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
           <div className="form">
             <label>Email</label>
             <input
-              className={`inputClass  ${!formData.email && "inputErrors"}   `}
+              className={`inputClass  ${!formData.email && formData.email!==null && "inputErrors"}   `}
               type="email"
               value={formData.email}
               onChange={(e) =>
@@ -91,13 +91,13 @@ const Signup = ({ handelLogin, handleSignUp }) => {
               }
               placeholder="Enter email"
             />
-            {!formData.email && (
+            {!formData.email &&formData.email!==null && (
               <div className="errors">{errors.emailError}</div>
             )}
 
             <label>Username</label>
             <input
-              className={`inputClass  ${!formData.email && "inputErrors"}   `}
+              className={`inputClass  ${!formData.username && formData.username!==null && "inputErrors"}   `}
               type="text"
               value={formData.username}
               onChange={(e) =>
@@ -105,7 +105,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
               }
               placeholder="Enter Username"
             />
-            {!formData.username && (
+            {!formData.username && formData.username!==null && (
               <div className="errors">{errors.usernameError}</div>
             )}
 
@@ -113,7 +113,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
 
             <div className="form-input-password">
               <input
-                className={`inputClass  ${!formData.password && "inputErrors"}`}
+                className={`inputClass  ${!formData.password&& formData.password!==null && "inputErrors"}`}
                 type={"text"}
                 value={formData.password}
                 onChange={(e) =>
@@ -122,7 +122,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
                 placeholder="Enter Password"
               />
             </div>
-            {!formData.password && (
+            {!formData.password && formData.password!==null && (
               <div className="errors"> {errors.passwordError}</div>
             )}
 
@@ -131,7 +131,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
             <div className="form-input-password">
               <input
                 className={`inputClass  ${
-                  !formData.confirm_password && "inputErrors"
+                  !formData.confirm_password && formData.confirm_password !==null && "inputErrors"
                 }`}
                 type={"text"}
                 value={formData.confirm_password}
@@ -141,7 +141,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
                 placeholder="Enter Confirm Password"
               />
             </div>
-            {!formData.confirm_password && (
+            {!formData.confirm_password && formData.confirm_password !==null && (
               <div className="errors"> {errors.confirm_passwordError}</div>
             )}
 

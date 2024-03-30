@@ -7,6 +7,8 @@ import Dashboard from "./Components/Dashboard/Dashboard";
 import AuthPage from "./Components/AuthPage/AuthPage";
 import Settings from "./Components/SettingsUI/Settings";
 import AweberAuthLinkPage from "./Components/AweberAuthLink/AweberAuthLinkPage";
+import ErrorRecords from "./Components/ErrorRecords/ErrorRecords";
+import DisplayWorkflows from "./Components/DashboardPages/DisplayWorkflows";
 
 function App() {
   const [checkUserLogin, setCheckUserLogin] = useState(false);
@@ -34,7 +36,9 @@ function App() {
             )
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<Dashboard />}/>
+            <Route path="/workflows" element={<DisplayWorkflows />} />
+            <Route path="/error" element={<ErrorRecords />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="/aweberauth" element={<AweberAuthLinkPage />} />

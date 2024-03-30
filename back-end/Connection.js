@@ -13,18 +13,4 @@ const dbConnection = async () => {
 // Call the function to establish database connection
 dbConnection()
 
-const checkCollectionInDB = async (sheetName) => {
-    try {
-        const collections = await mongoose.connection.db.listCollections().toArray(); 
-        const check= collections.some(collection => collection.name === sheetName)
-        return check
-      } catch (error) {
-        console.error("Error checking collection:", error);
-    }
-}
 
-
-//await checkCollectionInDB("MailerCloud");
-
-// Export the function if needed
-module.exports = checkCollectionInDB;

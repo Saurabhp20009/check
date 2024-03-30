@@ -1,195 +1,107 @@
-import React, { useEffect, useState } from "react";
-import "./AutomationCard.css"; // Import CSS for styling
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { IoCheckmarkDoneCircle } from "react-icons/io5";
+import "./ExistingWorkFlows.css";
+import { IoIosRemoveCircle } from "react-icons/io";
 import { ToastContainer, toast } from "react-toastify";
-import "./AutomationCard.css";
-import { RiRestartFill } from "react-icons/ri";
-import { MdRestartAlt } from "react-icons/md";
-import { ImSpinner4 } from "react-icons/im";
-import { FaAngleDown } from "react-icons/fa6";
-import { IoIosArrowUp } from "react-icons/io";
+import { PopBox } from "../PopUpBox/PopBox.js";
+import Modal from "react-modal";
 
-function ExistingWorkFlows({
-  handleDelete,
-  Name,
-  Email,
-  SheetId,
-  SheetName,
-  AweberListId,
-  Status,
-  LastTimeTrigged,
-  id,
-}) {
-  const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [sheetName, setSheetName] = useState("");
-  const [aweberListId, setAweberListId] = useState("");
-  const [lastTriggered, setLastTriggered] = useState("N/A");
-  const [aweberDataList, setAweberDataList] = useState([]);
-  const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
-  const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
-    []
-  );
-  const [workflowName, setWorkflowName] = useState(Name);
-  const [showSettings, setShowSettings] = useState(false);
-  
-  const handleSpreadsheetIdChange = (event) => {
-    setSpreadsheetId(event.target.value);
+const ExistingWorkFlows = ({ item }) => {
+  console.log(item);
+
+  const user = JSON.parse(localStorage.getItem("userInfo"));
+
+  const headers = {
+    Authorization: `Bearer ${user.token} `,
+    "Content-Type": "application/json",
   };
 
-  const handleSheetNameChange = (event) => {
-    setSheetName(event.target.value);
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleConfirm = async () => {
+    await axios
+      .delete(`http://localhost:8000/user/api/delete/workflow?id=${item._id}`, {
+        headers: headers,
+      })
+      .then((response) => window.location.reload())
+      .catch((error) => toast.error(error));
+
+    setIsOpen(false);
   };
 
-  const handleAweberListChange = (event) => {
-    setAweberListId(event.target.value);
+  const handleClose = () => {
+    setIsOpen(false);
   };
-
-  const handleStartAutomation = async () => {
-    // Your logic to start automation goes here
-    // For demo purposes, update lastTriggered with current time
-    console.log(id);
-
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/restartautomation",
-      { workflowId: id }
-    );
-
-    if (response.data.status === 200) {
-      return toast.success(response.data.message);
-    }
-
-    return toast.error(response.data.message);
-  };
-
-  const gettingAweberList = async () => {
-    const user = JSON.parse(localStorage.getItem("userInfo")).email;
-
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/gettinglists",
-      {
-        email: JSON.parse(localStorage.getItem("userInfo")).email,
-      }
-    );
-
-    if (response.data.status === 200) {
-      setAweberDataList([...response.data.list_data]);
-      setAweberListId(response.data.list_data[0].id);
-    }
-  };
-
-  const gettingSpreadsheetList = async () => {
-    const response = await axios.get(
-      "http://localhost:8000/aweber/api/gettingspreadsheets"
-    );
-    if (response.data.status === 200) {
-      setGoogleSpreadDataList([...response.data.data]);
-      setSpreadsheetId(response.data.data[0].id);
-    }
-  };
-
-  const gettingSpreadsheetSheetList = async () => {
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/gettingsheets",
-      {
-        sheetId: spreadsheetId,
-      }
-    );
-    if (response.data.status === 200) {
-      setGoogleSpreadDataSheetList([...response.data.data]);
-      setSheetName(response.data.data[0].title);
-    }
-  };
-
- const handleSettings=()=>{
-  setShowSettings(!showSettings)
- }
-
-  useEffect(() => {
-    gettingAweberList();
-    gettingSpreadsheetList();
-    gettingSpreadsheetSheetList();
-  }, []);
-
-  useEffect(() => {
-    gettingSpreadsheetSheetList();
-  }, [spreadsheetId]);
 
   return (
-    <div className="automation-card">
-      <div className="input-group">
-        <label htmlFor="name">Name</label>
-
-        <input className="NameInput" value={workflowName} />
-      </div>
-      
-      <div className="accordions" onClick={handleSettings}> Show More  {showSettings ? <IoIosArrowUp /> : <FaAngleDown />} </div>
-
-      {showSettings && (
-        <div className="accordions_dropdown">
-          <div className="input-group">
-            <label htmlFor="spreadsheetId"> Select spreadsheet</label>
-
-            <select id="aweberList" value={SheetId}>
-              {googleSpreadDataList.map((item, index) => (
-                <option key={index} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="sheetName">Select sheet</label>
-            <select id="aweberList" value={SheetName}>
-              {googleSpreadDataSheetList.map((item, index) => (
-                <option key={index} value={item.title}>
-                  {item.title}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="input-group">
-            <label htmlFor="aweberList">Select aweber list</label>
-            <select id="aweberList" value={AweberListId}>
-              {aweberDataList.map((item, index) => (
-                <option key={index} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="label-group">
-            <label>Last Time Triggered</label>
-            <span>{LastTimeTrigged}</span>
-          </div>
+    <div className="Container">
+      <div className="flex-content">
+        <div className="content">
+          <label>Name</label>
+          <p>{item.Name}</p>
         </div>
-      )}
-
-      <div className="buttons">
-        <button className="start-button" onClick={handleStartAutomation}>
-          {Status !== "running" ? (
-            <>
-              <MdRestartAlt className="start-icon" />
-              Restart
-            </>
-          ) : (
-            <>
-              <ImSpinner4 className="start-icon" />
-              Running
-            </>
-          )}
-        </button>
-        <button className="delete-button" onClick={handleDelete}>
-          <FontAwesomeIcon className="delete-icon" icon={faTrashAlt} />
-          Remove
-        </button>
+        <div className="content">
+          <label>Sheet Name</label>
+          <p>{item.SheetName}</p>
+        </div>
+        <div className="content">
+          <label>{item.WebinarId ? "WebinarId" : "Aweber List Id"}</label>
+          <p>{item.WebinarId ? item.WebinarId : item.AweberListId}</p>
+        </div>
+        <div className="content">
+          <label>Status</label>
+          <p style={{ display: "flex", alignItems: "center" }}>
+            <div className="spinner-overlay">
+              {item.Status === "Running" ? (
+                <div className="spinner-container">
+                  <div className="spinner"></div>
+                </div>
+              ) : (
+                <IoCheckmarkDoneCircle className="finishedIcon" />
+              )}
+            </div>
+            {item.Status}
+          </p>
+        </div>
+        <div>
+          <button
+            type="button"
+            className={
+              item.Status === "Running" ? "odd-remove-button" : "remove-button"
+            }
+            onClick={() => {
+             {
+                setIsOpen(true);
+              }
+            }}
+          >
+            <IoIosRemoveCircle className="removeIcon" />
+            Remove
+          </button>
+        </div>
+      </div>
+      <div>
+        <Modal
+          isOpen={isOpen}
+          onRequestClose={handleClose}
+          className="modal"
+          overlayClassName="overlay"
+        >
+          <div className="modal-content">
+            <h2>Do you want to remove this workflow record?</h2>
+            <p>There Error record will also be deleted.</p>
+            <div className="modal-buttons">
+              <button onClick={handleConfirm}>Yes</button>
+              <button onClick={handleClose}>No</button>
+            </div>
+          </div>
+        </Modal>
       </div>
 
-      <ToastContainer autoClose={3000} />
+      <ToastContainer />
     </div>
   );
-}
+};
 
 export default ExistingWorkFlows;

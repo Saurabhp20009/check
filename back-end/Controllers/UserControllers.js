@@ -1,5 +1,16 @@
-const {ModelUserData} = require("../Models/UserModel");
+const { ModelUserData } = require("../Models/UserModel");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const {
+  GoToWebinarAutomationData,
+  GoToWebinarTokenData,
+} = require("../Models/GoToWebinarModel");
+const {
+  ModelAweberAutomationData,
+  ModelAweberTokenData,
+} = require("../Models/AweberModel");
+const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 
 const createHash = async (password) => {
   const saltRounds = 10;
@@ -26,7 +37,7 @@ const handleSignUp = async (req, res) => {
         email: email,
         username: username,
         password: hashPassword,
-        automations: []
+        automations: [],
       });
       userInstance.save();
       console.log("user sucessfully created...");
@@ -42,6 +53,7 @@ const handleSignUp = async (req, res) => {
 
 const handleLogin = async (req, res) => {
   const { email, password } = req.body;
+  const secretKey = process.env.SECRET_KEY;
 
   // Checking all the fields
   if (!email || !password) {
@@ -64,7 +76,17 @@ const handleLogin = async (req, res) => {
 
       if (passwordCompareResult) {
         console.log("Password is correct & User authenticated ...");
-        return res.json({ status: 200, message: "User authenticated" });
+
+        const payload = {
+          email: checkUserExistInDB.email,
+          password: checkUserExistInDB.password,
+        };
+
+        const options = { expiresIn: "7d" };
+
+        const token = jwt.sign(payload, secretKey, options);
+
+        return res.json({ status: 200, checkUserExistInDB, token: token });
       } else {
         console.log("Password is incorrect...");
         return res.json({ status: 403, message: "Password is incorrect" });
@@ -80,15 +102,86 @@ const handleLogin = async (req, res) => {
 
 const handleGettingUserInfo = async (req, res) => {
   const { email } = req.body;
-    
 
   const userInfo = await ModelUserData.findOne({ email: email });
+
+  const checkGoogleAcountLinked = await ModelGoogleTokenData.find({
+    Email: email,
+  });
+  const checkGoToWebinarAccountLinked = await GoToWebinarTokenData.find();
+  const checkAweberAccountLinked = await ModelAweberTokenData.find({
+    email: email,
+  });
+
+  const GoogleAccountLinked = checkGoogleAcountLinked.length > 0;
+  const GoToWebinarAccountLinked = checkGoToWebinarAccountLinked.length > 0;
+  const AweberAccountLinked = checkAweberAccountLinked.length > 0;
 
   if (!userInfo) {
     return res.json({ status: 403, message: "user didn't found" });
   } else {
-    return res.json({ status: 200, message: "user found", info: userInfo });
+    return res.status(200).json({
+      Google: GoogleAccountLinked,
+      GTW: GoToWebinarAccountLinked,
+      Aweber: AweberAccountLinked,
+    });
   }
 };
 
-module.exports = { handleSignUp, handleLogin, handleGettingUserInfo };
+const handleGetAutomationData = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email not found" });
+  }
+
+  try {
+    let TotalWorkflows = [];
+    const GTWAutomationData = await GoToWebinarAutomationData.find({
+      Email: "saurabhpatwal92000@gmail.com",
+    });
+    TotalWorkflows = [];
+    const AweberAutomationData = await ModelAweberAutomationData.find({
+      Email: email,
+    });
+
+    TotalWorkflows = GTWAutomationData.concat(AweberAutomationData);
+    console.log(TotalWorkflows);
+    res.status(200).json({ Workflows: TotalWorkflows });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const handleDeleteWorkflow = async (req, res) => {
+  const { id } = req.query;
+
+  try {
+    const model = await GoToWebinarAutomationData.findById(id).exec();
+    if (model) {
+      await GoToWebinarAutomationData.deleteOne({ _id: id });
+      return res.status(200).json({ message: "Document deleted successfully." });
+    } else {
+      const modelB = await ModelAweberAutomationData.findById(id).exec();
+      if (modelB) {
+        await ModelAweberAutomationData.deleteOne({ _id: id });
+        return res.status(200).json({ message: "Document deleted successfully." });
+      } else {
+        console.log("Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData");
+        return res.status(404).json({ message: "Document not found." });
+      }
+    }
+  } catch (error) {
+    console.error("Error querying documents:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+  
+};
+
+module.exports = {
+  handleSignUp,
+  handleLogin,
+  handleGettingUserInfo,
+  handleGetAutomationData,
+  handleDeleteWorkflow
+};

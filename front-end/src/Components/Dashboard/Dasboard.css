@@ -1,16 +1,42 @@
 .add-automation-card {
     border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 2vh;
+    padding: 1vh;
     background-color: #f9f9f9;
     display: flex;
-    justify-content: right;
+    justify-content: space-between;
     margin: 0 auto;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    align-items: center;
   }
   
+  .pages{
+    margin-left: 5vh;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+  }
+
+  .pages svg{
+   height: 3.5vh;
+   width: 3.5vh;
+   margin-right: 1vh;
+  }
+ 
+  .pages_down
+  {
+    margin-left: 1vh;
+    color: #50575e;
+  }
+
+  .pages_down svg{
+    height: 2vh;
+    width: 2vh;
+  }
+
   .add-automation-button {
     background-color: #dcf6e9;
+    margin-right: 5vh;
     color: #33cd7f;
     border: none;
     border-radius: 5px;
@@ -26,4 +52,94 @@
     background-color: #4caf50 ;
     color: whitesmoke;
   }
+
+  .dropdown-container {
+   
+  }
   
+  
+  .dropdown-list {  
+    position: absolute;
+    top: 6.2rem;
+    right: 3em;
+    width: 10%;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-top: none;
+    box-shadow: 0 0 1px #e2e2e2;
+    border-radius: 5px;
+    padding: 1.5vh;
+
+   /* Initially hidden */
+  }
+  
+  .pagesDropDown{
+    position: absolute;
+    top: 6.2rem;
+    width: 13%;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-top: none;
+    box-shadow: 0 0 2px #e2e2e2;
+    border-radius: 5px;
+    padding: 1.5vh;
+    transition: all 0.4s ease; 
+    color: #50575d;
+  }
+
+  .pagesDropDown ul{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 350 ;
+    font-size: 16px;
+    font-weight: lighter;
+  }
+
+  .pagesDropDown ul li {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-weight: 350 ;
+    font-size: 16px;
+    font-weight: lighter;
+  }
+  
+  .dropdown-list ul li {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .dropdown-list ul li:hover {
+    background-color: #f0f0f0;
+  }
+
+  .error-icon{
+    margin-right: 2vh;
+  }
+  
+  /* Styles for screens smaller than 600px */
+@media (max-width: 600px) {
+  /* Your CSS rules for small screens here */
+ .add-automation-card{
+  display: none;
+ }
+
+}
+
+/* Styles for screens between 600px and 900px */
+@media (min-width: 600px) and (max-width: 900px) {
+  /* Your CSS rules for medium screens here */
+}
+
+/* Styles for screens larger than 900px */
+@media (min-width: 900px) {
+  /* Your CSS rules for large screens here */
+}

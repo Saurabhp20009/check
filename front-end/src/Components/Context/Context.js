@@ -1,17 +1,17 @@
-// import React, { createContext, useState , } from "react";
+import React, { createContext, useContext, useState , } from "react";
 
-// const MyContext = createContext();
+export const MyContext = createContext();
 
-// export  const Context = ({ children }) => {
-//   const [aweberLinkedStatus, setAweberLinkStatus] = useState(false);
+export  const Context = ({ children }) => {
+  const [isSideBarOpen, setIsSideBarOpen] = useState(false);
 
-//   return (
-//     <MyContext.Provider value={{ aweberLinkedStatus, setAweberLinkStatus }}>
-//       {children}
-//     </MyContext.Provider>
-//   );
-// };
+  return (
+    <MyContext.Provider value={{ isSideBarOpen,setIsSideBarOpen }}>
+      {children}
+    </MyContext.Provider>
+  );
+};
 
-// export const useMyContext = () => {
-//     return useContext(MyContext);
-//   };
+export const useMyContext = () => {
+    return useContext(MyContext);
+  };

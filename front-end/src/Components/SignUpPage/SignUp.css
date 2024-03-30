@@ -3,7 +3,6 @@
     justify-content: center;
     min-height: 100vh;
     background-color: #f3f6f9;
-    overflow-y: auto;
   }
   
   .container-innerBox {
@@ -85,6 +84,7 @@
     border: 0px;
     color: white;
     cursor: pointer;
+    margin-top:2vh ;
   }
   
   .footer {
@@ -99,5 +99,40 @@
     font-size: 0.875em;
     margin-bottom: 10px;
     color: #ed5e5e;
+  }
+  
+
+  @media (max-width: 600px)and (orientation:portrait) {
+   .container-innerBox{
+    width: 80%;
+   }
+    
+   .form label{
+    font-size: small;
+   }
+
+   .form input{
+    font-size: small;
+   }
+   
+   .footer{
+    font-size: small;
+   }
+
+  }
+  
+  /* Styles for screens between 600px and 900px */
+  @media (min-width: 600px) and (max-width: 900px) {
+    /* Your CSS rules for medium screens here */
+    .container-innerBox{
+      width: 80%;
+      height: fit-content;
+     }
+  
+  }
+  
+  /* Styles for screens larger than 900px */
+  @media (min-width: 900px) {
+    /* Your CSS rules for large screens here */
   }
   

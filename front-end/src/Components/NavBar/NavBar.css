@@ -10,6 +10,7 @@
 .navbar__left h1 {
   margin: 0;
   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  
 }
 
 .navbar__right{
@@ -71,4 +72,44 @@ h6 {
 
 .user-icon {
   font-size: 5vh;
+}
+
+.top-nav-icon{
+  display: none;
+}
+
+
+/* Styles for screens smaller than 600px */
+@media (max-width: 600px) {
+  /* Your CSS rules for small screens here */
+.navbar__left h1{
+  display: none;
+}
+
+.user svg{
+  height: 32px;
+  width: 32px;
+}
+
+.top-nav-icon{
+  display: block;
+}
+
+.navbar__left svg{
+  height: 32px;
+  width: 32px;
+}
+
+
+
+}
+
+/* Styles for screens between 600px and 900px */
+@media (min-width: 600px) and (max-width: 900px) {
+  /* Your CSS rules for medium screens here */
+}
+
+/* Styles for screens larger than 900px */
+@media (min-width: 900px) {
+  /* Your CSS rules for large screens here */
 }

@@ -9,18 +9,22 @@ const AweberAuthLinkPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const headers = {
+      'Authorization': `Bearer ${user.token} `,
+      'Content-Type': 'application/json'
+    };
+    
+
     // You can perform actions here with the aweberLink state
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/createtoken",
-      {
+    const response = await axios
+      .post("http://localhost:8000/aweber/api/createtoken", {
         authorizationResponse: aweberLink,
         email: user.email,
-      }
-    );
-
-    if (response.status === 200) {
-      setDisplayState(true);
-    }
+      },{
+        headers: headers
+      })
+      .then((response) => setDisplayState(true))
+      .catch((error) => console.log(error));
   };
 
   return (

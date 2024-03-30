@@ -3,64 +3,74 @@ import "../SettingsUI/Setting.css";
 import { FaUserCircle } from "react-icons/fa";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { FcGoogle } from "react-icons/fc";
+import { SiGotomeeting } from "react-icons/si";
+import { BiLogoGoogle } from "react-icons/bi";
 
 const Settings = () => {
-  const [userInfoData, setUserInfoData] = useState();
   const user = JSON.parse(localStorage.getItem("userInfo"));
-  const [displayLinked, setDisplayLinked] = useState(false);
-  
+  const [displayLinked, setDisplayLinked] = useState({});
 
-  const checkLinkedAweberAccount = async () => {
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/checkaweberlink",
-      { email: user.email }
-    );
-
-    if (response.data.status === 200) {
-      setDisplayLinked(true);
-    }
+  const headers = {
+    Authorization: `Bearer ${user.token}`,
+    "Content-Type": "application/json",
   };
 
-  const gettinguserInfo = async () => {
-    const requestResponse = await axios.post(
-      "http://localhost:8000/user/api/gettinguser",
-      { email: user.email}
-    );
-
-    if (requestResponse.data.status === 200) {
-      setUserInfoData(requestResponse.data.info.username);
-    }
+  const getUserInfo = async () => {
+    const response = await axios
+      .post(
+        "http://localhost:8000/user/api/gettinguser",
+        {
+          email: user.email,
+        },
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        setDisplayLinked(response.data);
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleAweberButton = async () => {
-    const response = await axios.get(
-      "http://localhost:8000/aweber/api/buildauthurl"
-    );
-
-    //navigation to app callback url
-    if (response.data.status === 200) {
-      window.open(response.data.url);
-      window.open("/aweberauth");
-      checkLinkedAweberAccount();
-    }
+    const response = await axios
+      .get("http://localhost:8000/aweber/api/buildauthurl", {
+        headers: headers,
+      })
+      .then((response) => {
+        window.open(response.data.url);
+        window.open("/aweberauth");
+      })
+      .catch((error) => console.log(error));
   };
- 
-  const handleRevokeToken=async()=>{
-  
-  const response=  await axios.post("http://localhost:8000/aweber/api/revokeToken",{email:user.email})
-  
-  if(response.data.status===200)
-  {
-    toast.success("Access token updated successfully")
-  }
- 
-}
- 
+
+  const handleGoogleLink = async () => {
+    console.log(headers);
+    await axios
+      .get(`http://localhost:8000/goauth/api/link?email=${user.email}`, {
+        headers: headers,
+      })
+      .then((response) => window.open(response.data.AuthUrl))
+      .catch((error) => console.log(error));
+  };
+
+  const handleGTWLink = async () => {
+    console.log(headers);
+    await axios
+      .get("http://localhost:8000/gotowebinar/api/login", {
+        headers: headers,
+      })
+      .then((response) => window.open(response.data.AuthUrl))
+      .catch((error) => console.log(error));
+  };
 
   useEffect(() => {
-    gettinguserInfo();
-    checkLinkedAweberAccount();
+    getUserInfo();
   }, []);
+
+  console.log(displayLinked);
 
   return (
     <div className="setting-outerbox">
@@ -68,17 +78,12 @@ const Settings = () => {
         <div className="user-card">
           <div className="user-card-flex">
             <FaUserCircle className="card-user-icon" />
-            <h4 className="username">{userInfoData}</h4>
+            <h4 className="username">{user.username}</h4>
           </div>
-
+        </div>
+        <div className="user-card buttons-card">
           <div className="buttons-container">
-            <div className="google-sign-in-button">
-              
-              <button className="btn-text" onClick={handleRevokeToken}>
-                <b>Revoke Token</b>
-              </button>
-            </div>
-            {!displayLinked ? (
+            {!displayLinked.Aweber ? (
               <div className="aweber-link-button" onClick={handleAweberButton}>
                 <div className="aweber-icon-wrapper">
                   <img
@@ -93,16 +98,42 @@ const Settings = () => {
               </div>
             ) : (
               <div className="aweber-link-button">
-                
                 <button className="aweber-btn-text">
-                  <b>Account Linked</b>
+                  <b>Aweber Account Connected</b>
                 </button>
               </div>
             )}
           </div>
+
+          {!displayLinked.Google ? (
+            <div className="google-sign-in-button">
+              <FcGoogle />
+              <button className="btn-text" onClick={handleGoogleLink}>
+                Connect Google Account
+              </button>
+            </div>
+          ) : (
+            <div className="google-sign-in-button">
+              <BiLogoGoogle />
+              <button className="btn-text">Google Account Connected</button>
+            </div>
+          )}
+          {!displayLinked.GTW ? (
+            <div className="google-sign-in-button" onClick={handleGTWLink}>
+              <SiGotomeeting />
+              <button className="btn-text">Connect GotoWebinar Account</button>
+            </div>
+          ) : (
+            <div className="google-sign-in-button">
+              <SiGotomeeting />
+              <button className="btn-text">
+                GotoWebinar Account Connected
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      <ToastContainer autoClose={3000}/>
+      <ToastContainer autoClose={3000} />
     </div>
   );
 };

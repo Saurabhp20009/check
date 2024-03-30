@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./AutomationCard.css"; // Import CSS for styling
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { TbSettingsAutomation } from "react-icons/tb";
+import { TfiClose } from "react-icons/tfi";
 
-function AutomationCard({ handleDelete }) {
+function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [aweberListId, setAweberListId] = useState("");
@@ -17,7 +16,14 @@ function AutomationCard({ handleDelete }) {
     []
   );
   const [workflowName, setWorkflowName] = useState("");
-  
+
+  const user = JSON.parse(localStorage.getItem("userInfo"));
+  const divRef = useRef(null);
+
+  const headers = {
+    Authorization: `Bearer ${user.token} `,
+    "Content-Type": "application/json",
+  };
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -48,55 +54,66 @@ function AutomationCard({ handleDelete }) {
       listId: aweberListId,
     };
 
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/startautomation",
-      body
-    );
-    // console.log(sheetName, aweberListId, spreadsheetId, workflowName);
-    if (response.data.status === 200) {
-      return toast.success(response.data.message);
-    }
+    const response = await axios
+      .post("http://localhost:8000/aweber/api/startautomation", body, {
+        headers: headers,
+      })
+      .then((response) => window.location.reload());
 
     return toast.error(response.data.message);
   };
 
   const gettingAweberList = async () => {
-    const user = JSON.parse(localStorage.getItem("userInfo")).email;
-
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/gettinglists",
-      {
-        email: JSON.parse(localStorage.getItem("userInfo")).email,
-      }
-    );
-
-    if (response.data.status === 200) {
-      setAweberDataList([...response.data.list_data]);
-      setAweberListId(response.data.list_data[0].id);
-    }
+    const response = await axios
+      .post(
+        "http://localhost:8000/aweber/api/gettinglists",
+        {
+          email: user.email,
+        },
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        setAweberDataList([...response.data.list_data]);
+        setAweberListId(response.data.list_data[0].id);
+      })
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetList = async () => {
-    const response = await axios.get(
-      "http://localhost:8000/aweber/api/gettingspreadsheets"
-    );
-    if (response.data.status === 200) {
-      setGoogleSpreadDataList([...response.data.data]);
-      setSpreadsheetId(response.data.data[0].id);
-    }
+    const response = await axios
+      .get(
+        `http://localhost:8000/goauth/api/get/spreadsheets?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        setGoogleSpreadDataList([...response.data.SpreadSheetData]);
+        setSpreadsheetId(response.data.SpreadSheetData[0].id);
+      })
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetSheetList = async () => {
-    const response = await axios.post(
-      "http://localhost:8000/aweber/api/gettingsheets",
-      {
-        sheetId: spreadsheetId,
-      }
-    );
-    if (response.data.status === 200) {
-      setGoogleSpreadDataSheetList([...response.data.data]);
-      setSheetName(response.data.data[0].title);
-    }
+    const body = {
+      SheetId: spreadsheetId,
+    };
+
+    const response = await axios
+      .post(
+        `http://localhost:8000/goauth/api/get/sheetsnames?email=${user.email}`,
+        body,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        setGoogleSpreadDataSheetList([...response.data.Sheets]);
+        setSheetName(response.data.Sheets[0]);
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleNameChange = (e) => {
@@ -107,6 +124,7 @@ function AutomationCard({ handleDelete }) {
     gettingAweberList();
     gettingSpreadsheetList();
     gettingSpreadsheetSheetList();
+    divRef.current.focus();
   }, []);
 
   useEffect(() => {
@@ -114,16 +132,25 @@ function AutomationCard({ handleDelete }) {
   }, [spreadsheetId]);
 
   return (
-    <div className="automation-card">
-      <div className="input-group">
-        <label htmlFor="name">Name</label>
+    <div className="automation-card" tabIndex={0} ref={divRef}>
+      <div className="input-group card-head">
+        <div className="name-div">
+          {" "}
+          <label htmlFor="name">Name</label>
+          <input
+            value={workflowName}
+            className="NameInput"
+            onChange={handleNameChange}
+          />
+        </ div>
+        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
+        <TfiClose />
+        </div>  
 
-        <input
-          value={workflowName}
-          className="NameInput"
-          onChange={handleNameChange}
-        />
-        <label htmlFor="spreadsheetId"> Select Google Spreadsheet ID:</label>
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -138,17 +165,16 @@ function AutomationCard({ handleDelete }) {
         </select>
       </div>
 
-
       <div className="input-group">
-        <label htmlFor="sheetName">Enter the Sheet Name:</label>
+        <label htmlFor="sheetName">Select the Sheet</label>
         <select
           id="aweberList"
           value={sheetName}
           onChange={handleSheetNameChange}
         >
           {googleSpreadDataSheetList.map((item, index) => (
-            <option key={index} value={item.title}>
-              {item.title}
+            <option key={index} value={item}>
+              {item}
             </option>
           ))}
         </select>
@@ -167,18 +193,10 @@ function AutomationCard({ handleDelete }) {
           ))}
         </select>
       </div>
-      <div className="label-group">
-        <label>Last Time Triggered:</label>
-        <span>{lastTriggered}</span>
-      </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
-          <FontAwesomeIcon icon={faPlay} className="start-icon" />
+          <TbSettingsAutomation className="start-icon" />
           Start
-        </button>
-        <button className="delete-button" onClick={handleDelete}>
-          <FontAwesomeIcon className="delete-icon" icon={faTrashAlt} />
-          Delete
         </button>
       </div>
 
@@ -187,4 +205,4 @@ function AutomationCard({ handleDelete }) {
   );
 }
 
-export default AutomationCard;
+export default AweberAutomationCard;

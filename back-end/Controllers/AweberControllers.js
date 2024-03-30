@@ -1,19 +1,20 @@
 const ClientOAuth2 = require("client-oauth2");
 const OAUTH_URL = "https://auth.aweber.com/oauth2";
 const TOKEN_URL = "https://auth.aweber.com/oauth2/token";
-const { ModelTokenData } = require("../Models/AweberModel.js");
+const {
+  ModelTokenData,
+  ModelAweberTokenData,
+  ModelAweberAutomationData,
+} = require("../Models/AweberModel.js");
 const clientId = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const clientSecret = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
 const state = "Undefined";
 const { google } = require("googleapis");
-const key = require("../my-project-6051-412211-c4701a7e7602.json");
 const { ModelAutomationData } = require("../Models/UserModel.js");
 const {
   gettingSheetDataAndStoringInDB,
   fetchDataFromDBAndSendToAPI,
 } = require("../Functions.js");
-const creating = require("./my-project-6051-412211-c4701a7e7602.json");
-const checkCollectionInDB = require("../Connection.js");
 const cron = require("node-cron");
 const { default: axios } = require("axios");
 
@@ -40,7 +41,7 @@ const aweberAuth = new ClientOAuth2({
 
 const buildAuthUrlAweber = async (req, res) => {
   const authorizationUrl = await aweberAuth.code.getUri({ state });
-  res.json({ status: 200, url: authorizationUrl });
+  res.status(200).json({ url: authorizationUrl });
 };
 
 const createTokenAweberAndStoreInDB = async (req, res) => {
@@ -49,40 +50,47 @@ const createTokenAweberAndStoreInDB = async (req, res) => {
   try {
     const user = await aweberAuth.code.getToken(authorizationResponse);
 
+    const currentTimeInMilliseconds = Date.now();
+
+    const currentTimeInSeconds =
+      Math.floor(currentTimeInMilliseconds / 1000) + 7200;
+
     if (user.data) {
-      const TokenDataInstance = new ModelTokenData({
+      const TokenDataInstance = new ModelAweberTokenData({
         access_token: user.data.access_token,
         refresh_token: user.data.refresh_token,
         email: email,
+        Refresh_time: currentTimeInSeconds,
       });
 
       TokenDataInstance.save();
       console.log("Access token and refresh token created successfully...");
-      return res.json({ status: 200, tokenData: user.data });
+      return res.status(200).json({ tokenData: user.data });
     } else {
-      return res.json({ status: 403, message: "Authentication failed" });
+      return res.status(401).json({ message: "Authentication failed" });
     }
   } catch (error) {
-    return res.json({ status: 403, message: "Authentication failed" });
+    return res.status(401).json({ message: "Authentication failed" });
   }
 };
 
 const checkAweberLink = async (req, res) => {
   const { email } = req.body;
 
-  const tokenData = await ModelTokenData.findOne({ email: email });
+  const tokenData = await ModelAweberTokenData.findOne({ email: email });
 
   if (tokenData) {
-    res.json({ status: 200, message: "already linked" });
+    res.status(200).json({ message: "already linked" });
   } else {
-    res.json({ status: 201, message: "not linked" });
+    res.status(404).json({ message: "not linked" });
   }
 };
 
 const gettingAweberLists = async (req, res) => {
   const { email } = req.body;
   try {
-    const tokenInfo = await ModelTokenData.findOne({ email: email });
+    await revokeAweberToken(email);
+    const tokenInfo = await ModelAweberTokenData.findOne({ email: email });
 
     const headers = {
       Accept: "application/json",
@@ -95,67 +103,19 @@ const gettingAweberLists = async (req, res) => {
       .then((response) => response.json())
       .then((data) => {
         if (data.entries) {
-          res.json({
-            status: 200,
+          res.status(200).json({
             total_list: data.total_size,
             list_data: data.entries,
           });
         } else {
-          res.json({
-            status: 403,
+          res.status(401).json({
             message: "expired token",
           });
         }
       });
   } catch (err) {
     console.error("The API returned an error:", err);
-    return res.json({ status: 403, SheetsData: err });
-  }
-};
-
-const gettingSpreadSheetsList = async (req, res) => {
-  const auth = new google.auth.GoogleAuth({
-    credentials: key,
-    scopes: ["https://www.googleapis.com/auth/drive.metadata.readonly"],
-  });
-
-  const drive = google.drive({ version: "v3", auth });
-
-  try {
-    const response = await drive.files.list({
-      q: "mimeType='application/vnd.google-apps.spreadsheet'",
-      fields: "files(id, name)",
-    });
-
-    const spreadsheets = response.data.files;
-    res.json({ status: 200, data: spreadsheets });
-  } catch (error) {
-    console.error("The API returned an error:", error);
-    res.json({ status: 403, message: "no spreadsheet found" });
-  }
-};
-
-const gettingSheetsList = async (req, res) => {
-  const { sheetId } = req.body;
-
-  const auth = new google.auth.GoogleAuth({
-    keyFile: "my-project-6051-412211-c4701a7e7602.json",
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-
-  try {
-    const sheet = google.sheets({ version: "v4", auth });
-
-    const spreadsheetId = sheetId;
-
-    const response = await sheet.spreadsheets.get({
-      spreadsheetId,
-    });
-
-    const sheetList = response.data.sheets.map((sheet) => sheet.properties);
-    res.json({ status: 200, data: sheetList });
-  } catch (error) {
-    res.json({ status: 403, message: "no sheets found" });
+    return res.status(400).json({ SheetsData: err });
   }
 };
 
@@ -164,37 +124,24 @@ const savingAutomationData = async (
   email,
   sheetId,
   sheetName,
-  aweberListId,
-  LastTimeTrigged
+  aweberListId
 ) => {
   //saving automation data
   try {
-    const automationInstance = new ModelAutomationData({
+    const automationInstance = new ModelAweberAutomationData({
       Name: name,
       Email: email,
       SheetId: sheetId,
       SheetName: sheetName,
       AweberListId: aweberListId,
-      LastTimeTrigged: LastTimeTrigged,
-      LastFetchedRowHashValue: "",
-      Status: "running",
+      Status: "Running",
       ErrorDatas: [],
     });
 
-    await automationInstance.save();
+    const workflow = await automationInstance.save();
     console.log("automation data is created in db...");
-    
 
-    const workflow = await ModelAutomationData.findOne({
-      Name: name,
-      Email: email,
-      SheetId: sheetId,
-      SheetName: sheetName,
-      AweberListId: aweberListId,
-    });
-
-
-    console.log(workflow)
+    console.log(workflow);
 
     return workflow;
   } catch (error) {
@@ -207,85 +154,60 @@ const startAutomation = async (req, res) => {
   const { sheetId, sheetName, listId, email, name } = req.body;
 
   if (!name || !sheetId || !sheetName || !listId || !email) {
-    return res.json({ status: 403, message: "fields are missing" });
+    return res.status(400).json({ message: "fields are missing" });
   }
 
-  const checkForFirstAutomation = await ModelAutomationData.find({
+  const checkingAutomation = await ModelAweberAutomationData.find({
     Email: email,
+    Status: "Running",
   });
 
-  if (checkForFirstAutomation.length != 0) {
-    const checkAnyAutomationRunning = await ModelAutomationData.find({
-      $and: [{ Email: email }, { Status: "running" }],
-    });
-
-    if (checkAnyAutomationRunning.length > 0) {
-      return res.json({
-        status: 403,
-        message: "Already automation running in background please wait till finished!!",
-      });
-    }
-  }
-
-  const checkExistAutomation = await ModelAutomationData.findOne({
-    Email: email,
-    SheetId: sheetId,
-    SheetName: sheetName,
-    AweberListId: listId,
-  });
-
-  if (checkExistAutomation) {
-    await axios.post("http://localhost:8000/aweber/api/restartautomation", {
-      workflowId: checkExistAutomation._id,
-    });
-
-    return res.json({
-      status: 200,
-      message: "This workflow already exist , workflow is restarted",
+  if (checkingAutomation.length > 0) {
+    return res.status(409).json({
+      message:
+        "Already automation running in background please wait till finished!!",
     });
   }
 
+  await revokeAweberToken(email);
   try {
-    const LastTimeTrigged = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-    });
-
     //saving the automation data in db
     const workflow = await savingAutomationData(
       name,
       email,
       sheetId,
       sheetName,
-      listId,
-      LastTimeTrigged
+      listId
     );
 
-    console.log(workflow);
-
     if (!workflow) {
-      return res.json({
-        status: 403,
+      return res.status(422).json({
         message: "Unable to save automation data in DB!",
       });
     }
 
+    console.log(workflow.Name);
+
+    await gettingSheetDataAndStoringInDB(email, sheetId, sheetName);
+    let errorRecords = [];
+
     const task = cron.schedule("* * * * *", async () => {
-      const checkWorkFlowStatus = await ModelAutomationData.findOne({
+      const checkWorkFlowStatus = await ModelAweberAutomationData.findOne({
         _id: workflow._id,
       });
 
-      if (checkWorkFlowStatus.Status === "running") {
-        await gettingSheetDataAndStoringInDB(sheetId, sheetName, workflow._id);
-        await fetchDataFromDBAndSendToAPI(workflow);
+      if (checkWorkFlowStatus.Status === "Running") {
+        errorRecords = await fetchDataFromDBAndSendToAPI(workflow);
       } else {
         console.log("Automation is finished no data found in DB");
         task.stop();
       }
     });
     task.start();
-    res.json({ status: 200, message: `Automation started ${workflow.Name} ` });
+    res.status(200).json({ message: `Automation started ${workflow.Name} ` });
   } catch (error) {
-    res.json({ status: 403, message: `Automation failed ${workflow.Name} ` });
+    console.log(error);
+    res.status(500).json({ message: `Automation failed ` });
   }
 };
 
@@ -297,10 +219,11 @@ const restartAutomation = async (req, res) => {
   });
 
   const checkAnyAutomationRunning = await ModelAutomationData.find({
-    Email: getWorkflow.Email , Status: "running"
+    Email: getWorkflow.Email,
+    Status: "running",
   });
-  
-  console.log(checkAnyAutomationRunning)
+
+  console.log(checkAnyAutomationRunning);
 
   if (checkAnyAutomationRunning.length > 0) {
     return res.json({
@@ -354,11 +277,17 @@ const restartAutomation = async (req, res) => {
   }
 };
 
-const revokeToken = async (req, res) => {
-  const { email } = req.body;
+const revokeAweberToken = async (email) => {
+  const tokenData = await ModelAweberTokenData.findOne({ email: email });
 
-  const tokenData = await ModelTokenData.findOne({ email: email });
-  console.log(tokenData);
+  const currentTimeInMilliseconds = Date.now();
+  const currentTimeInSeconds = Math.floor(currentTimeInMilliseconds / 1000);
+  const time= Number(tokenData.Refresh_time) - 3600
+  console.log(currentTimeInSeconds, time)
+
+   if (currentTimeInSeconds < time) {
+     return console.log("Aweber token is valid...");
+   }
 
   const aweberAuth = new ClientOAuth2({
     clientId: clientId,
@@ -369,45 +298,37 @@ const revokeToken = async (req, res) => {
     scopes,
   });
 
-  user = await aweberAuth
+  const user = await aweberAuth
     .createToken(tokenData.access_token, tokenData.refresh_token, "bearer")
     .refresh();
-  await ModelTokenData.updateOne(
-    { email: email },
-    {
-      $set: {
-        access_token: user.data.access_token,
-        refresh_token: user.data.refresh_token,
-      },
-    }
-  );
-  console.log("Token data updated....");
-  res.json({ status: 200, message: "access token updated" });
+
+
+ const u= await ModelAweberTokenData.updateOne({_id: tokenData._id},{$set:{
+  access_token: user.data.access_token,
+  Refresh_time: currentTimeInSeconds+7200
+ }})
+ console.log(u)
+  
 };
 
-const getAllWorkflows=async(req,res)=>{
-   
-  const {Email}= req.body
+
+const getAllWorkflows = async (req, res) => {
+  const { Email } = req.body;
 
   try {
-    const workflows = await ModelAutomationData.find({Email: Email})
-    res.json({status: 200 , workflows: workflows})
+    const workflows = await ModelAutomationData.find({ Email: Email });
+    res.json({ status: 200, workflows: workflows });
   } catch (error) {
-    res.json({status: 403 , message : "Unable to get all workflows"})
+    res.json({ status: 403, message: "Unable to get all workflows" });
   }
- 
- 
-}
+};
 
 module.exports = {
   buildAuthUrlAweber,
   createTokenAweberAndStoreInDB,
   checkAweberLink,
   gettingAweberLists,
-  gettingSpreadSheetsList,
-  gettingSheetsList,
-  revokeToken,
   startAutomation,
   restartAutomation,
-  getAllWorkflows
+  getAllWorkflows,
 };

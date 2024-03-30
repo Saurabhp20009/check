@@ -4,9 +4,10 @@
   align-items: center;
   min-height: 100vh;
   background-color: #f3f6f9;
+  padding: 5vh;
 }
 
-.container-innerBox {
+.container-login-innerBox {
   margin: auto;
   width: 90%;
   max-width: 400px;
@@ -16,7 +17,7 @@
   padding: 5%;
 }
 
-.container-innerBox-headings {
+.container-login-innerBox-headings {
   text-align: center;
   margin-bottom: 20px;
 }
@@ -28,36 +29,36 @@
   margin-bottom: 10px;
 }
 
-.container-innerBox-headings p {
+.container-login-innerBox-headings p {
   margin: 0;
   color: #898c9b;
 }
 
-.form {
+.login-form {
   display: flex;
   flex-direction: column;
 }
 
-.form label,
-.form input,
-.form .form-input-password {
+.login-form label,
+.login-form input,
+.login-form .form-input-password {
   margin-bottom: 10px;
 }
 
-.form-input-password {
+.login-form-input-password {
   display: flex;
   align-items: center;
 }
 
-.form-input-password input {
+.login-form-input-password input {
   width: 92%;
 }
 
-.inputClass {
+.login-inputClass {
   padding: 2%;
 }
 
-.form-button-div button {
+.login-form-button-div button {
   width: 100%;
   padding: 10px;
   background-color: #13c56b;
@@ -65,6 +66,7 @@
   border: 0;
   color: white;
   cursor: pointer;
+  margin-top: 2vh;
 }
 
 .footer {
@@ -72,41 +74,39 @@
   margin-top: 20px;
 }
 
-.inputErrors {
+.login-inputErrors {
   border: 1px solid #ed5e5e;
 }
 
-.errors {
+.login-errors {
   font-size: 0.875em;
   margin-bottom: 10px;
   color: #ed5e5e;
 }
 
 /* Media Queries */
-@media only screen and (max-width: 768px) {
-  .container-innerBox {
-    width: 80%;
+
+
+/* Styles for screens smaller than 600px */
+@media (max-width: 600px)and (orientation:portrait) {
+  .login-form label{
+    font-size: small;
+  }
+  .login-form input{
+    font-size: small;
   }
 
-  .container-innerBox-headings h3 {
-    font-size: 1rem;
-  }
-
-  .form-button-div button {
-    padding: 8px;
+  .login-form-button-div button{
+    font-size: small;
   }
 }
 
-@media only screen and (max-width: 480px) {
-  .container-innerBox {
-    width: 95%;
-  }
+/* Styles for screens between 600px and 900px */
+@media (min-width: 600px) and (max-width: 900px) {
+  /* Your CSS rules for medium screens here */
+}
 
-  .container-innerBox-headings h3 {
-    font-size: 0.9rem;
-  }
-
-  .form-button-div button {
-    padding: 6px;
-  }
+/* Styles for screens larger than 900px */
+@media (min-width: 900px) {
+  /* Your CSS rules for large screens here */
 }
