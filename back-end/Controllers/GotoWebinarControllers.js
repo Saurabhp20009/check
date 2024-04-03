@@ -14,11 +14,6 @@ const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const { FetchDataFromSheet } = require("./GoogleControllers");
 const cron = require("node-cron");
 
-const CLIENT_ID =
-  "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
-const CLIENT_SECRET = "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";
-const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 const oauthConfig = {
   client: {

@@ -27,7 +27,7 @@ const LinkGoogleAccount = async (req, res) => {
   const { email } = req.query;
   Email = email;
 
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000","http://connectsyncdata:3000");
   res.header("Referrer-Policy", "no-referrer-when-downgrade");
 
   const url = oauth2Client.generateAuthUrl({
