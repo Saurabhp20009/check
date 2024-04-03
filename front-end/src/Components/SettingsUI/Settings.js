@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../SettingsUI/Setting.css";
 import { FaUserCircle } from "react-icons/fa";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
 import { SiGotomeeting } from "react-icons/si";
 import { BiLogoGoogle } from "react-icons/bi";
@@ -17,9 +17,9 @@ const Settings = () => {
   };
 
   const getUserInfo = async () => {
-    const response = await axios
+     await axios
       .post(
-        "http://localhost:8000/user/api/gettinguser",
+        "http://connectsyncdata.com:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -35,8 +35,8 @@ const Settings = () => {
   };
 
   const handleAweberButton = async () => {
-    const response = await axios
-      .get("http://localhost:8000/aweber/api/buildauthurl", {
+    await axios
+      .get("http://connectsyncdata.com:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://localhost:8000/goauth/api/link?email=${user.email}`, {
+      .get(`http://connectsyncdata.com:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))
@@ -59,7 +59,7 @@ const Settings = () => {
   const handleGTWLink = async () => {
     console.log(headers);
     await axios
-      .get("http://localhost:8000/gotowebinar/api/login", {
+      .get("http://connectsyncdata.com:5000/gotowebinar/api/login", {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))

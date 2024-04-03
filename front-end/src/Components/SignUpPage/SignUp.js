@@ -7,8 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
-const Signup = ({ handelLogin, handleSignUp }) => {
-  const [passwordVisibility, setPasswordVisibilty] = useState(false);
+const Signup = ({handleSignUp }) => {
   const [formData, setFormData] = useState({
     email: null,
     username: null,
@@ -44,7 +43,7 @@ const Signup = ({ handelLogin, handleSignUp }) => {
       formData.username &&
       formData.password === formData.confirm_password
     ) {
-      const requestResult= await axios.post("http://localhost:8000/user/api/signup", {
+      const requestResult= await axios.post("http://connectsyncdata.com:5000/user/api/signup", {
         email: formData.email,
         username: formData.username,
         password: formData.password,
@@ -67,7 +66,6 @@ const Signup = ({ handelLogin, handleSignUp }) => {
         toast.error("Password is not matching");
       }
 
-      //console.log(displaySubmitError)
     }
   };
 

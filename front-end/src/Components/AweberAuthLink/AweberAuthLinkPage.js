@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import axios from "axios";
 
 const AweberAuthLinkPage = () => {
@@ -16,8 +16,8 @@ const AweberAuthLinkPage = () => {
     
 
     // You can perform actions here with the aweberLink state
-    const response = await axios
-      .post("http://localhost:8000/aweber/api/createtoken", {
+   await axios
+      .post("http://connectsyncdata.com:5000/aweber/api/createtoken", {
         authorizationResponse: aweberLink,
         email: user.email,
       },{

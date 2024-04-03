@@ -42,12 +42,6 @@ const authorizationUrl = oauthClient.authorizeURL({
   state: expectedStateForAuthorizationCode,
 });
 
-const oauth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  REDIRECT_URI
-);
-
 const linkGotoWebinarAccount = async (req, res) => {
   res.status(200).json({ AuthUrl: authorizationUrl });
 };

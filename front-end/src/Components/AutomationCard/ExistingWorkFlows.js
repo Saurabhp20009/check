@@ -20,7 +20,7 @@ const ExistingWorkFlows = ({ item }) => {
 
   const handleConfirm = async () => {
     await axios
-      .delete(`http://localhost:8000/user/api/delete/workflow?id=${item._id}`, {
+      .delete(`http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`, {
         headers: headers,
       })
       .then((response) => window.location.reload())

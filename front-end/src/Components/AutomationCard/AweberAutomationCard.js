@@ -9,7 +9,6 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [aweberListId, setAweberListId] = useState("");
-  const [lastTriggered, setLastTriggered] = useState("N/A");
   const [aweberDataList, setAweberDataList] = useState([]);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
@@ -40,8 +39,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const handleStartAutomation = async () => {
     // Your logic to start automation goes here
     // For demo purposes, update lastTriggered with current time
-    setLastTriggered(new Date().toLocaleString());
-
+  
     if (!workflowName) {
       return toast.error("Please fill the workflow name");
     }
@@ -55,7 +53,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     };
 
     const response = await axios
-      .post("http://localhost:8000/aweber/api/startautomation", body, {
+      .post("http://connectsyncdata.com:5000/aweber/api/startautomation", body, {
         headers: headers,
       })
       .then((response) => window.location.reload());
@@ -64,9 +62,9 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   };
 
   const gettingAweberList = async () => {
-    const response = await axios
+   await axios
       .post(
-        "http://localhost:8000/aweber/api/gettinglists",
+        "http://connectsyncdata.com:5000//aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -84,7 +82,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://localhost:8000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -103,7 +101,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     const response = await axios
       .post(
-        `http://localhost:8000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../LoginInPage/LoginInPage.css";
 import { FaEye } from "react-icons/fa6";
 import { FaEyeSlash } from "react-icons/fa";
-import { Link, json } from "react-router-dom";
+import { Link } from "react-router-dom";
 import emailValidator from "email-validator";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -31,7 +31,7 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
 
     if (emailValidationCheck) {
       const requestResult = await axios.post(
-        "http://localhost:8000/user/api/login",
+        "http://connectsyncdata.com:5000/user/api/login",
         {
           email: formData.email,
           password: formData.password,
@@ -67,15 +67,6 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    const name = e.target.name;
-
-    if (!value) {
-    } else {
-      setFormData({ ...formData, name: value });
-    }
-  };
 
   return (
     <div className="container-login">

@@ -1,13 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import "./Dasboard.css";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 import axios from "axios";
 import ExistingWorkFlows from "../AutomationCard/ExistingWorkFlows";
 import AweberAutomationCard from "../AutomationCard/AweberAutomationCard";
 import GTWAutomationCard from "../AutomationCard/GTWAutomationCard";
 import { RiPagesLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { MyContext } from "../Context/Context";
 import { RiErrorWarningFill } from "react-icons/ri";
 
 
@@ -41,7 +40,7 @@ const Dashboard = () => {
 
   const getWorkFlows = async () => {
     await axios
-      .get(`http://localhost:8000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => {
