@@ -64,7 +64,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingAweberList = async () => {
    await axios
       .post(
-        "http://connectsyncdata.com:5000//aweber/api/gettinglists",
+        "http://connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },

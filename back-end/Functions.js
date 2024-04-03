@@ -13,7 +13,7 @@ const {
   getAccessTokenFromRefreshToken,
 } = require("./Controllers/GoogleControllers.js");
 const { ModelGoogleTokenData } = require("./Models/GoogleModel.js");
-const { workerData } = require("worker_threads");
+
 require("./Connection.js");
 
 //Authentication
