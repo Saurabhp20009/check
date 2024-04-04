@@ -34,8 +34,8 @@ const ErrorRecords = () => {
     <div>
       <div className="heading">Error Records</div>
 
-      {workFlows &&
-        workFlows.map((item, index) => <ErrorCards key={index} item={item} />)}
+      {workFlows.length>0 ?
+        workFlows.map((item, index) => <ErrorCards key={index} item={item} />) : <h1 className="no-workflow-found">No error records found!</h1>}
     </div>
   );
 };

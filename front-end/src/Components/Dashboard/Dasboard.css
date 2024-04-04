@@ -122,6 +122,12 @@
   .error-icon{
     margin-right: 2vh;
   }
+
+  .no-workflow-found{
+    display: flex;
+  justify-content: center;
+   font-weight: lighter;
+  }
   
   /* Styles for screens smaller than 600px */
 @media (max-width: 600px) {

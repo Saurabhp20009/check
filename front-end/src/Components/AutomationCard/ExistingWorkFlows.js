@@ -20,9 +20,12 @@ const ExistingWorkFlows = ({ item }) => {
 
   const handleConfirm = async () => {
     await axios
-      .delete(`http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`, {
-        headers: headers,
-      })
+      .delete(
+        `http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`,
+        {
+          headers: headers,
+        }
+      )
       .then((response) => window.location.reload())
       .catch((error) => toast.error(error));
 
@@ -88,7 +91,7 @@ const ExistingWorkFlows = ({ item }) => {
               item.Status === "Running" ? "odd-remove-button" : "remove-button"
             }
             onClick={() => {
-             {
+              {
                 setIsOpen(true);
               }
             }}
@@ -98,7 +101,6 @@ const ExistingWorkFlows = ({ item }) => {
           </button>
         </div>
       </div>
-      
 
       <ToastContainer />
     </div>

@@ -72,7 +72,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#f3f6f9" }}>
+    <div style={{ backgroundColor: "#f3f6f9" ,minHeight: "100vh" }}>
       <div>
 
         <div className="add-automation-card">
@@ -103,10 +103,10 @@ const Dashboard = () => {
 
         {ShowAutomationCard && <div>{Applications[ShowApps]}</div>}
 
-        { workFlows &&
+        { workFlows.length>0 ?
           workFlows.map((item, index) => {
             return <ExistingWorkFlows key={index} item={item} />;
-          })}
+          }): <h1 className="no-workflow-found">No workflow found!</h1>}
       </div>
       <ToastContainer />
     </div>
