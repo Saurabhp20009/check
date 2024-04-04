@@ -190,13 +190,7 @@ const startAutomation = async (req, res) => {
     console.log(workflow.Name);
     
     //deleting all records before proceding
-    await ModelAweberSubscriberList.deleteMany({}, (err, result) => {
-      if (err) {
-        console.error("Errpr occured:", err);
-      } else {
-        console.log("Deleted all records:", result);
-      }
-    });
+    await ModelAweberSubscriberList.deleteMany({});
 
     await gettingSheetDataAndStoringInDB(email, sheetId, sheetName);
     let errorRecords = [];

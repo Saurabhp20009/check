@@ -181,13 +181,7 @@ const StartGoToWebinarAutomation = async (req, res) => {
     const GTWAutomationData = await DocumentInstance.save();
     console.log("Automation created...");
 
-    await GoToWebinarList.deleteMany({}, (err, result) => {
-      if (err) {
-        console.error("Error occurred:", err);
-      } else {
-        console.log("Deletion successfully all record:", result);
-      }
-    });
+    await GoToWebinarList.deleteMany({});
 
     res
       .status(200)
