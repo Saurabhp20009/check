@@ -84,7 +84,7 @@ const GotoWebinarCallback = async (req, res) => {
   res.json({ message: "Account linked", tokenDatas: tokenResponse });
 };
 
-const SendRegistrantDataToAPI = async (WebinarId) => {
+const SendRegistrantDataToAPI = async (WebinarId,GTWAutomationData) => {
   const data = await GoToWebinarList.find();
 
   await CheckGTWRefreshToken();
@@ -97,7 +97,7 @@ const SendRegistrantDataToAPI = async (WebinarId) => {
   }));
 
   const sendDataPromises = registrantsArray.map(async (registrant, index) => {
-    await sendData(registrant, index, WebinarId);
+    await sendData(registrant, index, WebinarId,GTWAutomationData);
   });
 
   //Wait for all promises to resolve
@@ -105,7 +105,7 @@ const SendRegistrantDataToAPI = async (WebinarId) => {
   await GoToWebinarList.deleteMany({});
 };
 
-async function sendData(registrant, index, WebinarId) {
+async function sendData(registrant, index, WebinarId,GTWAutomationData) {
   return new Promise(async (resolve, reject) => {
     try {
       const tokenData = await GoToWebinarTokenData.find();
