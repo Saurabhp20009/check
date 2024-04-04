@@ -138,7 +138,7 @@ const handleGetAutomationData = async (req, res) => {
   try {
     let TotalWorkflows = [];
     const GTWAutomationData = await GoToWebinarAutomationData.find({
-      Email: "saurabhpatwal92000@gmail.com",
+      Email: email,
     });
     TotalWorkflows = [];
     const AweberAutomationData = await ModelAweberAutomationData.find({
