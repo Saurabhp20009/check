@@ -35,6 +35,24 @@ const ExistingWorkFlows = ({ item }) => {
 
   return (
     <div className="Container">
+      <div>
+        <Modal
+          isOpen={isOpen}
+          onRequestClose={handleClose}
+          className="modal"
+          overlayClassName="overlay"
+        >
+          <div className="modal-content">
+            <h2>Do you want to remove this workflow record?</h2>
+            <p>There Error record will also be deleted.</p>
+            <div className="modal-buttons">
+              <button onClick={handleConfirm}>Yes</button>
+              <button onClick={handleClose}>No</button>
+            </div>
+          </div>
+        </Modal>
+      </div>
+
       <div className="flex-content">
         <div className="content">
           <label>Name</label>
@@ -80,23 +98,7 @@ const ExistingWorkFlows = ({ item }) => {
           </button>
         </div>
       </div>
-      <div>
-        <Modal
-          isOpen={isOpen}
-          onRequestClose={handleClose}
-          className="modal"
-          overlayClassName="overlay"
-        >
-          <div className="modal-content">
-            <h2>Do you want to remove this workflow record?</h2>
-            <p>There Error record will also be deleted.</p>
-            <div className="modal-buttons">
-              <button onClick={handleConfirm}>Yes</button>
-              <button onClick={handleClose}>No</button>
-            </div>
-          </div>
-        </Modal>
-      </div>
+      
 
       <ToastContainer />
     </div>

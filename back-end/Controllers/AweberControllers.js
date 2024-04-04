@@ -5,6 +5,7 @@ const {
   ModelTokenData,
   ModelAweberTokenData,
   ModelAweberAutomationData,
+  ModelAweberSubscriberList,
 } = require("../Models/AweberModel.js");
 const clientId = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const clientSecret = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
@@ -187,6 +188,15 @@ const startAutomation = async (req, res) => {
     }
 
     console.log(workflow.Name);
+    
+    //deleting all records before proceding
+    await ModelAweberSubscriberList.deleteMany({}, (err, result) => {
+      if (err) {
+        console.error("Errpr occured:", err);
+      } else {
+        console.log("Deleted all records:", result);
+      }
+    });
 
     await gettingSheetDataAndStoringInDB(email, sheetId, sheetName);
     let errorRecords = [];
@@ -282,12 +292,12 @@ const revokeAweberToken = async (email) => {
 
   const currentTimeInMilliseconds = Date.now();
   const currentTimeInSeconds = Math.floor(currentTimeInMilliseconds / 1000);
-  const time= Number(tokenData.Refresh_time) - 3600
-  console.log(currentTimeInSeconds, time)
+  const time = Number(tokenData.Refresh_time) - 3600;
+  console.log(currentTimeInSeconds, time);
 
-   if (currentTimeInSeconds < time) {
-     return console.log("Aweber token is valid...");
-   }
+  if (currentTimeInSeconds < time) {
+    return console.log("Aweber token is valid...");
+  }
 
   const aweberAuth = new ClientOAuth2({
     clientId: clientId,
@@ -302,15 +312,17 @@ const revokeAweberToken = async (email) => {
     .createToken(tokenData.access_token, tokenData.refresh_token, "bearer")
     .refresh();
 
-
- const u= await ModelAweberTokenData.updateOne({_id: tokenData._id},{$set:{
-  access_token: user.data.access_token,
-  Refresh_time: currentTimeInSeconds+7200
- }})
- console.log(u)
-  
+  const u = await ModelAweberTokenData.updateOne(
+    { _id: tokenData._id },
+    {
+      $set: {
+        access_token: user.data.access_token,
+        Refresh_time: currentTimeInSeconds + 7200,
+      },
+    }
+  );
+  console.log(u);
 };
-
 
 const getAllWorkflows = async (req, res) => {
   const { Email } = req.body;
