@@ -7,7 +7,7 @@ const { GoToWebinarList } = require("../Models/GoToWebinarModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -110,11 +110,16 @@ const GetSheetNames = async (req, res) => {
   try {
     await getAccessTokenFromRefreshToken(email);
 
-    const { Access_token } = await ModelGoogleTokenData.findOne({
+    const  tokenData  = await ModelGoogleTokenData.findOne({
       Email: email,
     });
 
-    oauth2Client.setCredentials({ access_token: Access_token });
+    if(!tokenData)
+    {
+      return 
+    }
+
+    oauth2Client.setCredentials({ access_token: tokenData.Access_token });
 
     const sheets = google.sheets({ version: "v4", auth: oauth2Client });
 
@@ -139,6 +144,11 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
   const TokenData = await ModelGoogleTokenData.findOne({
     Email: email,
   });
+   
+  if(!TokenData)
+  {
+    return
+  }
 
   oauth2Client.setCredentials({ access_token: TokenData.Access_token });
 
@@ -189,12 +199,20 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
 };
 
 async function getAccessTokenFromRefreshToken(Email) {
-  const { Access_token, Refresh_token } = await ModelGoogleTokenData.findOne({
+
+  
+  const responseGoogleToken = await ModelGoogleTokenData.findOne({
     Email: Email,
   });
+  
+ if(!responseGoogleToken)
+ {
+  return
+ }
+
 
   const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
-  const tokenInfoUrl = `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${Access_token}`;
+  const tokenInfoUrl = `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${responseGoogleToken.Access_token}`;
   const response = await fetch(tokenInfoUrl);
   const tokenInfo = await response.json();
 
@@ -217,7 +235,7 @@ async function getAccessTokenFromRefreshToken(Email) {
     const tokenResponse = await axios.post(TOKEN_ENDPOINT, {
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
-      refresh_token: Refresh_token,
+      refresh_token: responseGoogleToken.Refresh_token,
       grant_type: "refresh_token",
     });
 
@@ -226,7 +244,7 @@ async function getAccessTokenFromRefreshToken(Email) {
     try {
       if (tokenResponse.status === 200) {
         const r = await ModelGoogleTokenData.updateOne(
-          { Email: "saurabhpatwal92000@gmail.com" },
+          { Email:  Email},
           { $set: { Access_token: tokenResponse.data.access_token } }
         );
 

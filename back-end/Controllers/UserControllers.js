@@ -105,25 +105,23 @@ const handleGettingUserInfo = async (req, res) => {
 
   const userInfo = await ModelUserData.findOne({ email: email });
 
-  const checkGoogleAcountLinked = await ModelGoogleTokenData.find({
+  const checkGoogleAcountLinked = await ModelGoogleTokenData.findOne({
     Email: email,
   });
-  const checkGoToWebinarAccountLinked = await GoToWebinarTokenData.find();
-  const checkAweberAccountLinked = await ModelAweberTokenData.find({
+  const checkGoToWebinarAccountLinked = await GoToWebinarTokenData.findOne({Email:email});
+  const checkAweberAccountLinked = await ModelAweberTokenData.findOne({
     email: email,
   });
 
-  const GoogleAccountLinked = checkGoogleAcountLinked.length > 0;
-  const GoToWebinarAccountLinked = checkGoToWebinarAccountLinked.length > 0;
-  const AweberAccountLinked = checkAweberAccountLinked.length > 0;
+  
 
   if (!userInfo) {
     return res.json({ status: 403, message: "user didn't found" });
   } else {
     return res.status(200).json({
-      Google: GoogleAccountLinked,
-      GTW: GoToWebinarAccountLinked,
-      Aweber: AweberAccountLinked,
+      Google: checkGoogleAcountLinked,
+      GTW: checkGoToWebinarAccountLinked,
+      Aweber: checkAweberAccountLinked,
     });
   }
 };

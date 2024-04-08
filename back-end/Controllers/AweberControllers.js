@@ -36,7 +36,7 @@ const aweberAuth = new ClientOAuth2({
   clientSecret,
   accessTokenUri: TOKEN_URL,
   authorizationUri: `${OAUTH_URL}/authorize`,
-  redirectUri: "https://connectsyncdata.com/callback/aweber",
+  redirectUri: "https://localhost/callback/aweber",
   scopes,
 });
 
@@ -92,6 +92,11 @@ const gettingAweberLists = async (req, res) => {
   try {
     await revokeAweberToken(email);
     const tokenInfo = await ModelAweberTokenData.findOne({ email: email });
+
+    if(!tokenInfo)
+    {
+      return
+    }
 
     const headers = {
       Accept: "application/json",
@@ -283,6 +288,11 @@ const restartAutomation = async (req, res) => {
 
 const revokeAweberToken = async (email) => {
   const tokenData = await ModelAweberTokenData.findOne({ email: email });
+  
+  if(!tokenData)
+  {
+    return
+  }
 
   const currentTimeInMilliseconds = Date.now();
   const currentTimeInSeconds = Math.floor(currentTimeInMilliseconds / 1000);
@@ -298,7 +308,7 @@ const revokeAweberToken = async (email) => {
     clientSecret: clientSecret,
     accessTokenUri: TOKEN_URL,
     authorizationUri: `${OAUTH_URL}/authorize`,
-    redirectUri: "https://connectsyncdata.com/callback/aweber",
+    redirectUri: "https://localhost/callback/aweber",
     scopes,
   });
 

@@ -19,7 +19,7 @@ const Settings = () => {
   const getUserInfo = async () => {
      await axios
       .post(
-        "http://connectsyncdata.com:5000/user/api/gettinguser",
+        "http://localhost:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -28,7 +28,7 @@ const Settings = () => {
         }
       )
       .then((response) => {
-        console.log(response);
+        console.log(response.data);
         setDisplayLinked(response.data);
       })
       .catch((error) => console.log(error));
@@ -36,7 +36,7 @@ const Settings = () => {
 
   const handleAweberButton = async () => {
     await axios
-      .get("http://connectsyncdata.com:5000/aweber/api/buildauthurl", {
+      .get("http://localhost:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://connectsyncdata.com:5000/goauth/api/link?email=${user.email}`, {
+      .get(`http://localhost:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))
@@ -59,7 +59,7 @@ const Settings = () => {
   const handleGTWLink = async () => {
     console.log(headers);
     await axios
-      .get("http://connectsyncdata.com:5000/gotowebinar/api/login", {
+      .get(`http://localhost:5000/gotowebinar/api/login?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))

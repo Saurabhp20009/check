@@ -14,29 +14,69 @@ const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const { FetchDataFromSheet } = require("./GoogleControllers");
 const cron = require("node-cron");
 
-const oauthConfig = {
-  client: {
-    id: process.env.OAUTH_CLIENT_ID,
-    secret: process.env.OAUTH_CLIENT_SECRET,
-  },
-  auth: {
-    tokenHost: process.env.OAUTH_SERVICE_URL,
-  },
+let Email;
+
+const yogeshSir = {
+  OAUTH_SERVICE_URL: "https://authentication.logmeininc.com",
+  OAUTH_CLIENT_ID: "e6e0a08a-9c31-40fe-9685-8a7ffc9d8d2c",
+  OAUTH_CLIENT_SECRET: "HCC5Ug0dYygNAfO9BoSq6cyb",
+  OAUTH_REDIRECT_URI:
+    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
-const oauthClient = new AuthorizationCode(oauthConfig);
+const NehaMam = {
+  OAUTH_SERVICE_URL: "https://authentication.logmeininc.com",
+  OAUTH_CLIENT_ID: "d3823c8b-4e25-447e-90e7-d84edb3c00fa",
+  OAUTH_CLIENT_SECRET: "lusB5pkPVIopN8Sp1mWBb1Aa",
+  OAUTH_REDIRECT_URI:
+    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
+};
 
-const expectedStateForAuthorizationCode = crypto
-  .randomBytes(15)
-  .toString("hex");
-
-const authorizationUrl = oauthClient.authorizeURL({
-  redirect_uri: process.env.OAUTH_REDIRECT_URI,
-  scope: "collab:",
-  state: expectedStateForAuthorizationCode,
-});
+var expectedStateForAuthorizationCode = crypto
+.randomBytes(15)
+.toString("hex");
 
 const linkGotoWebinarAccount = async (req, res) => {
+  const { email } = req.query;
+
+  Email = email;
+
+  console.log(Email)
+
+  let oauthConfig;
+  if (Email === "ychoudhary320@gmail.com") {
+    oauthConfig = {
+      client: {
+        id: yogeshSir.OAUTH_CLIENT_ID,
+        secret: yogeshSir.OAUTH_CLIENT_SECRET,
+      },
+      auth: {
+        tokenHost: yogeshSir.OAUTH_SERVICE_URL,
+      },
+    };
+  } else {
+    oauthConfig = {
+      client: {
+        id: NehaMam.OAUTH_CLIENT_ID,
+        secret: NehaMam.OAUTH_CLIENT_SECRET,
+      },
+      auth: {
+        tokenHost: NehaMam.OAUTH_SERVICE_URL,
+      },
+    };
+  }
+
+  console.log(oauthConfig)
+  const oauthClient = new AuthorizationCode(oauthConfig);
+
+  const authorizationUrl = oauthClient.authorizeURL({
+    redirect_uri: yogeshSir.OAUTH_REDIRECT_URI,
+    scope: "collab:",
+    state: expectedStateForAuthorizationCode,
+  });
+   
+ 
+
   res.status(200).json({ AuthUrl: authorizationUrl });
 };
 
@@ -48,9 +88,33 @@ const GotoWebinarCallback = async (req, res) => {
 
   var authorizationCode = req.query.code;
 
+  let oauthConfig;
+  if (Email === "ychoudhary320@gmail.com") {
+    oauthConfig = {
+      client: {
+        id: yogeshSir.OAUTH_CLIENT_ID,
+        secret: yogeshSir.OAUTH_CLIENT_SECRET,
+      },
+      auth: {
+        tokenHost: yogeshSir.OAUTH_SERVICE_URL,
+      },
+    };
+  } else {
+    oauthConfig = {
+      client: {
+        id: NehaMam.OAUTH_CLIENT_ID,
+        secret: NehaMam.OAUTH_CLIENT_SECRET,
+      },
+      auth: {
+        tokenHost: NehaMam.OAUTH_SERVICE_URL,
+      },
+    };
+  }
+  const oauthClient = new AuthorizationCode(oauthConfig);
+
   var tokenParams = {
     code: authorizationCode,
-    redirect_uri: process.env.OAUTH_REDIRECT_URI,
+    redirect_uri: yogeshSir.OAUTH_REDIRECT_URI,
     scope: "collab:",
   };
 
@@ -66,10 +130,18 @@ const GotoWebinarCallback = async (req, res) => {
 
   console.log(tokenResponse.token);
 
+  const GetAccountNumber = await axios.get("https://api.getgo.com/identity/v1/Users/me",{
+    headers: {Authorization : `Bearer ${tokenResponse.token.access_token}`}
+  });
+ 
+ console.log("g",GetAccountNumber)
+
   const DocumentInstance = new GoToWebinarTokenData({
     Access_token: tokenResponse.token.access_token,
     Refresh_token: tokenResponse.token.refresh_token,
     Refresh_time: Math.floor(Date.now() / 1000),
+    Email: Email,
+    Account_number: GetAccountNumber.data.id
   });
 
   try {
@@ -83,10 +155,10 @@ const GotoWebinarCallback = async (req, res) => {
   res.json({ message: "Account linked", tokenDatas: tokenResponse });
 };
 
-const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData) => {
+const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData,email) => {
   const data = await GoToWebinarList.find();
 
-  await CheckGTWRefreshToken();
+  await CheckGTWRefreshToken(email);
 
   const registrantsArray = data.map((registrant) => ({
     firstName: registrant.FirstName,
@@ -96,7 +168,7 @@ const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData) => {
   }));
 
   const sendDataPromises = registrantsArray.map(async (registrant, index) => {
-    await sendData(registrant, index, WebinarId, GTWAutomationData);
+    await sendData(registrant, index, WebinarId, GTWAutomationData,email);
   });
 
   //Wait for all promises to resolve
@@ -104,11 +176,11 @@ const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData) => {
   await GoToWebinarList.deleteMany({});
 };
 
-async function sendData(registrant, index, WebinarId, GTWAutomationData) {
+async function sendData(registrant, index, WebinarId, GTWAutomationData,email) {
   return new Promise(async (resolve, reject) => {
     try {
-      const tokenData = await GoToWebinarTokenData.find();
-
+      
+  
       const payload = {
         firstName: registrant.firstName,
         lastName: registrant.lastName,
@@ -116,15 +188,18 @@ async function sendData(registrant, index, WebinarId, GTWAutomationData) {
         // Include other fields as needed
       };
 
+      const account= await GoToWebinarTokenData.findOne({Email:email})  
+      
       const options = {
         method: "POST",
-        url: `https://api.getgo.com/G2W/rest/v2/organizers/4721184591451331590/webinars/${WebinarId}/registrants`,
+        url: `https://api.getgo.com/G2W/rest/v2/organizers/${account.Account_number}/webinars/${WebinarId}/registrants`,
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${tokenData[0].Access_token}`,
+          Authorization: `Bearer ${account.Access_token}`,
         },
         data: payload,
       };
+     
 
       // Use setTimeout to introduce a delay
       setTimeout(async () => {
@@ -188,7 +263,7 @@ const StartGoToWebinarAutomation = async (req, res) => {
       .json({ message: `Automation started in background jobs name ${Name}` });
 
     await FetchDataFromSheet(SpreadSheetId, SheetName, email);
-    await SendRegistrantDataToAPI(WebinarId, GTWAutomationData);
+    await SendRegistrantDataToAPI(WebinarId, GTWAutomationData,email);
 
     const task = cron.schedule("* * * * *", async () => {
       try {
@@ -216,12 +291,29 @@ const StartGoToWebinarAutomation = async (req, res) => {
 
 ``;
 
-const CheckGTWRefreshToken = async () => {
-  const tokenData = await GoToWebinarTokenData.find().limit(1);
+const CheckGTWRefreshToken = async (email) => {
+   
+  let base64EncodedString
+
+  if (email==="ychoudhary320@gmail.com") {
+    const combinedString = `${yogeshSir.OAUTH_CLIENT_ID}:${yogeshSir.OAUTH_CLIENT_SECRET}`;
+     console.log(combinedString) 
+    base64EncodedString = Buffer.from(combinedString).toString('base64');
+
+  } else {
+    const combinedString = `${NehaMam.OAUTH_CLIENT_ID}:${NehaMam.OAUTH_CLIENT_SECRET}`;
+    console.log(combinedString)
+     base64EncodedString = Buffer.from(combinedString).toString('base64');
+  }
+
+  console.log(base64EncodedString)
+
+
+  const tokenData = await GoToWebinarTokenData.findOne({Email:email})
 
   let currentDateTimeInSeconds = Math.floor(Date.now() / 1000);
 
-  if (parseInt(tokenData[0].Refresh_time) + 1800 > currentDateTimeInSeconds) {
+  if (parseInt(tokenData.Refresh_time) + 1800 > currentDateTimeInSeconds) {
     console.log("token is valid...");
     return;
   }
@@ -230,20 +322,22 @@ const CheckGTWRefreshToken = async () => {
     "https://authentication.logmeininc.com/oauth/token",
     {
       grant_type: "refresh_token",
-      refresh_token: tokenData[0].Refresh_token,
+      refresh_token: tokenData.Refresh_token,
     },
     {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization:
-          "Basic ZDM4MjNjOGItNGUyNS00NDdlLTkwZTctZDg0ZWRiM2MwMGZhOmx1c0I1cGtQVklvcE44U3AxbVdCYjFBYQ==",
+          `Basic ${base64EncodedString}`,
       },
     }
   );
 
+  console.log('r',response)
+
   try {
     const updateCheck = await GoToWebinarTokenData.updateOne(
-      { _id: tokenData[0]._id },
+      { _id: tokenData._id },
       {
         $set: {
           Access_token: response.data.access_token,
@@ -254,19 +348,15 @@ const CheckGTWRefreshToken = async () => {
 
     console.log("Token GTW data updated successfully...., ", updateCheck);
   } catch (error) {
-    console.log("Error.... ", error);
+    //console.log("Error.... ", error);
   }
 
   console.log(response.data);
 };
 
-//GetGTWRefreshToken()
 
-//getAccessTokenFromRefreshToken();
 
-//CheckGTWRefreshToken("2956140803390498906");
 
-//CheckGTWRefreshToken();
 
 module.exports = {
   GotoWebinarCallback,

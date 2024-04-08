@@ -12,6 +12,8 @@ const GTWUserTokenSchema = new Schema({
   Access_token: String,
   Refresh_token: String,
   Refresh_time: String,
+  Email: String,
+  Account_number:String
 });
 
 const GTWAutomationDataSchema = new Schema({
@@ -30,6 +32,7 @@ const GTWAutomationDataSchema = new Schema({
   ],
 });
 
+
 const GoToWebinarList = mongoose.model(
   "GTWRegistrantList",
   GTWRegistrantSchema
@@ -43,8 +46,9 @@ const GoToWebinarAutomationData = mongoose.model(
   GTWAutomationDataSchema
 );
 
+
 module.exports = {
   GoToWebinarList,
   GoToWebinarTokenData,
-  GoToWebinarAutomationData,
+  GoToWebinarAutomationData
 };

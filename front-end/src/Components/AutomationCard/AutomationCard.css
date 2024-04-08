@@ -187,7 +187,7 @@ select {
   margin-top: 1vh;
   display: flex;
   flex-direction: column;
-  width: -moz-available;
+  width: 100%;
 }
 
 .close-card :hover{
