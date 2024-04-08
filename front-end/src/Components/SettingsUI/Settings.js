@@ -19,7 +19,7 @@ const Settings = () => {
   const getUserInfo = async () => {
      await axios
       .post(
-        "http://localhost:5000/user/api/gettinguser",
+        "http://connectsyncdata:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -36,7 +36,7 @@ const Settings = () => {
 
   const handleAweberButton = async () => {
     await axios
-      .get("http://localhost:5000/aweber/api/buildauthurl", {
+      .get("http://connectsyncdata:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://localhost:5000/goauth/api/link?email=${user.email}`, {
+      .get(`http://connectsyncdata:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))
@@ -59,7 +59,7 @@ const Settings = () => {
   const handleGTWLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://localhost:5000/gotowebinar/api/login?email=${user.email}`, {
+      .get(`http://connectsyncdata:5000/gotowebinar/api/login?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => window.open(response.data.AuthUrl))
