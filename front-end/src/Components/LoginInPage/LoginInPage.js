@@ -31,7 +31,7 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
 
     if (emailValidationCheck) {
       const requestResult = await axios.post(
-        "http://connectsyncdata:5000/user/api/login",
+        "http://connectsyncdata.com:5000/user/api/login",
         {
           email: formData.email,
           password: formData.password,

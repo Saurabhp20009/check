@@ -5,8 +5,8 @@ const express = require("express");
 const { default: axios } = require("axios");
 const {
   GoToWebinarTokenData,
-  GoToWebinarList,
-  GoToWebinarAutomationData,
+  GotoWebinerListInDB,
+  GoToWebinarAutomationData
 } = require("../Models/GoToWebinarModel");
 const app = express();
 const { google } = require("googleapis");
@@ -21,7 +21,7 @@ const yogeshSir = {
   OAUTH_CLIENT_ID: "e6e0a08a-9c31-40fe-9685-8a7ffc9d8d2c",
   OAUTH_CLIENT_SECRET: "HCC5Ug0dYygNAfO9BoSq6cyb",
   OAUTH_REDIRECT_URI:
-    "http://connectsyncdata:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 const NehaMam = {
@@ -29,7 +29,7 @@ const NehaMam = {
   OAUTH_CLIENT_ID: "d3823c8b-4e25-447e-90e7-d84edb3c00fa",
   OAUTH_CLIENT_SECRET: "lusB5pkPVIopN8Sp1mWBb1Aa",
   OAUTH_REDIRECT_URI:
-    "http://connectsyncdata:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 var expectedStateForAuthorizationCode = crypto
@@ -133,8 +133,7 @@ const GotoWebinarCallback = async (req, res) => {
   const GetAccountNumber = await axios.get("https://api.getgo.com/identity/v1/Users/me",{
     headers: {Authorization : `Bearer ${tokenResponse.token.access_token}`}
   });
- 
- console.log("g",GetAccountNumber)
+
 
   const DocumentInstance = new GoToWebinarTokenData({
     Access_token: tokenResponse.token.access_token,
@@ -156,11 +155,12 @@ const GotoWebinarCallback = async (req, res) => {
 };
 
 const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData,email) => {
-  const data = await GoToWebinarList.find();
-
+  const userRecords = await GotoWebinerListInDB.findOne({UserEmail: email});
+  
+ 
   await CheckGTWRefreshToken(email);
 
-  const registrantsArray = data.map((registrant) => ({
+  const registrantsArray = userRecords.RegistrantRecords.map((registrant) => ({
     firstName: registrant.FirstName,
     lastName: registrant.LastName,
     email: registrant.Email,
@@ -173,7 +173,7 @@ const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData,email) => {
 
   //Wait for all promises to resolve
   await Promise.all(sendDataPromises);
-  await GoToWebinarList.deleteMany({});
+  await GotoWebinerListInDB.deleteMany({UserEmail:email});
 };
 
 async function sendData(registrant, index, WebinarId, GTWAutomationData,email) {
@@ -256,7 +256,7 @@ const StartGoToWebinarAutomation = async (req, res) => {
     const GTWAutomationData = await DocumentInstance.save();
     console.log("Automation created...");
 
-    await GoToWebinarList.deleteMany({});
+    await GotoWebinerListInDB.deleteMany({UserEmail:email});
 
     res
       .status(200)
@@ -267,7 +267,7 @@ const StartGoToWebinarAutomation = async (req, res) => {
 
     const task = cron.schedule("* * * * *", async () => {
       try {
-        const CheckDataInDB = await GoToWebinarList.find();
+        const CheckDataInDB = await GotoWebinerListInDB.find();
         console.log(CheckDataInDB);
         if (CheckDataInDB.length <= 0) {
           await GoToWebinarAutomationData.updateOne(

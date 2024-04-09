@@ -3,11 +3,11 @@ const express = require("express");
 const app = express();
 const { google } = require("googleapis");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
-const { GoToWebinarList } = require("../Models/GoToWebinarModel");
+const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -27,7 +27,11 @@ const LinkGoogleAccount = async (req, res) => {
   const { email } = req.query;
   Email = email;
 
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000","http://connectsyncdata:3000");
+  res.header(
+    "Access-Control-Allow-Origin",
+    "http://connectsyncdata.com:3000",
+    "http://localhost:3000"
+  );
   res.header("Referrer-Policy", "no-referrer-when-downgrade");
 
   const url = oauth2Client.generateAuthUrl({
@@ -54,7 +58,12 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
     });
 
     DocumentInstance.save();
-    res.status(200).json({AccessToken: `${accessToken}`, RefreshToken: `${refreshToken}`,message: "Google account connected successfully,token details successfully save in db"});
+    res.status(200).json({
+      AccessToken: `${accessToken}`,
+      RefreshToken: `${refreshToken}`,
+      message:
+        "Google account connected successfully,token details successfully save in db",
+    });
   } catch (error) {
     console.error("Error exchanging code for tokens:", error);
     res.status(500).send("Failed to authenticate with Google.");
@@ -110,13 +119,12 @@ const GetSheetNames = async (req, res) => {
   try {
     await getAccessTokenFromRefreshToken(email);
 
-    const  tokenData  = await ModelGoogleTokenData.findOne({
+    const tokenData = await ModelGoogleTokenData.findOne({
       Email: email,
     });
 
-    if(!tokenData)
-    {
-      return 
+    if (!tokenData) {
+      return;
     }
 
     oauth2Client.setCredentials({ access_token: tokenData.Access_token });
@@ -144,10 +152,9 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
   const TokenData = await ModelGoogleTokenData.findOne({
     Email: email,
   });
-   
-  if(!TokenData)
-  {
-    return
+
+  if (!TokenData) {
+    return;
   }
 
   oauth2Client.setCredentials({ access_token: TokenData.Access_token });
@@ -181,17 +188,30 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
 
     //getting all data from sheet (first time)
     {
+      const DocumentInstance = new GotoWebinerListInDB({
+        UserEmail: email,
+        RegistrantRecords: [],
+      });
+      await DocumentInstance.save();
+
+      let tempRegistrant = [];
       //looping for accessing every elements of rows
       for (let i = 1; i <= rows.length - 1; i++) {
-        const DocumentInstance = new GoToWebinarList({
+        tempRegistrant.push({
           FirstName: rows[i][0],
           LastName: rows[i][1],
           Email: rows[i][2],
         });
-
-        await DocumentInstance.save();
         // //Getting only updated data from the sheet
       }
+     
+      console.log(tempRegistrant)
+
+      const res= await GotoWebinerListInDB.findOneAndUpdate(
+        { UserEmail: email },
+        { $set: { RegistrantRecords: tempRegistrant } }
+      );
+      console.log(res)
     }
   } catch (error) {
     console.log("Unable to fetch data", error);
@@ -199,17 +219,13 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
 };
 
 async function getAccessTokenFromRefreshToken(Email) {
-
-  
   const responseGoogleToken = await ModelGoogleTokenData.findOne({
     Email: Email,
   });
-  
- if(!responseGoogleToken)
- {
-  return
- }
 
+  if (!responseGoogleToken) {
+    return;
+  }
 
   const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
   const tokenInfoUrl = `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${responseGoogleToken.Access_token}`;
@@ -244,7 +260,7 @@ async function getAccessTokenFromRefreshToken(Email) {
     try {
       if (tokenResponse.status === 200) {
         const r = await ModelGoogleTokenData.updateOne(
-          { Email:  Email},
+          { Email: Email },
           { $set: { Access_token: tokenResponse.data.access_token } }
         );
 

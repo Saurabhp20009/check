@@ -2,10 +2,9 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const GTWRegistrantSchema = new Schema({
-  FirstName: String,
-  LastName: String,
-  Email: String,
+const GTWRegistrantSchemaInDB = new Schema({
+  UserEmail: String,
+  RegistrantRecords: [{ FirstName: String, LastName: String, Email: String }],
 });
 
 const GTWUserTokenSchema = new Schema({
@@ -13,7 +12,7 @@ const GTWUserTokenSchema = new Schema({
   Refresh_token: String,
   Refresh_time: String,
   Email: String,
-  Account_number:String
+  Account_number: String,
 });
 
 const GTWAutomationDataSchema = new Schema({
@@ -32,10 +31,9 @@ const GTWAutomationDataSchema = new Schema({
   ],
 });
 
-
-const GoToWebinarList = mongoose.model(
+const GotoWebinerListInDB = mongoose.model(
   "GTWRegistrantList",
-  GTWRegistrantSchema
+  GTWRegistrantSchemaInDB
 );
 const GoToWebinarTokenData = mongoose.model(
   "GTWTokenDatas",
@@ -46,9 +44,8 @@ const GoToWebinarAutomationData = mongoose.model(
   GTWAutomationDataSchema
 );
 
-
 module.exports = {
-  GoToWebinarList,
+  GotoWebinerListInDB,
   GoToWebinarTokenData,
-  GoToWebinarAutomationData
+  GoToWebinarAutomationData,
 };
