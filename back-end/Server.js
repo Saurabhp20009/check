@@ -18,7 +18,6 @@ app.use("/user/api", userRouter);
 app.use("/aweber/api", aweberRouter);
 app.use("/gotowebinar/api", GoToWebinarRouter);
 app.use("/goauth/api", GoogleRouter);
-app.use("/mailerlite/api");
 
 
 app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));

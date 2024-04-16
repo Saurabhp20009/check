@@ -36,7 +36,7 @@ const aweberAuth = new ClientOAuth2({
   clientSecret,
   accessTokenUri: TOKEN_URL,
   authorizationUri: `${OAUTH_URL}/authorize`,
-  redirectUri: "https://connectsyncdata.com/callback/aweber",
+  redirectUri: "https://localhost/callback/aweber",
   scopes,
 });
 
@@ -308,7 +308,7 @@ const revokeAweberToken = async (email) => {
     clientSecret: clientSecret,
     accessTokenUri: TOKEN_URL,
     authorizationUri: `${OAUTH_URL}/authorize`,
-    redirectUri: "https://connectsyncdata.com/callback/aweber",
+    redirectUri: "https://localhost/callback/aweber",
     scopes,
   });
 

@@ -21,7 +21,7 @@ const yogeshSir = {
   OAUTH_CLIENT_ID: "e6e0a08a-9c31-40fe-9685-8a7ffc9d8d2c",
   OAUTH_CLIENT_SECRET: "HCC5Ug0dYygNAfO9BoSq6cyb",
   OAUTH_REDIRECT_URI:
-    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 const NehaMam = {
@@ -29,7 +29,7 @@ const NehaMam = {
   OAUTH_CLIENT_ID: "d3823c8b-4e25-447e-90e7-d84edb3c00fa",
   OAUTH_CLIENT_SECRET: "lusB5pkPVIopN8Sp1mWBb1Aa",
   OAUTH_REDIRECT_URI:
-    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 var expectedStateForAuthorizationCode = crypto.randomBytes(15).toString("hex");
