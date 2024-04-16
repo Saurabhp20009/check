@@ -6,7 +6,7 @@ const { default: axios } = require("axios");
 const {
   GoToWebinarTokenData,
   GotoWebinerListInDB,
-  GoToWebinarAutomationData
+  GoToWebinarAutomationData,
 } = require("../Models/GoToWebinarModel");
 const app = express();
 const { google } = require("googleapis");
@@ -32,16 +32,14 @@ const NehaMam = {
     "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
-var expectedStateForAuthorizationCode = crypto
-.randomBytes(15)
-.toString("hex");
+var expectedStateForAuthorizationCode = crypto.randomBytes(15).toString("hex");
 
 const linkGotoWebinarAccount = async (req, res) => {
   const { email } = req.query;
 
   Email = email;
 
-  console.log(Email)
+  console.log(Email);
 
   let oauthConfig;
   if (Email === "ychoudhary320@gmail.com") {
@@ -66,7 +64,7 @@ const linkGotoWebinarAccount = async (req, res) => {
     };
   }
 
-  console.log(oauthConfig)
+  console.log(oauthConfig);
   const oauthClient = new AuthorizationCode(oauthConfig);
 
   const authorizationUrl = oauthClient.authorizeURL({
@@ -74,8 +72,6 @@ const linkGotoWebinarAccount = async (req, res) => {
     scope: "collab:",
     state: expectedStateForAuthorizationCode,
   });
-   
- 
 
   res.status(200).json({ AuthUrl: authorizationUrl });
 };
@@ -130,17 +126,19 @@ const GotoWebinarCallback = async (req, res) => {
 
   console.log(tokenResponse.token);
 
-  const GetAccountNumber = await axios.get("https://api.getgo.com/identity/v1/Users/me",{
-    headers: {Authorization : `Bearer ${tokenResponse.token.access_token}`}
-  });
-
+  const GetAccountNumber = await axios.get(
+    "https://api.getgo.com/identity/v1/Users/me",
+    {
+      headers: { Authorization: `Bearer ${tokenResponse.token.access_token}` },
+    }
+  );
 
   const DocumentInstance = new GoToWebinarTokenData({
     Access_token: tokenResponse.token.access_token,
     Refresh_token: tokenResponse.token.refresh_token,
     Refresh_time: Math.floor(Date.now() / 1000),
     Email: Email,
-    Account_number: GetAccountNumber.data.id
+    Account_number: GetAccountNumber.data.id,
   });
 
   try {
@@ -154,42 +152,54 @@ const GotoWebinarCallback = async (req, res) => {
   res.json({ message: "Account linked", tokenDatas: tokenResponse });
 };
 
-const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData,email) => {
-  const userRecords = await GotoWebinerListInDB.findOne({UserEmail: email});
+const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData, email) => {
+  const userRecords = await GotoWebinerListInDB.findOne({ UserEmail: email });
   
- 
+  //Checking user's GotoWebinar token is valid or not
   await CheckGTWRefreshToken(email);
-
+  
   const registrantsArray = userRecords.RegistrantRecords.map((registrant) => ({
     firstName: registrant.FirstName,
     lastName: registrant.LastName,
     email: registrant.Email,
-    // Include other fields as needed
   }));
+  
 
-  const sendDataPromises = registrantsArray.map(async (registrant, index) => {
-    await sendData(registrant, index, WebinarId, GTWAutomationData,email);
+  //Getting remaining registrant from list
+  const RemainingRegistrant = await GetRemainingRegistrant(
+    WebinarId,
+    email,
+    registrantsArray
+  );
+  
+
+  //Syncing the data in webinar
+  const sendDataPromises = RemainingRegistrant.map(async (registrant, index) => {
+    await sendData(registrant, index, WebinarId, GTWAutomationData, email);
   });
 
   //Wait for all promises to resolve
   await Promise.all(sendDataPromises);
-  await GotoWebinerListInDB.deleteMany({UserEmail:email});
+  await GotoWebinerListInDB.deleteMany({ UserEmail: email });
 };
 
-async function sendData(registrant, index, WebinarId, GTWAutomationData,email) {
+async function sendData(
+  registrant,
+  index,
+  WebinarId,
+  GTWAutomationData,
+  email
+) {
   return new Promise(async (resolve, reject) => {
     try {
-      
-  
       const payload = {
         firstName: registrant.firstName,
         lastName: registrant.lastName,
         email: registrant.email,
-        // Include other fields as needed
       };
 
-      const account= await GoToWebinarTokenData.findOne({Email:email})  
-      
+      const account = await GoToWebinarTokenData.findOne({ Email: email });
+
       const options = {
         method: "POST",
         url: `https://api.getgo.com/G2W/rest/v2/organizers/${account.Account_number}/webinars/${WebinarId}/registrants`,
@@ -199,7 +209,6 @@ async function sendData(registrant, index, WebinarId, GTWAutomationData,email) {
         },
         data: payload,
       };
-     
 
       // Use setTimeout to introduce a delay
       setTimeout(async () => {
@@ -207,8 +216,7 @@ async function sendData(registrant, index, WebinarId, GTWAutomationData,email) {
           const response = await axios.request(options);
           console.log(response.data);
           resolve(); // Resolve the promise when the operation is successful
-        } catch (error) {
-          //console.error("Error sending request:", error);
+        } catch (error) {         
           console.log(error.response.data);
           if (error.response.status !== 409) {
             await GoToWebinarAutomationData.updateOne(
@@ -233,7 +241,8 @@ const StartGoToWebinarAutomation = async (req, res) => {
   if (!Name || !SpreadSheetId || !SheetName || !WebinarId || !email) {
     return res.status(400).json({ message: "fields are invalid" });
   }
-
+  
+  //checking for any automation running currently?
   const TotalAutomation = await GoToWebinarAutomationData.find({
     Email: email,
     Status: "Running",
@@ -243,6 +252,8 @@ const StartGoToWebinarAutomation = async (req, res) => {
   }
 
   try {
+
+    //creating an automation record in DB
     const DocumentInstance = new GoToWebinarAutomationData({
       Name: Name,
       SpreadSheetId: SpreadSheetId,
@@ -256,14 +267,14 @@ const StartGoToWebinarAutomation = async (req, res) => {
     const GTWAutomationData = await DocumentInstance.save();
     console.log("Automation created...");
 
-    await GotoWebinerListInDB.deleteMany({UserEmail:email});
+    await GotoWebinerListInDB.deleteMany({ UserEmail: email });
 
     res
       .status(200)
       .json({ message: `Automation started in background jobs name ${Name}` });
 
     await FetchDataFromSheet(SpreadSheetId, SheetName, email);
-    await SendRegistrantDataToAPI(WebinarId, GTWAutomationData,email);
+    await SendRegistrantDataToAPI(WebinarId, GTWAutomationData, email);
 
     const task = cron.schedule("* * * * *", async () => {
       try {
@@ -289,27 +300,54 @@ const StartGoToWebinarAutomation = async (req, res) => {
   }
 };
 
-``;
+const GetRemainingRegistrant = async (WebinarId, email, registrantsArray) => {
+  const account = await GoToWebinarTokenData.findOne({ Email: email });
+
+  const RemainingRegistrant = [];
+
+  try {
+    var options = {
+      method: "GET",
+      url: `https://api.getgo.com/G2W/rest/v2/organizers/${account.Account_number}/webinars/${WebinarId}/registrants`,
+      //params: {page: 'SOME_INTEGER_VALUE', limit: 'SOME_INTEGER_VALUE'},
+      headers: { Authorization: `Bearer ${account.Access_token}` },
+    };
+
+    const response = await axios.request(options);
+    console.log(response);
+
+    const RegistredRegistrantsEmails = response.data.map((obj) => obj.email);
+
+    registrantsArray.forEach((item) => {
+      if (!RegistredRegistrantsEmails.includes(item.email)) {
+        RemainingRegistrant.push(item);
+      }
+    });
+
+    console.log(RemainingRegistrant);
+    return RemainingRegistrant;
+  } catch (error) {
+    console.log(error);
+  }
+  //console.log(response)
+};
 
 const CheckGTWRefreshToken = async (email) => {
-   
-  let base64EncodedString
+  let base64EncodedString;
 
-  if (email==="ychoudhary320@gmail.com") {
+  if (email === "ychoudhary320@gmail.com") {
     const combinedString = `${yogeshSir.OAUTH_CLIENT_ID}:${yogeshSir.OAUTH_CLIENT_SECRET}`;
-     console.log(combinedString) 
-    base64EncodedString = Buffer.from(combinedString).toString('base64');
-
+    console.log(combinedString);
+    base64EncodedString = Buffer.from(combinedString).toString("base64");
   } else {
     const combinedString = `${NehaMam.OAUTH_CLIENT_ID}:${NehaMam.OAUTH_CLIENT_SECRET}`;
-    console.log(combinedString)
-     base64EncodedString = Buffer.from(combinedString).toString('base64');
+    console.log(combinedString);
+    base64EncodedString = Buffer.from(combinedString).toString("base64");
   }
 
-  console.log(base64EncodedString)
+  console.log(base64EncodedString);
 
-
-  const tokenData = await GoToWebinarTokenData.findOne({Email:email})
+  const tokenData = await GoToWebinarTokenData.findOne({ Email: email });
 
   let currentDateTimeInSeconds = Math.floor(Date.now() / 1000);
 
@@ -327,13 +365,12 @@ const CheckGTWRefreshToken = async (email) => {
     {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Authorization:
-          `Basic ${base64EncodedString}`,
+        Authorization: `Basic ${base64EncodedString}`,
       },
     }
   );
 
-  console.log('r',response)
+  console.log("r", response);
 
   try {
     const updateCheck = await GoToWebinarTokenData.updateOne(
@@ -353,10 +390,6 @@ const CheckGTWRefreshToken = async (email) => {
 
   console.log(response.data);
 };
-
-
-
-
 
 module.exports = {
   GotoWebinarCallback,

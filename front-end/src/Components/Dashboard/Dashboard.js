@@ -96,6 +96,7 @@ const Dashboard = () => {
               <ul>
                 <li onClick={() => handleList(0)}>Aweber</li>
                 <li onClick={() => handleList(1)}>GoToWebinar</li>
+                <li onClick={() => handleList(2)}>MailerLite</li>
               </ul>
             </div>
           )}

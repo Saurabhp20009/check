@@ -204,14 +204,13 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
         });
         // //Getting only updated data from the sheet
       }
-     
-      console.log(tempRegistrant)
 
-      const res= await GotoWebinerListInDB.findOneAndUpdate(
+
+      const res = await GotoWebinerListInDB.findOneAndUpdate(
         { UserEmail: email },
         { $set: { RegistrantRecords: tempRegistrant } }
       );
-      console.log(res)
+      console.log(res);
     }
   } catch (error) {
     console.log("Unable to fetch data", error);
@@ -274,6 +273,22 @@ async function getAccessTokenFromRefreshToken(Email) {
   }
 }
 
+const UnlinkGoogleAccount = async (req,res) => {
+  const {email}=req.query
+  try {
+    const result = await ModelGoogleTokenData.deleteOne({ Email: email });
+    console.log(result,"google account unlinked successfully...");
+
+    if (result.acknowledged) {
+      res.status(200).json({ message: "account unlinked successfully" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+};
+
+
+
 module.exports = {
   LinkGoogleAccount,
   GoogleOAuthCallBackHandle,
@@ -281,4 +296,5 @@ module.exports = {
   GetSheetNames,
   FetchDataFromSheet,
   getAccessTokenFromRefreshToken,
+  UnlinkGoogleAccount
 };

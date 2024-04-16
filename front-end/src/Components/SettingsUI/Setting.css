@@ -45,6 +45,11 @@
   background-color: #0056b3;
 }
 
+
+.button-margin{
+  margin: 1vh;
+}
+
 @media (min-width: 768px) {
   .buttons-container {
     flex-direction: row;

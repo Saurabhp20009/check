@@ -66,6 +66,18 @@ const Settings = () => {
       .catch((error) => console.log(error));
   };
 
+
+  const handleUnlinkGoogleAccount=async()=>{
+    await axios
+    .delete(`http://connectsyncdata.com:5000/goauth/api/unlink/googleaccount?email=${user.email}`, {
+      headers: headers,
+    })
+    .then((response) => window.location.reload())
+    .catch((error) => console.log(error));
+  } 
+  
+
+
   useEffect(() => {
     getUserInfo();
   }, []);
@@ -82,7 +94,7 @@ const Settings = () => {
           </div>
         </div>
         <div className="user-card buttons-card">
-          <div className="buttons-container">
+          <div className="buttons-container button-margin">
             {!displayLinked.Aweber ? (
               <div className="aweber-link-button" onClick={handleAweberButton}>
                 <div className="aweber-icon-wrapper">
@@ -97,7 +109,7 @@ const Settings = () => {
                 </button>
               </div>
             ) : (
-              <div className="aweber-link-button">
+              <div className="aweber-link-button button-margin">
                 <button className="aweber-btn-text">
                   <b>Aweber Account Connected</b>
                 </button>
@@ -106,25 +118,25 @@ const Settings = () => {
           </div>
 
           {!displayLinked.Google ? (
-            <div className="google-sign-in-button">
+            <div className="google-sign-in-button button-margin">
               <FcGoogle />
               <button className="btn-text" onClick={handleGoogleLink}>
                 Connect Google Account
               </button>
             </div>
           ) : (
-            <div className="google-sign-in-button">
+            <div className="google-sign-in-button button-margin" onClick={handleUnlinkGoogleAccount}>
               <BiLogoGoogle />
-              <button className="btn-text">Google Account Connected</button>
+              <button className="btn-text">Unlink google account</button>
             </div>
           )}
           {!displayLinked.GTW ? (
-            <div className="google-sign-in-button" onClick={handleGTWLink}>
+            <div className="google-sign-in-button button-margin" onClick={handleGTWLink}>
               <SiGotomeeting />
               <button className="btn-text">Connect GotoWebinar Account</button>
             </div>
           ) : (
-            <div className="google-sign-in-button">
+            <div className="google-sign-in-button button-margin">
               <SiGotomeeting />
               <button className="btn-text">
                 GotoWebinar Account Connected

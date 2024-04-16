@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mailerlite/mailerlite-nodejs": "^1.2.1",
     "aweber-api": "^1.0.0",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
