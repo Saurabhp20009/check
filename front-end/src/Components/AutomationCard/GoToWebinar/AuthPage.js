@@ -23,7 +23,7 @@ const GoToWebinarAuthPage = () => {
   const handleConnect = async () => {
     await axios
       .post(
-        `http://localhost:5000/gotowebinar/api/login?email=${user.email}`,
+        `http://connectsyncdata.com:5000/gotowebinar/api/login?email=${user.email}`,
         body,
         {
           headers: headers,
