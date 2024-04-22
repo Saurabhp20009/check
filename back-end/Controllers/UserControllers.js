@@ -5,12 +5,14 @@ const jwt = require("jsonwebtoken");
 const {
   GoToWebinarAutomationData,
   GoToWebinarTokenData,
+  GoToWebinarToGoogleSheetAutomationData,
 } = require("../Models/GoToWebinarModel");
 const {
   ModelAweberAutomationData,
   ModelAweberTokenData,
 } = require("../Models/AweberModel");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
+const { BrevoUserData, BrevoAutomationData } = require("../Models/BrevoModel");
 
 const createHash = async (password) => {
   const saltRounds = 10;
@@ -108,12 +110,16 @@ const handleGettingUserInfo = async (req, res) => {
   const checkGoogleAcountLinked = await ModelGoogleTokenData.findOne({
     Email: email,
   });
-  const checkGoToWebinarAccountLinked = await GoToWebinarTokenData.findOne({Email:email});
+  const checkGoToWebinarAccountLinked = await GoToWebinarTokenData.findOne({
+    Email: email,
+  });
   const checkAweberAccountLinked = await ModelAweberTokenData.findOne({
     email: email,
   });
 
-  
+ const checkBrevoAccountLinked=await BrevoUserData.findOne({
+  UserEmail: email
+ })  
 
   if (!userInfo) {
     return res.json({ status: 403, message: "user didn't found" });
@@ -122,6 +128,7 @@ const handleGettingUserInfo = async (req, res) => {
       Google: checkGoogleAcountLinked,
       GTW: checkGoToWebinarAccountLinked,
       Aweber: checkAweberAccountLinked,
+      Brevo: checkBrevoAccountLinked
     });
   }
 };
@@ -138,12 +145,20 @@ const handleGetAutomationData = async (req, res) => {
     const GTWAutomationData = await GoToWebinarAutomationData.find({
       Email: email,
     });
-    TotalWorkflows = [];
+
     const AweberAutomationData = await ModelAweberAutomationData.find({
       Email: email,
     });
 
-    TotalWorkflows = GTWAutomationData.concat(AweberAutomationData);
+    const GTWToSheet = await GoToWebinarToGoogleSheetAutomationData.find({
+      Email: email,
+    });
+
+    const BrevoWorkflow =await BrevoAutomationData.find({
+      Email:email
+    })
+
+    TotalWorkflows = GTWAutomationData.concat(AweberAutomationData, GTWToSheet,BrevoWorkflow);
     console.log(TotalWorkflows);
     res.status(200).json({ Workflows: TotalWorkflows });
   } catch (error) {
@@ -158,14 +173,20 @@ const handleDeleteWorkflow = async (req, res) => {
     const model = await GoToWebinarAutomationData.findById(id).exec();
     if (model) {
       await GoToWebinarAutomationData.deleteOne({ _id: id });
-      return res.status(200).json({ message: "Document deleted successfully." });
+      return res
+        .status(200)
+        .json({ message: "Document deleted successfully." });
     } else {
       const modelB = await ModelAweberAutomationData.findById(id).exec();
       if (modelB) {
         await ModelAweberAutomationData.deleteOne({ _id: id });
-        return res.status(200).json({ message: "Document deleted successfully." });
+        return res
+          .status(200)
+          .json({ message: "Document deleted successfully." });
       } else {
-        console.log("Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData");
+        console.log(
+          "Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData"
+        );
         return res.status(404).json({ message: "Document not found." });
       }
     }
@@ -173,7 +194,6 @@ const handleDeleteWorkflow = async (req, res) => {
     console.error("Error querying documents:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
-  
 };
 
 module.exports = {
@@ -181,5 +201,5 @@ module.exports = {
   handleLogin,
   handleGettingUserInfo,
   handleGetAutomationData,
-  handleDeleteWorkflow
+  handleDeleteWorkflow,
 };

@@ -1,14 +1,16 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Dasboard.css";
-import { ToastContainer} from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import axios from "axios";
 import ExistingWorkFlows from "../AutomationCard/ExistingWorkFlows";
 import AweberAutomationCard from "../AutomationCard/AweberAutomationCard";
-import GTWAutomationCard from "../AutomationCard/GTWAutomationCard";
+import GTWAutomationCard from "../AutomationCard/GoToWebinar/GTWAutomationCard";
 import { RiPagesLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { RiErrorWarningFill } from "react-icons/ri";
-
+import GetResponseAutomationCard from "../AutomationCard/GetResponseAutomationCard";
+import GTWToSheetAutomationCard from "../AutomationCard/GTWToSheet";
+import BrevoAutomationCard from "../AutomationCard/Brevo/BrevoAutomationCard";
 
 const Dashboard = () => {
   const [automationLimit, setAutomationLimit] = useState([]);
@@ -17,11 +19,47 @@ const Dashboard = () => {
   const [ShowApps, setShowApps] = useState(null);
   const [workFlows, setWorkFlows] = useState([]);
   const [pagesDropDown, setPagesDropDown] = useState(false);
-  const Applications = [<AweberAutomationCard setShowAutomationCard={setShowAutomationCard} ShowAutomationCard={ShowAutomationCard} />, <GTWAutomationCard setShowAutomationCard={setShowAutomationCard} ShowAutomationCard={ShowAutomationCard} />];
+  const Applications = [
+    <AweberAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GTWAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GetResponseAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GetResponseAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <BrevoAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GetResponseAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GetResponseAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GetResponseAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />,
+    <GTWToSheetAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      ShowAutomationCard={ShowAutomationCard}
+    />
+  ];
 
- const navigate=useNavigate()
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("userInfo"));
-   
 
   const headers = {
     Authorization: `Bearer ${user.token} `,
@@ -40,7 +78,7 @@ const Dashboard = () => {
 
   const getWorkFlows = async () => {
     await axios
-      .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://localhost:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => {
@@ -51,7 +89,6 @@ const Dashboard = () => {
 
   const handlePagesDropDown = () => {
     setPagesDropDown(!pagesDropDown);
-    
   };
 
   const handleList = (index) => {
@@ -60,11 +97,9 @@ const Dashboard = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
- const handlePages=()=>{
-  navigate('/error')
-}
-
- 
+  const handlePages = () => {
+    navigate("/error");
+  };
 
   console.log(workFlows);
   useEffect(() => {
@@ -72,43 +107,55 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#f3f6f9" ,minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#f3f6f9", minHeight: "100vh" }}>
       <div>
-
         <div className="add-automation-card">
           <div className="pages" onClick={handlePagesDropDown}>
             <RiPagesLine />
             Pages
-          </div>
-
-          {pagesDropDown && (
+           
             <div className="pagesDropDown">
               <ul>
-                <li onClick={handlePages}><RiErrorWarningFill className="error-icon" /> Error Records</li>
+                <li onClick={handlePages}>
+                  <RiErrorWarningFill className="error-icon" /> Error Records
+                </li>
               </ul>
             </div>
-          )}
+
+          </div>
+
+          
+            
+        
           <button className="add-automation-button" onClick={handleClick}>
             Add Automation
-          </button>
-          {isDropdownOpen && (
+         
+          
             <div className="dropdown-list">
               <ul>
                 <li onClick={() => handleList(0)}>Aweber</li>
                 <li onClick={() => handleList(1)}>GoToWebinar</li>
-                <li onClick={() => handleList(2)}>MailerLite</li>
+                <li onClick={() => handleList(2)}>Get Response</li>
+                <li onClick={() => handleList(3)}>BigMarker</li>
+                <li onClick={() => handleList(4)}>Brevo</li>
+                <li onClick={() => handleList(5)}>Mailwizz</li>
+                <li onClick={() => handleList(6)}>Sendy</li>
               </ul>
             </div>
-          )}
+            </button> 
         </div>
-
+          
         {ShowAutomationCard && <div>{Applications[ShowApps]}</div>}
 
-        { workFlows.length>0 ?
+        {workFlows.length > 0 ? (
           workFlows.map((item, index) => {
             return <ExistingWorkFlows key={index} item={item} />;
-          }): <h1 className="no-workflow-found">No workflow found!</h1>}
+          })
+        ) : (
+          <h1 className="no-workflow-found">No workflow found!</h1>
+        )}
       </div>
+      
       <ToastContainer />
     </div>
   );

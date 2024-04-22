@@ -9,6 +9,8 @@ import Settings from "./Components/SettingsUI/Settings";
 import AweberAuthLinkPage from "./Components/AweberAuthLink/AweberAuthLinkPage";
 import ErrorRecords from "./Components/ErrorRecords/ErrorRecords";
 import DisplayWorkflows from "./Components/DashboardPages/DisplayWorkflows";
+import BrevoAuthPage from "./Components/AutomationCard/Brevo/AuthPage";
+import GoToWebinarAuthPage from "./Components/AutomationCard/GoToWebinar/AuthPage";
 
 function App() {
   const [checkUserLogin, setCheckUserLogin] = useState(false);
@@ -42,6 +44,9 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="/aweberauth" element={<AweberAuthLinkPage />} />
+        <Route path="/auth/brevo" element={<BrevoAuthPage />} />
+        <Route path="/auth/gtw" element={<GoToWebinarAuthPage />} />
+
       </Routes>
     </>
   );

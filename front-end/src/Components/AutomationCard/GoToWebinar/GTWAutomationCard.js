@@ -1,28 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./AutomationCard.css"; // Import CSS for styling
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { TbSettingsAutomation } from "react-icons/tb";
 import { TfiClose } from "react-icons/tfi";
+import { TbSettingsAutomation } from "react-icons/tb";
 
-function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+
+
+function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
-  const [aweberListId, setAweberListId] = useState("");
-  const [aweberDataList, setAweberDataList] = useState([]);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
+  const [WebinarId, setWebinarId] = useState("");
   const [workflowName, setWorkflowName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-  const divRef = useRef(null);
-
+   
   const headers = {
-    Authorization: `Bearer ${user.token} `,
-    "Content-Type": "application/json",
+    'Authorization': `Bearer ${user.token} `,
+    'Content-Type': 'application/json'
   };
+
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -32,66 +33,55 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setSheetName(event.target.value);
   };
 
-  const handleAweberListChange = (event) => {
-    setAweberListId(event.target.value);
+  const handleWebinarId = (event) => {
+    setWebinarId(event.target.value);
   };
 
   const handleStartAutomation = async () => {
-    // Your logic to start automation goes here
-    // For demo purposes, update lastTriggered with current time
-  
-    if (!workflowName) {
-      return toast.error("Please fill the workflow name");
+    if (!workflowName || !WebinarId) {
+      return toast.error("Please fill the input fields correctly");
     }
-    const user = JSON.parse(localStorage.getItem("userInfo"));
+
+    const temp = WebinarId;
+    const WebinarIdWithoutHyphens = temp.replace(/-/g, "");
+
     const body = {
-      name: workflowName,
-      email: user.email,
-      sheetId: spreadsheetId,
-      sheetName: sheetName,
-      listId: aweberListId,
+      Name: workflowName,
+      SpreadSheetId: spreadsheetId,
+      SheetName: sheetName,
+      WebinarId: WebinarIdWithoutHyphens,
     };
 
-    const response = await axios
-      .post("http://localhost:5000/aweber/api/startautomation", body, {
-        headers: headers,
-      })
-      .then((response) => window.location.reload());
-
-    return toast.error(response.data.message);
-  };
-
-  const gettingAweberList = async () => {
-   await axios
+    console.log(body);
+    await axios
       .post(
-        "http://localhost:5000/aweber/api/gettinglists",
-        {
-          email: user.email,
-        },
-        {
-          headers: headers,
+        `http://localhost:5000/gotowebinar/api/start/automation?email=${user.email}`,
+        body,{
+          headers: headers
         }
       )
       .then((response) => {
-        setAweberDataList([...response.data.list_data]);
-        setAweberListId(response.data.list_data[0].id);
+        console.log(response);
+        window.location.reload();
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error.response);
+        return toast.error(error.response.data.message);
+      });
   };
 
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
-        {
-          headers: headers,
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
+          headers: headers
         }
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log("spread"); toast.error("Unable to fetch sheet data")});
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -99,19 +89,18 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       SheetId: spreadsheetId,
     };
 
-    const response = await axios
+     await axios
       .post(
         `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
-        body,
-        {
-          headers: headers,
+        body,{
+          headers: headers
         }
       )
-      .then((response) => {
-        setGoogleSpreadDataSheetList([...response.data.Sheets]);
-        setSheetName(response.data.Sheets[0]);
-      })
-      .catch((error) => console.log(error));
+      .then((response) =>
+        {setGoogleSpreadDataSheetList([...response.data.Sheets])
+        setSheetName(response.data.Sheets[0])}
+      )
+      .catch((error) => console.log(error.response));
   };
 
   const handleNameChange = (e) => {
@@ -119,10 +108,8 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   };
 
   useEffect(() => {
-    gettingAweberList();
     gettingSpreadsheetList();
     gettingSpreadsheetSheetList();
-    divRef.current.focus();
   }, []);
 
   useEffect(() => {
@@ -130,12 +117,11 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   }, [spreadsheetId]);
 
   return (
-    <div className="automation-card" tabIndex={0} ref={divRef}>
-      <ToastContainer autoClose={3000} />
+    <div className="automation-card">
       <div className="input-group card-head">
-        <div className="name-div">
+      <div className="name-div ">
           {" "}
-          <label htmlFor="name">Name : (Google Sheet --- Aweber)</label>
+          <label htmlFor="name">Name : (GoogleSheet --- GotoWebinar)</label>
           <input
             value={workflowName}
             className="NameInput"
@@ -145,7 +131,6 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
         <TfiClose />
         </div>  
-
       </div>
 
       <div className="input-group">
@@ -179,29 +164,23 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Aweber List:</label>
-        <select
-          id="aweberList"
-          value={aweberListId}
-          onChange={handleAweberListChange}
-        >
-          {aweberDataList.map((item, index) => (
-            <option key={index} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        <label htmlFor="aweberList">Enter Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+        />
       </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
-          <TbSettingsAutomation className="start-icon" />
+        <TbSettingsAutomation className="start-icon" />
           Start
         </button>
       </div>
 
-      
+      <ToastContainer autoClose={3000} />
     </div>
   );
 }
 
-export default AweberAutomationCard;
+export default GTWAutomationCard;

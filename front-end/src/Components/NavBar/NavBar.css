@@ -9,21 +9,22 @@
 
 .navbar__left h1 {
   margin: 0;
-  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
 }
 
-.navbar__right{
+.navbar__right {
   margin-right: 5vh;
 }
 
 h6 {
-  color: #9a9ca9;
+  color: #333333;
   margin: 5vh auto 1vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   font-size: small;
+  font-weight: 600;
 }
 
 .user {
@@ -31,14 +32,22 @@ h6 {
   position: relative;
 }
 
+
+
 .dropdown {
+  display: none;
   position: absolute;
-  top: 100%;
+  top: 101%;
   right: -35px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-width: 120px;
   text-align: center;
+  border-radius: 10px;
+}
+
+.user:hover .dropdown{
+  display: block
 }
 
 .dropdown ul {
@@ -74,34 +83,30 @@ h6 {
   font-size: 5vh;
 }
 
-.top-nav-icon{
+.top-nav-icon {
   display: none;
 }
-
 
 /* Styles for screens smaller than 600px */
 @media (max-width: 600px) {
   /* Your CSS rules for small screens here */
-.navbar__left h1{
-  display: none;
-}
+  .navbar__left h1 {
+    display: none;
+  }
 
-.user svg{
-  height: 32px;
-  width: 32px;
-}
+  .user svg {
+    height: 32px;
+    width: 32px;
+  }
 
-.top-nav-icon{
-  display: block;
-}
+  .top-nav-icon {
+    display: block;
+  }
 
-.navbar__left svg{
-  height: 32px;
-  width: 32px;
-}
-
-
-
+  .navbar__left svg {
+    height: 32px;
+    width: 32px;
+  }
 }
 
 /* Styles for screens between 600px and 900px */

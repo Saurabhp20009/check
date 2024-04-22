@@ -1,141 +1,157 @@
 .add-automation-card {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 1vh;
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: space-between;
-    margin: 0 auto;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    align-items: center;
-  }
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 1vh;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  align-items: center;
+}
+
+.pages {
+  margin-left: 5vh;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+}
+
+.pages:hover .pagesDropDown{
+  display: inline-block;
+}
+
+.pages svg {
+  height: 3.5vh;
+  width: 3.5vh;
+  margin-right: 1vh;
+}
+
+.pages_down {
+  margin-left: 1vh;
+  color: #50575e;
+}
+
+.pages_down svg {
+  height: 2vh;
+  width: 2vh;
+}
+
+.add-automation-button {
+  background-color: #dcf6e9;
+  margin-right: 5vh;
+  color: #33cd7f;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-size: 16px;
+  font-weight: lighter;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-automation-button:hover {
+  background-color: #4caf50;
+  color: whitesmoke;
+    
+}
+
+
+
+.dropdown-list {
+  display: none;
+  position: absolute;
+  top: 6.2rem;
+  right: 2em;
+  width: 10%;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-top: none;
+  box-shadow: 0 0 1px #e2e2e2;
+  border-radius: 10px;
+  padding: 1.5vh;
+  transition: 1s;
+  text-align: left;
   
-  .pages{
-    margin-left: 5vh;
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-  }
 
-  .pages svg{
-   height: 3.5vh;
-   width: 3.5vh;
-   margin-right: 1vh;
-  }
- 
-  .pages_down
-  {
-    margin-left: 1vh;
-    color: #50575e;
-  }
+  /* Initially hidden */
+}
 
-  .pages_down svg{
-    height: 2vh;
-    width: 2vh;
-  }
+.dropdown-list ul{
+  color: #333;
+}
 
-  .add-automation-button {
-    background-color: #dcf6e9;
-    margin-right: 5vh;
-    color: #33cd7f;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-size: 16px;
-    font-weight: lighter;
-    cursor: pointer;
-    transition: background-color 0.3s ease
-  }
-  
-  .add-automation-button:hover {
-    background-color: #4caf50 ;
-    color: whitesmoke;
-  }
+.pagesDropDown {
+  display: none;
+  position: absolute;
+  top: 5.7rem;
+  width: 13%;
+  left: 1%;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-top: none;
+  box-shadow: 0 0 2px #e2e2e2;
+  border-radius: 5px;
+  padding: 1.5vh;
+  transition: 1s;
+  color: #50575d;
+}
 
+.pagesDropDown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-weight: 350;
+  font-size: 16px;
+  font-weight: lighter;
+}
 
-  
-  
-  .dropdown-list {  
-    position: absolute;
-    top: 6.2rem;
-    right: 3em;
-    width: 10%;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-top: none;
-    box-shadow: 0 0 1px #e2e2e2;
-    border-radius: 5px;
-    padding: 1.5vh;
+.pagesDropDown ul li {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: black;
+}
 
-   /* Initially hidden */
-  }
-  
-  .pagesDropDown{
-    position: absolute;
-    top: 6.2rem;
-    width: 13%;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    border-top: none;
-    box-shadow: 0 0 2px #e2e2e2;
-    border-radius: 5px;
-    padding: 1.5vh;
-    transition: all 0.4s ease; 
-    color: #50575d;
-  }
+.dropdown-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  font-weight: lighter;
+}
 
-  .pagesDropDown ul{
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    font-weight: 350 ;
-    font-size: 16px;
-    font-weight: lighter;
-  }
+.dropdown-list ul li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
 
-  .pagesDropDown ul li {
-    padding: 8px 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
+.dropdown-list ul li:hover {
+  background-color: #f0f0f0;
+}
 
-  .dropdown-list ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    font-weight: 350 ;
-    font-size: 16px;
-    font-weight: lighter;
-  }
-  
-  .dropdown-list ul li {
-    padding: 8px 12px;
-    cursor: pointer;
-  }
-  
-  .dropdown-list ul li:hover {
-    background-color: #f0f0f0;
-  }
+.error-icon {
+  margin-right: 2vh;
+}
 
-  .error-icon{
-    margin-right: 2vh;
-  }
-
-  .no-workflow-found{
-    display: flex;
+.no-workflow-found {
+  display: flex;
   justify-content: center;
-   font-weight: lighter;
-  }
-  
-  /* Styles for screens smaller than 600px */
+  font-weight: lighter;
+}
+
+.add-automation-button:hover .dropdown-list {
+  display: inline-block;
+}
+
+/* Styles for screens smaller than 600px */
 @media (max-width: 600px) {
   /* Your CSS rules for small screens here */
- .add-automation-card{
-  display: none;
- }
-
+  .add-automation-card {
+    display: none;
+  }
 }
 
 /* Styles for screens between 600px and 900px */

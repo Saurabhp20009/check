@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import "../SettingsUI/Setting.css";
 import { FaUserCircle } from "react-icons/fa";
 import axios from "axios";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
 import { SiGotomeeting } from "react-icons/si";
-import { BiLogoGoogle } from "react-icons/bi";
+import { SiBrevo } from "react-icons/si";
 
 const Settings = () => {
   const user = JSON.parse(localStorage.getItem("userInfo"));
@@ -17,9 +17,9 @@ const Settings = () => {
   };
 
   const getUserInfo = async () => {
-     await axios
+    await axios
       .post(
-        "http://connectsyncdata.com:5000/user/api/gettinguser",
+        "http://localhost:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -36,7 +36,7 @@ const Settings = () => {
 
   const handleAweberButton = async () => {
     await axios
-      .get("http://connectsyncdata.com:5000/aweber/api/buildauthurl", {
+      .get("http://localhost:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,34 +49,70 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://connectsyncdata.com:5000/goauth/api/link?email=${user.email}`, {
+      .get(`http://localhost:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
-      .then((response) => window.open(response.data.AuthUrl))
+      .then((response) => {
+        window.open(response.data.AuthUrl);
+        console.log(response);
+      })
       .catch((error) => console.log(error));
   };
 
   const handleGTWLink = async () => {
-    console.log(headers);
+    window.open("auth/gtw");
+
+    // console.log(headers);
+    // await axios
+    //   .get(`http://localhost:5000/gotowebinar/api/login?email=${user.email}`, {
+    //     headers: headers,
+    //   })
+    //   .then((response) => window.open(response.data.AuthUrl))
+    //   .catch((error) => console.log(error));
+  };
+
+  const handleUnlinkGTWAccount = async () => {
     await axios
-      .get(`http://connectsyncdata.com:5000/gotowebinar/api/login?email=${user.email}`, {
-        headers: headers,
-      })
-      .then((response) => window.open(response.data.AuthUrl))
+      .delete(
+        `http://localhost:5000/gotowebinar/api/remove/account?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
       .catch((error) => console.log(error));
   };
 
-
-  const handleUnlinkGoogleAccount=async()=>{
+  const handleUnlinkGoogleAccount = async () => {
     await axios
-    .delete(`http://connectsyncdata.com:5000/goauth/api/unlink/googleaccount?email=${user.email}`, {
-      headers: headers,
-    })
-    .then((response) => window.location.reload())
-    .catch((error) => console.log(error));
-  } 
-  
+      .delete(
+        `http://localhost:5000/goauth/api/unlink/googleaccount?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => console.log(error));
+  };
 
+  const handleBrevoLink = async () => {
+    window.open("/auth/brevo");
+  };
+
+  const handleBrevoAccountRemove = async () => {
+    await axios
+      .delete(
+        `http://localhost:5000/brevo/api/delete/account?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => {
+        console.log(error);
+        toast.error("Error occurred..");
+      });
+  };
 
   useEffect(() => {
     getUserInfo();
@@ -94,55 +130,211 @@ const Settings = () => {
           </div>
         </div>
         <div className="user-card buttons-card">
+          <h2>Account linking</h2>
+
           <div className="buttons-container button-margin">
-            {!displayLinked.Aweber ? (
-              <div className="aweber-link-button" onClick={handleAweberButton}>
-                <div className="aweber-icon-wrapper">
-                  <img
-                    className="aweber-icon"
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGHvFQKZjNIDSbfv0aiO6O3HsGDAFEOhvoPUXBpRpytQ&s"
-                    alt="AWeber icon"
-                  />
-                </div>
-                <button className="aweber-btn-text">
-                  <b>Link AWeber</b>
-                </button>
+            <div className="aweber-link-button">
+              <img
+                className="aweber-icon"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGHvFQKZjNIDSbfv0aiO6O3HsGDAFEOhvoPUXBpRpytQ&s"
+                alt="AWeber icon"
+              />
+              AWeber
+            </div>
+
+            <div className="Connection-show-button">
+              <div>
+                {!displayLinked.Aweber ? (
+                  <button
+                    className="Connect-button"
+                    onClick={handleAweberButton}
+                  >
+                    Connect
+                  </button>
+                ) : (
+                  <button className="Connect-button">Disconnect</button>
+                )}
               </div>
-            ) : (
-              <div className="aweber-link-button button-margin">
-                <button className="aweber-btn-text">
-                  <b>Aweber Account Connected</b>
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
-          {!displayLinked.Google ? (
-            <div className="google-sign-in-button button-margin">
-              <FcGoogle />
-              <button className="btn-text" onClick={handleGoogleLink}>
-                Connect Google Account
-              </button>
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <FcGoogle className="google-icon" />
+              <label>Google</label>
             </div>
-          ) : (
-            <div className="google-sign-in-button button-margin" onClick={handleUnlinkGoogleAccount}>
-              <BiLogoGoogle />
-              <button className="btn-text">Unlink google account</button>
+            <div className="Connection-show-button">
+              <div>
+                {!displayLinked.Google ? (
+                  <button className="Connect-button" onClick={handleGoogleLink}>
+                    Connect
+                  </button>
+                ) : (
+                  <button
+                    className="Connect-button"
+                    onClick={handleUnlinkGoogleAccount}
+                  >
+                    Disconnect
+                  </button>
+                )}
+              </div>
             </div>
-          )}
-          {!displayLinked.GTW ? (
-            <div className="google-sign-in-button button-margin" onClick={handleGTWLink}>
-              <SiGotomeeting />
-              <button className="btn-text">Connect GotoWebinar Account</button>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <SiGotomeeting
+                className="google-icon"
+                style={{ color: "#00baeb" }}
+              />
+              <label> GotoWebinar</label>
             </div>
-          ) : (
-            <div className="google-sign-in-button button-margin">
-              <SiGotomeeting />
-              <button className="btn-text">
-                GotoWebinar Account Connected
-              </button>
+
+            <div>
+              {!displayLinked.GTW ? (
+                <button className="Connect-button" onClick={handleGTWLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleUnlinkGTWAccount}
+                >
+                  Disconnect
+                </button>
+              )}
             </div>
-          )}
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <SiBrevo className="google-icon" style={{ color: "#0b996f" }} />
+              Brevo
+            </div>
+
+            <div>
+              {!displayLinked.Brevo ? (
+                <button className="Connect-button" onClick={handleBrevoLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleBrevoAccountRemove}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCLeX6fGZJOijKz60REOzXGQPQmE6aU-xeACo72UZ80g&s"
+                Bigmarker
+                alt="bigmarker-icon"
+                className="bigmarker-img"
+              />{" "}
+              Bigmarker
+            </div>
+
+            <div>
+              {!displayLinked.Brevo ? (
+                <button className="Connect-button" onClick={handleBrevoLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleBrevoAccountRemove}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5i_7FxYoqMQp_vaNNTz2EU7aQyLHaaf_yLw8YDhZPWA&s"
+                Bigmarker
+                alt="getresponse-icon"
+                className="bigmarker-img"
+              />{" "}
+              GetResponse
+            </div>
+
+            <div>
+              {!displayLinked.Brevo ? (
+                <button className="Connect-button" onClick={handleBrevoLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleBrevoAccountRemove}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://pipedream.com/s.v0/app_OkrhrJ/logo/orig"
+                Bigmarker
+                alt="mailwizz-icon"
+                className="bigmarker-img"
+              />{" "}
+              Mailwizz
+            </div>
+
+            <div>
+              {!displayLinked.Brevo ? (
+                <button className="Connect-button" onClick={handleBrevoLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleBrevoAccountRemove}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://cdn-1.webcatalog.io/catalog/sendy/sendy-icon-filled-256.png?v=1675594526904"
+                Bigmarker
+                alt="sendy-icon"
+                className="bigmarker-img"
+              />{" "}
+              Sendy
+            </div>
+
+            <div>
+              {!displayLinked.Brevo ? (
+                <button className="Connect-button" onClick={handleBrevoLink}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleBrevoAccountRemove}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <ToastContainer autoClose={3000} />

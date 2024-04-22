@@ -9,6 +9,7 @@ const aweberRouter = require("./Routes/AweberRoutes");
 const { default: mongoose } = require("mongoose");
 const GoToWebinarRouter = require("./Routes/GoToWebinarRoutes");
 const GoogleRouter = require("./Routes/GoogleRoutes");
+const BrevoRouter = require("./Routes/BrevoRoutes");
 require("dotenv").config();
 
 
@@ -18,6 +19,9 @@ app.use("/user/api", userRouter);
 app.use("/aweber/api", aweberRouter);
 app.use("/gotowebinar/api", GoToWebinarRouter);
 app.use("/goauth/api", GoogleRouter);
+app.use("/brevo/api",BrevoRouter);
+
+//app.use("/getresponse/api",GetResponseRouter);
 
 
 app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));

@@ -13,10 +13,13 @@ const GTWUserTokenSchema = new Schema({
   Refresh_time: String,
   Email: String,
   Account_number: String,
+  Client_id: String,
+  Client_secret: String,
 });
 
 const GTWAutomationDataSchema = new Schema({
   Name: String,
+  AppName: String,
   SpreadSheetId: String,
   SheetName: String,
   WebinarId: String,
@@ -29,6 +32,16 @@ const GTWAutomationDataSchema = new Schema({
       email: String,
     },
   ],
+});
+
+const GTWToGoogleSheetAutomationDataSchema = new Schema({
+  Name: String,
+  AppName: String,
+  SpreadSheetId: String,
+  SheetName: String,
+  WebinarId: String,
+  Status: String,
+  Email: String,
 });
 
 const GotoWebinerListInDB = mongoose.model(
@@ -44,8 +57,14 @@ const GoToWebinarAutomationData = mongoose.model(
   GTWAutomationDataSchema
 );
 
+const GoToWebinarToGoogleSheetAutomationData = mongoose.model(
+  "GTWToGoogleSheetAutomationData",
+  GTWToGoogleSheetAutomationDataSchema
+);
+
 module.exports = {
   GotoWebinerListInDB,
   GoToWebinarTokenData,
   GoToWebinarAutomationData,
+  GoToWebinarToGoogleSheetAutomationData,
 };

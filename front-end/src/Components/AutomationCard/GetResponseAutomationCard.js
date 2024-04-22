@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { TbSettingsAutomation } from "react-icons/tb";
 import { TfiClose } from "react-icons/tfi";
 
-function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [aweberListId, setAweberListId] = useState("");
@@ -91,7 +91,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log("spread"); toast.error("Unable to fetch sheet data")});
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -131,11 +131,10 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
   return (
     <div className="automation-card" tabIndex={0} ref={divRef}>
-      <ToastContainer autoClose={3000} />
       <div className="input-group card-head">
         <div className="name-div">
           {" "}
-          <label htmlFor="name">Name : (Google Sheet --- Aweber)</label>
+          <label htmlFor="name">Name:(GoogleSheet --- GetResponse)</label>
           <input
             value={workflowName}
             className="NameInput"
@@ -199,9 +198,9 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </button>
       </div>
 
-      
+      <ToastContainer autoClose={3000} />
     </div>
   );
 }
 
-export default AweberAutomationCard;
+export default GetResponseAutomationCard;

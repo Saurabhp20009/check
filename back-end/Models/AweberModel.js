@@ -20,6 +20,7 @@ const TokenDataSchema = new Schema({
 const AweberAutomationDataSchema = new Schema([
   {
     Name: String,
+    AppName: String,
     Email: String,
     SheetId: String,
     SheetName: String,

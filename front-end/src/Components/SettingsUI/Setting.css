@@ -6,7 +6,7 @@
 
 .setting-outerbox {
   background-color: #f1f4f7;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .user-info {
@@ -26,8 +26,8 @@
 }
 
 .buttons-container {
+  background-color: #f3f6f9;
   display: flex;
-  justify-content: center;
 }
 
 .button {
@@ -45,8 +45,7 @@
   background-color: #0056b3;
 }
 
-
-.button-margin{
+.button-margin {
   margin: 1vh;
 }
 
@@ -107,40 +106,39 @@
   text-align: center;
 }
 
-
 .google-sign-in-button {
-  margin: auto;
-  width: fit-content;
+  width: -moz-available;
   padding: 10px;
   border-radius: 5px;
   background-color: #f3f6f9;
   display: flex;
   align-items: center;
-  cursor: pointer;
-  border: 2px solid #f3f6f9 ;
+  border: 2px solid #f3f6f9;
 }
 
-.google-sign-in-button svg{
+.google-sign-in-button svg {
   height: 20px;
   width: 20px;
 }
 
-.google-sign-in-button:hover{
+.google-sign-in-button:hover {
   box-shadow: 0 0 1px;
 }
 
+.google-icon {
+  margin-right: 15px;
+}
 
 .google-icon-wrapper {
   width: 30px;
   margin-right: 15px;
   display: flex;
   align-items: center;
-  
 }
 
-.google-icon {
-  width: 100%;
-  height: auto;
+.google-sign-in-button svg {
+  height: 30px;
+  width: 30px;
 }
 
 .btn-text {
@@ -149,30 +147,20 @@
   font-size: 16px;
   font-weight: bold;
   color: #3c3c3c;
-  cursor: pointer;
   padding: 0;
   margin-left: 2vh;
   text-transform: none;
 }
 
-
 .aweber-link-button {
-  margin: auto;
-  width: fit-content;
+  width: 80vh;
   padding: 9px;
   border-radius: 5px;
-  border: 2px solid #f3f6f9 ;
+  border: 2px solid #f3f6f9;
   display: flex;
   align-items: center;
-  cursor: pointer;
   background-color: #f3f6f9;
 }
-
-
-.aweber-link-button:hover{
-  box-shadow: 0 0 2px;
-}
-
 
 .aweber-icon-wrapper {
   width: 30px;
@@ -180,8 +168,9 @@
 }
 
 .aweber-icon {
-  width: 100%;
-  height: auto;
+  height: 30px;
+  width: 30px;
+  margin-right: 15px;
 }
 
 .aweber-btn-text {
@@ -195,7 +184,41 @@
   text-transform: none;
 }
 
-.button-cards{
+.button-cards {
   display: flex;
   align-items: left;
+}
+
+.Connection-show-button {
+  display: flex;
+  align-items: center;
+  background-color: #f3f6f9;
+  width: 20%;
+}
+
+.Connect-button {
+  padding: 1vh;
+  background-color: #333333;
+  border-radius: 10px;
+  color: whitesmoke;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.Connect-button:hover {
+  box-shadow: 0 0 2px black;
+}
+
+.google-button-div {
+  display: flex;
+  align-items: center;
+  width: 436px;
+}
+
+.bigmarker-img {
+  height: 30px;
+  width: 30px;
+  border-radius: 25px;
+  margin-right: 15px;
 }

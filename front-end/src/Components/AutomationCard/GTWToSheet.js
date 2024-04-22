@@ -7,7 +7,7 @@ import { TbSettingsAutomation } from "react-icons/tb";
 
 
 
-function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function GTWToSheetAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
@@ -46,7 +46,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     const WebinarIdWithoutHyphens = temp.replace(/-/g, "");
 
     const body = {
-      Name: workflowName,
+      name: workflowName,
       SpreadSheetId: spreadsheetId,
       SheetName: sheetName,
       WebinarId: WebinarIdWithoutHyphens,
@@ -55,7 +55,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     console.log(body);
     await axios
       .post(
-        `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${user.email}`,
+        `http://localhost:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
         body,{
           headers: headers
         }
@@ -73,7 +73,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
           headers: headers
         }
       )
@@ -91,7 +91,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
      await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,{
           headers: headers
         }
@@ -121,7 +121,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       <div className="input-group card-head">
       <div className="name-div ">
           {" "}
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">Name (GotoWebinar --- Google Sheet)</label>
           <input
             value={workflowName}
             className="NameInput"
@@ -183,4 +183,4 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   );
 }
 
-export default GTWAutomationCard;
+export default GTWToSheetAutomationCard;
