@@ -156,8 +156,8 @@ const SendRegistrantDataToAPI = async (
       email: registrant.Email,
     }));
 
-    //const account = await GoToWebinarTokenData.findOne({ Email: email });
-    // const { Account_number, Access_token } = account;
+    const account = await GoToWebinarTokenData.findOne({ Email: email });
+    const { Account_number, Access_token } = account;
 
     //Getting remaining registrant from list
     // const RemainingRegistrant = await GetRemainingRegistrant(
