@@ -123,17 +123,17 @@ const ExistingWorkFlows = ({ item }) => {
       <div className="flex-content">
         <div className="content">
           <label>Name</label>
-          <p>{item.Name}</p>
+          <p>{item?.Name}</p>
         </div>
 
         <div className="content">
           <label>Operation</label>
-          <p>{item.Operation.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
+          <p>{item?.Operation.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
         </div>
 
         <div className="content">
           <label>Sheet Name</label>
-          <p>{item.SheetName}</p>
+          <p>{item?.SheetName}</p>
         </div>
         <div className="content">
           <label>{id}</label>
@@ -143,7 +143,7 @@ const ExistingWorkFlows = ({ item }) => {
           <label>Status</label>
           <p style={{ display: "flex", alignItems: "center" }}>
             <div className="status-spinner-overlay">
-              {item.Status === "Running" ? (
+              {item?.Status === "Running" ? (
                 <div className="status-spinner-container">
                   <div className="status-spinner"></div>
                 </div>
@@ -151,7 +151,7 @@ const ExistingWorkFlows = ({ item }) => {
                 <IoCheckmarkDoneCircle className="finishedIcon" />
               )}
             </div>
-            {item.Status}
+            {item?.Status}
           </p>
         </div>
         <div className="button-div">
