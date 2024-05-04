@@ -128,7 +128,7 @@ const ExistingWorkFlows = ({ item }) => {
 
         <div className="content">
           <label>Operation</label>
-          <p>{item?.Operation.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
+          <p>{item?.Operation?.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
         </div>
 
         <div className="content">
@@ -157,7 +157,7 @@ const ExistingWorkFlows = ({ item }) => {
         <div className="button-div">
           <button
             className={
-              item.Status !== "Finished" ? "edit-but" : "edit-but-finished"
+              item?.Status !== "Finished" ? "edit-but" : "edit-but-finished"
             }
             onClick={handleEdit}
           >
@@ -167,7 +167,7 @@ const ExistingWorkFlows = ({ item }) => {
           <button
             type="button"
             className={
-              item.Status === "Running" ? "odd-remove-button" : "remove-button"
+              item?.Status === "Running" ? "odd-remove-button" : "remove-button"
             }
             onClick={() => {
               {
