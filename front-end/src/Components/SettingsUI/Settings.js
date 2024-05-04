@@ -61,14 +61,6 @@ const Settings = () => {
 
   const handleGTWLink = async () => {
     window.open("auth/gtw");
-
-    // console.log(headers);
-    // await axios
-    //   .get(`http://connectsyncdata.com:5000/gotowebinar/api/login?email=${user.email}`, {
-    //     headers: headers,
-    //   })
-    //   .then((response) => window.open(response.data.AuthUrl))
-    //   .catch((error) => console.log(error));
   };
 
   const handleUnlinkGTWAccount = async () => {
@@ -114,6 +106,66 @@ const Settings = () => {
       });
   };
 
+  const handleGetReponse = () => {
+    window.open("/auth/get/response");
+  };
+
+  const handleRemoveGetResponseAccount = async () => {
+    const r = await axios
+      .delete(
+        `http://connectsyncdata.com:5000/getresponse/api/remove/account?id=${displayLinked.GetResponse._id}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => console.log(error));
+  };
+
+  const handleAweberRemove = async () => {
+    const r = await axios
+      .delete(
+        `http://connectsyncdata.com:5000/aweber/api/remove/account?id=${displayLinked.Aweber._id}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => console.log(error));
+  };
+
+  const handleBigMarkerConnect = async () => {
+    window.open("auth/bigmarker");
+  };
+
+  const handleBigmarkerAccountRemove = async () => {
+    const r = await axios
+      .delete(
+        `http://connectsyncdata.com:5000/bigmarker/api/remove/account?id=${displayLinked.Bigmarker._id}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => console.log(error));
+  };
+
+  const handleSendyAccountRemove = async () => {
+    const r = await axios
+      .delete(
+        `http://connectsyncdata.com:5000/sendy/api/remove/account?id=${displayLinked.Sendy._id}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => window.location.reload())
+      .catch((error) => console.log(error));
+  };
+
+  const handleSendyConnect = () => {
+    window.open("auth/sendy");
+  };
+
   useEffect(() => {
     getUserInfo();
   }, []);
@@ -139,7 +191,7 @@ const Settings = () => {
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGHvFQKZjNIDSbfv0aiO6O3HsGDAFEOhvoPUXBpRpytQ&s"
                 alt="AWeber icon"
               />
-              AWeber
+               <label>AWeber</label>
             </div>
 
             <div className="Connection-show-button">
@@ -152,7 +204,12 @@ const Settings = () => {
                     Connect
                   </button>
                 ) : (
-                  <button className="Connect-button">Disconnect</button>
+                  <button
+                    className="Connect-button"
+                    onClick={handleAweberRemove}
+                  >
+                    Disconnect
+                  </button>
                 )}
               </div>
             </div>
@@ -240,14 +297,17 @@ const Settings = () => {
             </div>
 
             <div>
-              {!displayLinked.Brevo ? (
-                <button className="Connect-button" onClick={handleBrevoLink}>
+              {!displayLinked.Bigmarker ? (
+                <button
+                  className="Connect-button"
+                  onClick={handleBigMarkerConnect}
+                >
                   Connect
                 </button>
               ) : (
                 <button
                   className="Connect-button"
-                  onClick={handleBrevoAccountRemove}
+                  onClick={handleBigmarkerAccountRemove}
                 >
                   Disconnect
                 </button>
@@ -259,7 +319,6 @@ const Settings = () => {
             <div className="google-button-div">
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5i_7FxYoqMQp_vaNNTz2EU7aQyLHaaf_yLw8YDhZPWA&s"
-                Bigmarker
                 alt="getresponse-icon"
                 className="bigmarker-img"
               />{" "}
@@ -267,14 +326,14 @@ const Settings = () => {
             </div>
 
             <div>
-              {!displayLinked.Brevo ? (
-                <button className="Connect-button" onClick={handleBrevoLink}>
+              {!displayLinked.GetResponse ? (
+                <button className="Connect-button" onClick={handleGetReponse}>
                   Connect
                 </button>
               ) : (
                 <button
                   className="Connect-button"
-                  onClick={handleBrevoAccountRemove}
+                  onClick={handleRemoveGetResponseAccount}
                 >
                   Disconnect
                 </button>
@@ -282,7 +341,7 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="google-sign-in-button button-margin">
+          {/* <div className="google-sign-in-button button-margin">
             <div className="google-button-div">
               <img
                 src="https://pipedream.com/s.v0/app_OkrhrJ/logo/orig"
@@ -307,7 +366,7 @@ const Settings = () => {
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
 
           <div className="google-sign-in-button button-margin">
             <div className="google-button-div">
@@ -321,14 +380,14 @@ const Settings = () => {
             </div>
 
             <div>
-              {!displayLinked.Brevo ? (
-                <button className="Connect-button" onClick={handleBrevoLink}>
+              {!displayLinked.Sendy ? (
+                <button className="Connect-button" onClick={handleSendyConnect}>
                   Connect
                 </button>
               ) : (
                 <button
                   className="Connect-button"
-                  onClick={handleBrevoAccountRemove}
+                  onClick={handleSendyAccountRemove}
                 >
                   Disconnect
                 </button>

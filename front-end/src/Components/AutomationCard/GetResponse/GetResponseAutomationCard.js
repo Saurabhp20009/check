@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./AutomationCard.css"; // Import CSS for styling
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { TfiClose } from "react-icons/tfi";
 import { TbSettingsAutomation } from "react-icons/tb";
+import { TfiClose } from "react-icons/tfi";
 
-
-
-function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
+  const [campaignListId, setCampaignListId] = useState("");
+  const [CampaignLists, setCampaignaLists] = useState([]);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
-  const [listId, setListId] = useState("");
   const [workflowName, setWorkflowName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-   
-  const headers = {
-    'Authorization': `Bearer ${user.token} `,
-    'Content-Type': 'application/json'
-  };
+  const divRef = useRef(null);
 
+  const headers = {
+    Authorization: `Bearer ${user.token} `,
+    "Content-Type": "application/json",
+  };
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -33,58 +32,66 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setSheetName(event.target.value);
   };
 
-  const handleListId = (event) => {
-    setListId(event.target.value);
+  const handleCampaignListChange = (event) => {
+    setCampaignListId(event.target.value);
   };
 
   const handleStartAutomation = async () => {
-    if (!workflowName || !listId) {
-      return toast.error("Please fill the input fields correctly");
+    // Your logic to start automation goes here
+    // For demo purposes, update lastTriggered with current time
+  
+    if (!workflowName) {
+      return toast.error("Please fill the workflow name");
     }
-  
-   
-    const numberlistId=parseInt(listId)
-  
-    console.log(spreadsheetId)
- 
-
+    const user = JSON.parse(localStorage.getItem("userInfo"));
     const body = {
-      name: workflowName,
-      spreadsheetId: spreadsheetId,
-      sheetName: sheetName,
-      listIds: numberlistId,
+      Name: workflowName,
+      SpreadSheetId: spreadsheetId,
+      SheetName: sheetName,
+      CampaignId: campaignListId,
     };
+    
 
-    console.log(body);
-    await axios
-      .post(
-        `http://connectsyncdata.com:5000/brevo/api/start/automation?email=${user.email}`,
-        body,{
-          headers: headers
+      console.log(body)
+    const response = await axios
+      .post(`http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${user.email}`, body, {
+        headers: headers,
+      })
+      .then((response) => window.location.reload());
+
+    return toast.error(response.data.message);
+  };
+
+  const gettingCampaignLists = async () => {
+   await axios
+      .get(
+        `http://connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        {
+          headers: headers,
         }
       )
       .then((response) => {
-        console.log(response);
-        window.location.reload();
+        console.log(response.data)
+         setCampaignaLists([...response.data.data]);
+         setCampaignListId(response.data[0].id);
+         console.log('e',CampaignListsId)
       })
-      .catch((error) => {
-        console.log(error.response);
-        return toast.error(error.response.data.message);
-      });
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
-          headers: headers
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        {
+          headers: headers,
         }
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log(error); });
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -92,60 +99,54 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       SheetId: spreadsheetId,
     };
 
-     await axios
+    const response = await axios
       .post(
         `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
-        body,{
-          headers: headers
+        body,
+        {
+          headers: headers,
         }
       )
-      .then((response) =>
-        {setGoogleSpreadDataSheetList([...response.data.Sheets])
-        setSheetName(response.data.Sheets[0])}
-      )
-      .catch((error) => {console.log(error.response); });
+      .then((response) => {
+        setGoogleSpreadDataSheetList([...response.data.Sheets]);
+        setSheetName(response.data.Sheets[0]);
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleNameChange = (e) => {
     setWorkflowName(e.target.value);
   };
-  
-
 
   useEffect(() => {
+    gettingCampaignLists();
     gettingSpreadsheetList();
-    //gettingSpreadsheetSheetList();
+    gettingSpreadsheetSheetList();
   }, []);
 
   useEffect(() => {
-    if(spreadsheetId)
-    {
-      gettingSpreadsheetSheetList();
-    }
-    
+    gettingSpreadsheetSheetList();
   }, [spreadsheetId]);
 
 
-  
+  console.log(CampaignLists)
 
   return (
-    <div className="automation-card">
-      <ToastContainer autoClose={3000} />
-
+    <div className="automation-card" tabIndex={0} ref={divRef}>
       <div className="input-group card-head">
-      <div className="name-div ">
+        <div className="name-div">
           {" "}
-          <label htmlFor="name">Name :  Brevo </label>
+          <label htmlFor="name">Name</label>
           <input
             value={workflowName}
             className="NameInput"
             onChange={handleNameChange}
-            placeholder="Enter workflow name"
           />
         </ div>
         <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
         <TfiClose />
         </div>  
+
       </div>
 
       <div className="input-group">
@@ -179,23 +180,30 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Enter List ID</label>
-        <input
-          value={listId}
-          className="NameInput"
-          placeholder="Enter the list id"
-          onChange={handleListId}
-          type="number"/>
+        <label htmlFor="aweberList">Campaign List:</label>
+        <select
+          id="aweberList"
+          value={campaignListId}
+          onChange={handleCampaignListChange}
+        >
+          {CampaignLists.map((item, index) => (
+            <option key={index} value={item.campaignId}>
+              {console.log(item.name)}
+              {item.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
-        <TbSettingsAutomation className="start-icon" />
+          <TbSettingsAutomation className="start-icon" />
           Start
         </button>
       </div>
 
+      <ToastContainer autoClose={3000} />
     </div>
   );
 }
 
-export default BrevoAutomationCard;
+export default GetResponseAutomationCard;

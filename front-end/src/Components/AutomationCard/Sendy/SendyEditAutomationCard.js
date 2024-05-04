@@ -5,25 +5,25 @@ import { ToastContainer, toast } from "react-toastify";
 import { TfiClose } from "react-icons/tfi";
 import { TbSettingsAutomation } from "react-icons/tb";
 
-
-
-function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
-  const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [sheetName, setSheetName] = useState("");
+function SendyEditAutomationCard({
+  setShowAutomationCard,
+  item,
+}) {
+  const [spreadsheetId, setSpreadsheetId] = useState(item.SpreadSheetId);
+  const [sheetName, setSheetName] = useState(item.SheetName);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
-  const [listId, setListId] = useState("");
-  const [workflowName, setWorkflowName] = useState("");
+  const [listId, setListId] = useState(item.ListId);
+  const [workflowName, setWorkflowName] = useState(item.Name);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-   
-  const headers = {
-    'Authorization': `Bearer ${user.token} `,
-    'Content-Type': 'application/json'
-  };
 
+  const headers = {
+    Authorization: `Bearer ${user.token} `,
+    "Content-Type": "application/json",
+  };
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -41,26 +41,23 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     if (!workflowName || !listId) {
       return toast.error("Please fill the input fields correctly");
     }
-  
-   
-    const numberlistId=parseInt(listId)
-  
-    console.log(spreadsheetId)
- 
 
     const body = {
-      name: workflowName,
-      spreadsheetId: spreadsheetId,
-      sheetName: sheetName,
-      listIds: numberlistId,
+      Name: workflowName,
+      SpreadSheetId: spreadsheetId,
+      SheetName: sheetName,
+      ListId: listId,
+      DataInDB: item.DataInDB,
+      Item: item,
     };
 
     console.log(body);
     await axios
       .post(
-        `http://connectsyncdata.com:5000/brevo/api/start/automation?email=${user.email}`,
-        body,{
-          headers: headers
+        `http://connectsyncdata.com:5000/sendy/api/edit/automation?email=${user.email}`,
+        body,
+        {
+          headers: headers,
         }
       )
       .then((response) => {
@@ -76,15 +73,17 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
-          headers: headers
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        {
+          headers: headers,
         }
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
-        setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log(error); });
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -92,60 +91,57 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       SheetId: spreadsheetId,
     };
 
-     await axios
+    await axios
       .post(
         `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
-        body,{
-          headers: headers
+        body,
+        {
+          headers: headers,
         }
       )
-      .then((response) =>
-        {setGoogleSpreadDataSheetList([...response.data.Sheets])
-        setSheetName(response.data.Sheets[0])}
-      )
-      .catch((error) => {console.log(error.response); });
+      .then((response) => {
+        setGoogleSpreadDataSheetList([...response.data.Sheets]);
+      })
+      .catch((error) => {
+        console.log(error.response);
+      });
   };
 
   const handleNameChange = (e) => {
     setWorkflowName(e.target.value);
   };
-  
-
 
   useEffect(() => {
     gettingSpreadsheetList();
-    //gettingSpreadsheetSheetList();
   }, []);
 
   useEffect(() => {
-    if(spreadsheetId)
-    {
+    if (spreadsheetId) {
       gettingSpreadsheetSheetList();
     }
-    
   }, [spreadsheetId]);
-
-
-  
 
   return (
     <div className="automation-card">
       <ToastContainer autoClose={3000} />
 
       <div className="input-group card-head">
-      <div className="name-div ">
+        <div className="name-div ">
           {" "}
-          <label htmlFor="name">Name :  Brevo </label>
+          <label htmlFor="name">Name </label>
           <input
             value={workflowName}
             className="NameInput"
             onChange={handleNameChange}
             placeholder="Enter workflow name"
           />
-        </ div>
-        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
-        <TfiClose />
-        </div>  
+        </div>
+        <div
+          className="close-card"
+          onClick={() => setShowAutomationCard(false)}
+        >
+          <TfiClose />
+        </div>
       </div>
 
       <div className="input-group">
@@ -185,17 +181,16 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           className="NameInput"
           placeholder="Enter the list id"
           onChange={handleListId}
-          type="number"/>
+        />
       </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
-        <TbSettingsAutomation className="start-icon" />
+          <TbSettingsAutomation className="start-icon" />
           Start
         </button>
       </div>
-
     </div>
   );
 }
 
-export default BrevoAutomationCard;
+export default SendyEditAutomationCard;

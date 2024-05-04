@@ -1,5 +1,4 @@
 .container {
-  margin-top: 5vh;
   background-color: #f9f9f9;
   box-shadow: 0 0 2px #dcdcdc;
   padding: 1.5vh;
@@ -14,6 +13,7 @@
 
 .content {
   display: flex;
+  align-items: center;
   align-items: center;
   width: 25%;
   cursor: pointer;

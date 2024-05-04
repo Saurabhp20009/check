@@ -7,15 +7,15 @@ import { TbSettingsAutomation } from "react-icons/tb";
 
 
 
-function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
-  const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [sheetName, setSheetName] = useState("");
+function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
+  const [spreadsheetId, setSpreadsheetId] = useState(item.SpreadSheetId);
+  const [sheetName, setSheetName] = useState(item.SheetName);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
-  const [listId, setListId] = useState("");
-  const [workflowName, setWorkflowName] = useState("");
+  const [listId, setListId] = useState(item.ListIds[0]);
+  const [workflowName, setWorkflowName] = useState(item.Name);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
    
@@ -50,15 +50,17 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     const body = {
       name: workflowName,
-      spreadsheetId: spreadsheetId,
+      spreadSheetId: spreadsheetId,
       sheetName: sheetName,
       listIds: numberlistId,
+      DataInDB: item.DataInDB,
+      Item:item
     };
 
     console.log(body);
     await axios
       .post(
-        `http://connectsyncdata.com:5000/brevo/api/start/automation?email=${user.email}`,
+        `http://connectsyncdata.com:5000/brevo/api/edit/automation?email=${user.email}`,
         body,{
           headers: headers
         }
@@ -82,7 +84,6 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
-        setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
       .catch((error) => {console.log(error); });
   };
@@ -101,7 +102,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       )
       .then((response) =>
         {setGoogleSpreadDataSheetList([...response.data.Sheets])
-        setSheetName(response.data.Sheets[0])}
+}
       )
       .catch((error) => {console.log(error.response); });
   };
@@ -143,7 +144,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
             placeholder="Enter workflow name"
           />
         </ div>
-        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
+        <div className="close-card" onClick={()=>setShowAutomationCard(false)}>
         <TfiClose />
         </div>  
       </div>
@@ -198,4 +199,4 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   );
 }
 
-export default BrevoAutomationCard;
+export default BrevoEditAutomationCard;

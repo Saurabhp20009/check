@@ -1,15 +1,78 @@
 import axios from "axios";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import "./ExistingWorkFlows.css";
 import { IoIosRemoveCircle } from "react-icons/io";
 import { ToastContainer, toast } from "react-toastify";
 import Modal from "react-modal";
+import { MdOutlineEditNote } from "react-icons/md";
+import AweberEditAutomationCard from "./Aweber/AweberEditAutomationCard";
+import BigmarkerEditAutomationCard from "./Bigmarker/BigMarkerEditAutomationCard";
+import BrevoEditAutomationCard from "./Brevo/BrevoEditAutomationCard";
+import GetResponseEditAutomationCard from "./GetResponse/GetResponseEditAutomationCard";
+import GTWEditAutomationCard from "./GoToWebinar/GTWEditAutomationCard";
+import SendyEditAutomationCard from "./Sendy/SendyEditAutomationCard";
 
 const ExistingWorkFlows = ({ item }) => {
   console.log(item);
 
+  const [id, setId] = useState("");
+  const [index, setIndex] = useState();
+  const [ShowAutomationCard, setShowAutomationCard] = useState(false);
+
   const user = JSON.parse(localStorage.getItem("userInfo"));
+
+  const EditAutomationCards = [
+    null,
+    <AweberEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+    <BigmarkerEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+    <BrevoEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+    <GetResponseEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+    <GTWEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+    <SendyEditAutomationCard
+      setShowAutomationCard={setShowAutomationCard}
+      item={item}
+    />,
+  ];
+
+  const handleExtractId = () => {
+    const keysArray = Object.keys(item);
+    console.log(keysArray);
+    for (let key of keysArray) {
+      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id") {
+        console.log(key);
+        setId(key);
+      }
+    }
+
+    setIndex(item.AppId);
+  };
+
+  const handleEdit = async () => {
+
+    if(item.Status==="Finished")
+    {
+      return
+    }
+    console.log(EditAutomationCards);
+    setShowAutomationCard(true);
+    console.log(ShowAutomationCard);
+  };
 
   const headers = {
     Authorization: `Bearer ${user.token} `,
@@ -20,12 +83,9 @@ const ExistingWorkFlows = ({ item }) => {
 
   const handleConfirm = async () => {
     await axios
-      .delete(
-        `http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`,
-        {
-          headers: headers,
-        }
-      )
+      .delete(`http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`, {
+        headers: headers,
+      })
       .then((response) => window.location.reload())
       .catch((error) => toast.error(error));
 
@@ -35,6 +95,8 @@ const ExistingWorkFlows = ({ item }) => {
   const handleClose = () => {
     setIsOpen(false);
   };
+
+  useEffect(() => handleExtractId(), []);
 
   return (
     <div className="Container">
@@ -56,26 +118,34 @@ const ExistingWorkFlows = ({ item }) => {
         </Modal>
       </div>
 
+      {ShowAutomationCard && <div>{EditAutomationCards[index]}</div>}
+
       <div className="flex-content">
         <div className="content">
           <label>Name</label>
           <p>{item.Name}</p>
         </div>
+
+        <div className="content">
+          <label>Operation</label>
+          <p>{item.Operation.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
+        </div>
+
         <div className="content">
           <label>Sheet Name</label>
           <p>{item.SheetName}</p>
         </div>
         <div className="content">
-          <label>{item.WebinarId ? "WebinarId" : "Aweber List Id"}</label>
-          <p>{item.WebinarId ? item.WebinarId : item.AweberListId}</p>
+          <label>{id}</label>
+          <p>{item[id]}</p>
         </div>
         <div className="content">
           <label>Status</label>
           <p style={{ display: "flex", alignItems: "center" }}>
-            <div className="spinner-overlay">
+            <div className="status-spinner-overlay">
               {item.Status === "Running" ? (
-                <div className="spinner-container">
-                  <div className="spinner"></div>
+                <div className="status-spinner-container">
+                  <div className="status-spinner"></div>
                 </div>
               ) : (
                 <IoCheckmarkDoneCircle className="finishedIcon" />
@@ -84,7 +154,16 @@ const ExistingWorkFlows = ({ item }) => {
             {item.Status}
           </p>
         </div>
-        <div>
+        <div className="button-div">
+          <button
+            className={
+              item.Status !== "Finished" ? "edit-but" : "edit-but-finished"
+            }
+            onClick={handleEdit}
+          >
+            <MdOutlineEditNote id="edit-icon" /> Edit
+          </button>
+
           <button
             type="button"
             className={

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./ErrorCards.css";
 import { FaChevronCircleDown } from "react-icons/fa";
 import { IoIosDownload } from "react-icons/io";
@@ -9,11 +9,26 @@ import { MdArrowUpward } from "react-icons/md";
 
 const ErrorCards = ({ item }) => {
   const [showTable, setShowTable] = useState(false);
+  const [id, setId] = useState("");
+
 
   const handleShowTable = () => {
     setShowTable(!showTable);
   };
+ 
+  const handleExtractId = () => {
+    const keysArray = Object.keys(item);
+    console.log(keysArray);
+    for (let key of keysArray) {
+      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id") {
+        console.log(key);
+        setId(key);
+      }
+    }
+  };
 
+
+  console.log(item)
   const headers = [
     {
       label: "firstName",
@@ -29,7 +44,8 @@ const ErrorCards = ({ item }) => {
     },
   ];
 
-  console.log(item.ErrorRecords);
+  useEffect(() => handleExtractId(), []);
+
 
   return (
     <div className="container">
@@ -43,8 +59,8 @@ const ErrorCards = ({ item }) => {
           <p>{item.SheetName}</p>
         </div>
         <div className="content">
-          <label>{item.WebinarId ? "WebinarId" : "Aweber List Id"}</label>
-          <p>{item.WebinarId ? item.WebinarId : item.AweberListId}</p>
+          <label>{id}</label>
+          <p>{item[id]}</p>
         </div>
         <div className="content" onClick={handleShowTable}>
           <label>Show table</label>
@@ -52,7 +68,7 @@ const ErrorCards = ({ item }) => {
         </div>
 
         <div className="content">
-          <IoIosDownload className="downloadIcon" />
+         {item.ErrorRecords && <div style={{display:"flex", alignItems: "center"}}>  <IoIosDownload className="downloadIcon" />
           <CSVLink
             data={item.ErrorRecords}
             headers={headers}
@@ -60,7 +76,7 @@ const ErrorCards = ({ item }) => {
             className="downloadCSV"
           >
             Download CSV{" "}
-          </CSVLink>
+          </CSVLink> </div> }
         </div>
       </div>
 

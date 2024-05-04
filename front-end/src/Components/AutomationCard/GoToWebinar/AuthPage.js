@@ -9,6 +9,7 @@ const GoToWebinarAuthPage = () => {
   const [connect, setConnect] = useState(false);
   const [client_id, setClient_id] = useState("");
   const [client_secret, setClient_secret] = useState("");
+  const [spinner, setSpinner] = useState(false);
 
   const headers = {
     Authorization: `Bearer ${user.token}`,
@@ -17,10 +18,11 @@ const GoToWebinarAuthPage = () => {
 
   const body = {
     client_id: client_id,
-    client_secret:client_secret
+    client_secret: client_secret,
   };
 
   const handleConnect = async () => {
+    setSpinner(true);
     await axios
       .post(
         `http://connectsyncdata.com:5000/gotowebinar/api/login?email=${user.email}`,
@@ -31,19 +33,25 @@ const GoToWebinarAuthPage = () => {
       )
       .then((response) => {
         console.log(response);
-        window.open(response.data.AuthUrl)
-        setConnect(!connect);
+        window.open(response.data.AuthUrl);
+        setSpinner(false)
+        
       })
       .catch((error) => {
-        console.log("e", error.response.data.error);
-        //toast.error(" , unauthorized");
-      });
-  };
+        console.log("e", error);
+        toast.error(error.response.data.message);
+        setSpinner(false)
+      })
+      
+
+    };
 
   const handleClientId = (e) => {
     setClient_id(e.target.value);
   };
-  
+ 
+
+  console.log(spinner)
   const handleClientSecret = (e) => {
     setClient_secret(e.target.value);
   };
@@ -73,7 +81,7 @@ const GoToWebinarAuthPage = () => {
         </div>
 
         {connect ? (
-          <h1>GotoWebinar account connected successfully!!</h1>
+          <h1>Please login account in new window</h1>
         ) : (
           <div style={{ width: "20%" }}>
             <div
@@ -94,7 +102,9 @@ const GoToWebinarAuthPage = () => {
               </div>
 
               <div>
-                <label style={{ fontWeight: "bolder" }}>Enter Client Secret:</label>
+                <label style={{ fontWeight: "bolder" }}>
+                  Enter Client Secret:
+                </label>
                 <input
                   value={client_secret}
                   style={{ marginTop: "2vh" }}
@@ -104,21 +114,28 @@ const GoToWebinarAuthPage = () => {
               </div>
             </div>
 
-            <button
-              style={{
-                backgroundColor: "#01baeb",
-                border: "none",
-                padding: "2vh",
-                borderRadius: "25px",
-                color: "white",
-                fontWeight: "bolder",
-                cursor: "pointer",
-              }}
-              onClick={handleConnect}
-            >
-              {" "}
-              Connect
-            </button>
+            {!spinner ? (
+              <button
+                style={{
+                  backgroundColor: "#01baeb",
+                  border: "none",
+                  padding: "2vh",
+                  borderRadius: "25px",
+                  color: "white",
+                  fontWeight: "bolder",
+                  cursor: "pointer",
+                }}
+                onClick={handleConnect}
+              >
+                Connect
+              </button>
+            ) : (
+              <div className="spinner-overlay">
+                <div className="spinner-container">
+                  <div className="spinner"></div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

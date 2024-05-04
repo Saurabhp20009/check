@@ -11,6 +11,9 @@ import ErrorRecords from "./Components/ErrorRecords/ErrorRecords";
 import DisplayWorkflows from "./Components/DashboardPages/DisplayWorkflows";
 import BrevoAuthPage from "./Components/AutomationCard/Brevo/AuthPage";
 import GoToWebinarAuthPage from "./Components/AutomationCard/GoToWebinar/AuthPage";
+import GetResponseAuthPage from "./Components/AutomationCard/GetResponse/AuthPage";
+import BigmarkerAuthPage from "./Components/AutomationCard/Bigmarker/AuthPage";
+import SendyAuthPage from "./Components/AutomationCard/Sendy/AuthPage";
 
 function App() {
   const [checkUserLogin, setCheckUserLogin] = useState(false);
@@ -46,6 +49,9 @@ function App() {
         <Route path="/aweberauth" element={<AweberAuthLinkPage />} />
         <Route path="/auth/brevo" element={<BrevoAuthPage />} />
         <Route path="/auth/gtw" element={<GoToWebinarAuthPage />} />
+        <Route path="/auth/get/response" element={<GetResponseAuthPage />} />
+        <Route path="/auth/bigmarker" element={<BigmarkerAuthPage />} />
+        <Route path="/auth/sendy" element={<SendyAuthPage />} />
 
       </Routes>
     </>

@@ -1,5 +1,4 @@
 .Container {
-  margin-top: 5vh;
   background-color: #f9f9f9;
   box-shadow: 0 0 2px #dcdcdc;
   padding: 1.5vh;
@@ -21,11 +20,14 @@
 .content label{
     color: #495057;
     font-weight: bolder;
+    font-size: smaller;
+
 }
 
 .content p{
     color: #818492;
     font-weight: 500;
+    font-size: smaller;
 }
 
 .remove-button {
@@ -37,7 +39,8 @@
   border-radius: 5px; /* Rounded corners */
   display: flex;
   align-items: center;
-
+  width: 15vh;
+  justify-content: center;
 }
 
 .remove-button:hover {
@@ -69,7 +72,7 @@
 }
 
 /* Spinner CSS */
-.spinner-overlay {
+.status-spinner-overlay {
   width: 100%;
   height: 100%;
   background-color: #f9f9f9; /* Semi-transparent background */
@@ -78,18 +81,18 @@
   align-items: center;
 }
 
-.spinner-container {
+.status-spinner-container {
   width: 30px;
   height: 30px;
   margin-top: 5px;
 }
 
-.spinner {
+.status-spinner {
   width: 15px;
   height: 15px;
-  border: 5px solid #5d5d5d; /* White with transparency */
+  border: 5px solid #f9f9f9; /* White with transparency */
   border-radius: 50%;
-  border-top-color: #333333; /* White color */
+  border-top-color: #36ce81; /* White color */
   animation: spin 1s linear infinite; /* Spin animation */
 }
 
@@ -128,7 +131,48 @@
   margin: 0 10px;
 }
 
+.button-div{
+  display: flex;
+  width: 20%;
+}
 
+.edit-but{
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  color: whitesmoke;
+  background-color: #36ce81;
+  width: 15vh;
+  justify-content: center;
+  margin-right: 1vh;
+   
+}
+
+.edit-but-finished{
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: none;
+  color: whitesmoke;
+  background-color: #a9a9a9;
+  width: 15vh;
+  justify-content: center;
+  margin-right: 1vh;
+}
+
+#edit-icon{
+  margin-right: 1vh;
+}
+
+#edit-icon svg{
+  height: 20px;
+  width: 20px;
+}
 
 @keyframes spin {
   to {

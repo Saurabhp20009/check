@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./AutomationCard.css"; // Import CSS for styling
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { TfiClose } from "react-icons/tfi";
 import { TbSettingsAutomation } from "react-icons/tb";
+import { TfiClose } from "react-icons/tfi";
 
-function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
-  const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [sheetName, setSheetName] = useState("");
+function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
+  const [spreadsheetId, setSpreadsheetId] = useState(item.SpreadSheetId);
+  const [sheetName, setSheetName] = useState(item.SheetName);
+  const [campaignListId, setCampaignListId] = useState(item.CampaignId);
+  const [CampaignLists, setCampaignaLists] = useState([]);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
-  const [WebinarId, setWebinarId] = useState("");
-  const [workflowName, setWorkflowName] = useState("");
-  const [operation, setOperation] = useState(1);
+  const [workflowName, setWorkflowName] = useState(item.Name);
+
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
   const headers = {
@@ -30,66 +31,56 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setSheetName(event.target.value);
   };
 
-  const handleWebinarId = (event) => {
-    setWebinarId(event.target.value);
-  };
-
-  const handleOperation = (event) => {
-    setOperation(event.target.value);
+  const handleCampaignListChange = (event) => {
+    setCampaignListId(event.target.value);
   };
 
   const handleStartAutomation = async () => {
-    if (!workflowName || !WebinarId) {
-      return toast.error("Please fill the input fields correctly");
+    // Your logic to start automation goes here
+    // For demo purposes, update lastTriggered with current time
+
+    if (!workflowName) {
+      return toast.error("Please fill the workflow name");
     }
-
-    const temp = WebinarId;
-    const WebinarIdWithoutHyphens = temp.replace(/-/g, "");
-
+    const user = JSON.parse(localStorage.getItem("userInfo"));
     const body = {
       Name: workflowName,
       SpreadSheetId: spreadsheetId,
       SheetName: sheetName,
-      WebinarId: WebinarIdWithoutHyphens,
+      CampaignId: campaignListId,
+      DataInDB: item.DataInDB,
+      Item: item
     };
 
-    if (operation == 2) {
-      await axios
-        .post(
-          `http://connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
-          body,
-          {
-            headers: headers,
-          }
-        )
-        .then((response) => {
-          console.log(response);
-          window.location.reload();
-        })
-        .catch((error) => {
-          console.log(error.response);
-          return toast.error(error.response.data.message);
-        });
-
-      return;
-    }
-
-    await axios
+    console.log(body);
+    const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${user.email}`,
+        `http://connectsyncdata.com:5000/getresponse/api/edit/automation?email=${user.email}`,
         body,
         {
           headers: headers,
         }
       )
+      .then((response) => window.location.reload());
+
+    return toast.error(response.data.message);
+  };
+
+  const gettingCampaignLists = async () => {
+    await axios
+      .get(
+        `http://connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
       .then((response) => {
-        console.log(response);
-        window.location.reload();
+        console.log(response.data);
+        setCampaignaLists([...response.data.data]);
+
+        console.log("e", CampaignListsId);
       })
-      .catch((error) => {
-        console.log(error.response);
-        return toast.error(error.response.data.message);
-      });
+      .catch((error) => console.log(error));
   };
 
   const gettingSpreadsheetList = async () => {
@@ -102,7 +93,6 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
-        setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
       .catch((error) => console.log(error));
   };
@@ -112,7 +102,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       SheetId: spreadsheetId,
     };
 
-    await axios
+    const response = await axios
       .post(
         `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
@@ -122,9 +112,8 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       )
       .then((response) => {
         setGoogleSpreadDataSheetList([...response.data.Sheets]);
-        setSheetName(response.data.Sheets[0]);
       })
-      .catch((error) => console.log(error.response));
+      .catch((error) => console.log(error));
   };
 
   const handleNameChange = (e) => {
@@ -132,19 +121,21 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   };
 
   useEffect(() => {
+    gettingCampaignLists();
     gettingSpreadsheetList();
-    //gettingSpreadsheetSheetList();
+    gettingSpreadsheetSheetList();
   }, []);
 
   useEffect(() => {
-    if (spreadsheetId) {
-      gettingSpreadsheetSheetList();
-    }
+    gettingSpreadsheetSheetList();
   }, [spreadsheetId]);
+
+  console.log(CampaignLists);
+
   return (
-    <div className="automation-card">
+    <div className="automation-card" tabIndex={0}>
       <div className="input-group card-head">
-        <div className="name-div ">
+        <div className="name-div">
           {" "}
           <label htmlFor="name">Name</label>
           <input
@@ -155,20 +146,10 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </div>
         <div
           className="close-card"
-          onClick={() => setShowAutomationCard(!ShowAutomationCard)}
+          onClick={() => setShowAutomationCard(false)}
         >
           <TfiClose />
         </div>
-      </div>
-
-      <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Operation</label>
-
-        <select id="aweberList" value={operation} onChange={handleOperation}>
-          <option value={1}>Google Sheet --- Go to webinar</option>
-
-          <option value={2}>Go to Webinar --- Google Sheet</option>
-        </select>
       </div>
 
       <div className="input-group">
@@ -202,12 +183,19 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Enter Webinar ID</label>
-        <input
-          value={WebinarId}
-          className="NameInput"
-          onChange={handleWebinarId}
-        />
+        <label htmlFor="aweberList">Campaign List:</label>
+        <select
+          id="aweberList"
+          value={campaignListId}
+          onChange={handleCampaignListChange}
+        >
+          {CampaignLists.map((item, index) => (
+            <option key={index} value={item.campaignId}>
+              {console.log(item.name)}
+              {item.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
@@ -221,4 +209,4 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   );
 }
 
-export default GTWAutomationCard;
+export default GetResponseEditAutomationCard;
