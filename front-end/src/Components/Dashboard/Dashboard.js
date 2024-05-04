@@ -75,9 +75,9 @@ const Dashboard = () => {
       .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
-      .then((response) => {
+      .then(async(response) => {
         console.log(response.data.Workflows);
-        setWorkFlows([...response.data.Workflows]);
+        await setWorkFlows([...response.data.Workflows]);
       })
       .catch((error) => console.log(error));
   };

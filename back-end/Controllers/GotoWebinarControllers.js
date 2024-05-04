@@ -146,30 +146,29 @@ const SendRegistrantDataToAPI = async (
       SubscriberDetailsInDB._id
     ).select({ SubscriberRecords: { $slice: 400 } });
 
-    const RegistrantsList = [...Records.RegistrantRecords];
 
     //Checking user's GotoWebinar token is valid or not
     await CheckGTWRefreshToken(email);
 
-    const registrantsArray = RegistrantsList.map((registrant) => ({
+    const registrantsArray = Records.RegistrantRecords.map((registrant) => ({
       firstName: registrant.FirstName,
       lastName: registrant.LastName,
       email: registrant.Email,
     }));
 
-    const account = await GoToWebinarTokenData.findOne({ Email: email });
-    const { Account_number, Access_token } = account;
+    //const account = await GoToWebinarTokenData.findOne({ Email: email });
+    // const { Account_number, Access_token } = account;
 
     //Getting remaining registrant from list
-    const RemainingRegistrant = await GetRemainingRegistrant(
-      WebinarId,
-      Account_number,
-      registrantsArray,
-      Access_token
-    );
+    // const RemainingRegistrant = await GetRemainingRegistrant(
+    //   WebinarId,
+    //   Account_number,
+    //   registrantsArray,
+    //   Access_token
+    // );
 
     //Syncing the data in webinar
-    const sendDataPromises = RemainingRegistrant.map(
+    const sendDataPromises = registrantsArray.map(
       async (registrant, index) => {
         await sendData(
           registrant,
@@ -184,9 +183,7 @@ const SendRegistrantDataToAPI = async (
 
     //Wait for all promises to resolve
     await Promise.all(sendDataPromises);
-
-    console.log(RemainingRegistrant);
-
+    
     const document = await GotoWebinerListInDB.findById(
       SubscriberDetailsInDB._id
     );
@@ -306,7 +303,8 @@ const StartGoToWebinarAutomation = async (req, res) => {
     const Workflow = await DocumentInstance.save();
     console.log("Automation created...");
 
-    //await SendRegistrantDataToAPI(WebinarId, GTWAutomationData, email);
+    
+
 
     const task = cron.schedule("* * * * *", async () => {
 
