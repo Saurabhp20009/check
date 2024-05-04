@@ -81,6 +81,8 @@ const GetSpreadSheetRecords = async (req, res) => {
   });
 
   if (!TokenData) {
+     res.status(401).json({ message: "Please connect google account" });
+
     return console.log("Token data is null");
   }
 
@@ -124,7 +126,7 @@ const GetSheetNames = async (req, res) => {
     });
 
     if (!tokenData) {
-      return;
+      return res.status(401).json({ message: "Please connect google account" });;
     }
 
     oauth2Client.setCredentials({ access_token: tokenData.Access_token });
@@ -142,7 +144,7 @@ const GetSheetNames = async (req, res) => {
 
     res.status(200).json({ Sheets: sheetNames });
   } catch (error) {
-    res.status(401).json({ error: error });
+    res.status(401).json({ message: error });
   }
 };
 
@@ -154,7 +156,7 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
   });
 
   if (!TokenData) {
-    return;
+    return console.log("Token data of user not found while fetching..")
   }
 
   oauth2Client.setCredentials({ access_token: TokenData.Access_token });
@@ -192,7 +194,7 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
         UserEmail: email,
         RegistrantRecords: [],
       });
-      await DocumentInstance.save();
+      const SubscriberDetailsInDB= await DocumentInstance.save();
 
       let tempRegistrant = [];
       //looping for accessing every elements of rows
@@ -206,11 +208,13 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
       }
 
 
-      const res = await GotoWebinerListInDB.findOneAndUpdate(
-        { UserEmail: email },
+       await GotoWebinerListInDB.findOneAndUpdate(
+        { _id: SubscriberDetailsInDB._id },
         { $set: { RegistrantRecords: tempRegistrant } }
       );
-      console.log(res);
+      
+      console.log(SubscriberDetailsInDB)
+      return SubscriberDetailsInDB
     }
   } catch (error) {
     console.log("Unable to fetch data", error);

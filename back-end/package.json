@@ -13,6 +13,7 @@
     "aweber-api": "^1.0.0",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
+    "cheerio": "^1.0.0-rc.12",
     "client-oauth2": "^4.3.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -26,9 +27,11 @@
     "mongoose": "^8.1.2",
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
+    "node-mailwizz": "^2.0.9",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "react-icons": "^5.0.1",
+    "sendy-api-node": "^0.5.2",
     "simple-oauth2": "^5.0.0",
     "sse-express": "^1.0.2"
   }

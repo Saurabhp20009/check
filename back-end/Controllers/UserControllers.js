@@ -13,6 +13,19 @@ const {
 } = require("../Models/AweberModel");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const { BrevoUserData, BrevoAutomationData } = require("../Models/BrevoModel");
+const {
+  GetResponseUserData,
+  GetResponseAutomationData,
+} = require("../Models/GoToResponseModel");
+const {
+  BigmarkerUserData,
+  BigmarkerAutomationData,
+  BigmarkerToGoogleSheetAutomationData,
+} = require("../Models/BigMarkerModel");
+const {
+  SendyUserDetails,
+  SendyAutomationData,
+} = require("../Models/SendyModel");
 
 const createHash = async (password) => {
   const saltRounds = 10;
@@ -107,6 +120,11 @@ const handleGettingUserInfo = async (req, res) => {
 
   const userInfo = await ModelUserData.findOne({ email: email });
 
+  if (!userInfo) {
+    return res.json({ status: 403, message: "user didn't found" });
+  }
+
+  
   const checkGoogleAcountLinked = await ModelGoogleTokenData.findOne({
     Email: email,
   });
@@ -117,20 +135,31 @@ const handleGettingUserInfo = async (req, res) => {
     email: email,
   });
 
- const checkBrevoAccountLinked=await BrevoUserData.findOne({
-  UserEmail: email
- })  
+  const checkBrevoAccountLinked = await BrevoUserData.findOne({
+    UserEmail: email,
+  });
 
-  if (!userInfo) {
-    return res.json({ status: 403, message: "user didn't found" });
-  } else {
-    return res.status(200).json({
-      Google: checkGoogleAcountLinked,
-      GTW: checkGoToWebinarAccountLinked,
-      Aweber: checkAweberAccountLinked,
-      Brevo: checkBrevoAccountLinked
-    });
-  }
+  const checkGetResponseAccountLinked = await GetResponseUserData.findOne({
+    UserEmail: email,
+  });
+
+  const checkBigmarkerAccountLinked = await BigmarkerUserData.findOne({
+    UserEmail: email,
+  });
+
+  const checkSendyAccountLinked = await SendyUserDetails.findOne({
+    UserEmail: email,
+  });
+
+  res.status(200).json({
+    Google: checkGoogleAcountLinked,
+    GTW: checkGoToWebinarAccountLinked,
+    Aweber: checkAweberAccountLinked,
+    Brevo: checkBrevoAccountLinked,
+    GetResponse: checkGetResponseAccountLinked,
+    Bigmarker: checkBigmarkerAccountLinked,
+    Sendy: checkSendyAccountLinked,
+  });
 };
 
 const handleGetAutomationData = async (req, res) => {
@@ -146,19 +175,38 @@ const handleGetAutomationData = async (req, res) => {
       Email: email,
     });
 
+    const GTWToGoogleSheetWorkflows =
+      await GoToWebinarToGoogleSheetAutomationData.find({ Email: email });
     const AweberAutomationData = await ModelAweberAutomationData.find({
       Email: email,
     });
 
-    const GTWToSheet = await GoToWebinarToGoogleSheetAutomationData.find({
+    const BrevoWorkflow = await BrevoAutomationData.find({
       Email: email,
     });
 
-    const BrevoWorkflow =await BrevoAutomationData.find({
-      Email:email
-    })
+    const BigmarkerWorkflows = await BigmarkerAutomationData.find({
+      Email: email,
+    });
 
-    TotalWorkflows = GTWAutomationData.concat(AweberAutomationData, GTWToSheet,BrevoWorkflow);
+    const BigmarkerToSheetWorkflows =
+      await BigmarkerToGoogleSheetAutomationData.find({ Email: email });
+
+    const GetResponseWorkflows = await GetResponseAutomationData.find({
+      Email: email,
+    });
+
+    const SendyWorkflows = await SendyAutomationData.find({ Email: email });
+
+    TotalWorkflows = GTWAutomationData.concat(
+      GTWToGoogleSheetWorkflows,
+      AweberAutomationData,
+      BrevoWorkflow,
+      BigmarkerWorkflows,
+      BigmarkerToSheetWorkflows,
+      GetResponseWorkflows,
+      SendyWorkflows
+    );
     console.log(TotalWorkflows);
     res.status(200).json({ Workflows: TotalWorkflows });
   } catch (error) {
@@ -170,26 +218,53 @@ const handleDeleteWorkflow = async (req, res) => {
   const { id } = req.query;
 
   try {
-    const model = await GoToWebinarAutomationData.findById(id).exec();
-    if (model) {
-      await GoToWebinarAutomationData.deleteOne({ _id: id });
-      return res
-        .status(200)
-        .json({ message: "Document deleted successfully." });
-    } else {
-      const modelB = await ModelAweberAutomationData.findById(id).exec();
-      if (modelB) {
-        await ModelAweberAutomationData.deleteOne({ _id: id });
+    const collections = [
+      ModelAweberAutomationData,
+      BigmarkerAutomationData,
+      BigmarkerToGoogleSheetAutomationData,
+      BrevoAutomationData,
+      GetResponseAutomationData,
+      GoToWebinarAutomationData,
+      GoToWebinarToGoogleSheetAutomationData,
+      SendyAutomationData,
+    ];
+
+    for (const model of collections) {
+      const delItem = await model.findByIdAndDelete(id);
+
+      if (delItem) {
         return res
           .status(200)
-          .json({ message: "Document deleted successfully." });
-      } else {
-        console.log(
-          "Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData"
-        );
-        return res.status(404).json({ message: "Document not found." });
+          .json({ message: "workflow deleted successfully." });
       }
     }
+    
+    res
+    .status(401)
+    .json({ message: "workflow doesn't found..." });
+
+    
+    return;
+    // const model = await GoToWebinarAutomationData.findById(id).exec();
+    // if (model) {
+    //   await GoToWebinarAutomationData.deleteOne({ _id: id });
+    //   return res
+    //     .status(200)
+    //     .json({ message: "Document deleted successfully." });
+    // } else {
+    //   const modelB = await ModelAweberAutomationData.findById(id).exec();
+    //   if (modelB) {
+    //     await ModelAweberAutomationData.deleteOne({ _id: id });
+    //     return res
+    //       .status(200)
+    //       .json({ message: "Document deleted successfully." });
+    //   } else {
+    //     console.log(
+    //       "Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData"
+    //     );
+    //     return res.status(404).json({ message: "Document not found." });
+    //   }
+    // }
   } catch (error) {
     console.error("Error querying documents:", error);
     return res.status(500).json({ message: "Internal server error." });

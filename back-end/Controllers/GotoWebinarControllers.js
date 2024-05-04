@@ -31,9 +31,9 @@ let oauthConfig = {
     id: null,
     secret: null,
   },
-  auth:{
-    tokenHost: null
-  }
+  auth: {
+    tokenHost: null,
+  },
 };
 
 var expectedStateForAuthorizationCode = crypto.randomBytes(15).toString("hex");
@@ -42,52 +42,38 @@ const linkGotoWebinarAccount = async (req, res) => {
   const { email } = req.query;
   const { client_id, client_secret } = req.body;
 
-  Email = email;
+  if (!client_id || !client_secret || !email) {
+    return res.status(401).json({ message: "Fields are missing..." });
+  }
 
-  console.log(Email);
+  try {
+    Email = email;
 
-   oauthConfig = {
-    client: {
-      id: client_id,
-      secret: client_secret,
-    },
-    auth:{
-      tokenHost: GTWUrls.OAUTH_SERVICE_URL
-    }
-  };
+    console.log(Email);
 
-  // if (Email === "ychoudhary320@gmail.com") {
-  //   oauthConfig = {
-  //     client: {
-  //       id: yogeshSir.OAUTH_CLIENT_ID,
-  //       secret: yogeshSir.OAUTH_CLIENT_SECRET,
-  //     },
-  //     auth: {
-  //       tokenHost: yogeshSir.OAUTH_SERVICE_URL,
-  //     },
-  //   };
-  // } else {
-  //   oauthConfig = {
-  //     client: {
-  //       id: NehaMam.OAUTH_CLIENT_ID,
-  //       secret: NehaMam.OAUTH_CLIENT_SECRET,
-  //     },
-  //     auth: {
-  //       tokenHost: NehaMam.OAUTH_SERVICE_URL,
-  //     },
-  //   };
-  // }
+    oauthConfig = {
+      client: {
+        id: client_id,
+        secret: client_secret,
+      },
+      auth: {
+        tokenHost: GTWUrls.OAUTH_SERVICE_URL,
+      },
+    };
 
-  console.log(oauthConfig);
-  const oauthClient = new AuthorizationCode(oauthConfig);
+    console.log(oauthConfig);
+    const oauthClient = new AuthorizationCode(oauthConfig);
 
-  const authorizationUrl = oauthClient.authorizeURL({
-    redirect_uri: GTWUrls.OAUTH_REDIRECT_URI,
-    scope: "collab:",
-    state: expectedStateForAuthorizationCode,
-  });
+    const authorizationUrl = oauthClient.authorizeURL({
+      redirect_uri: GTWUrls.OAUTH_REDIRECT_URI,
+      scope: "collab:",
+      state: expectedStateForAuthorizationCode,
+    });
 
-  res.status(200).json({ AuthUrl: authorizationUrl });
+    res.status(200).json({ AuthUrl: authorizationUrl });
+  } catch (error) {
+    res.status(401).json({ message: error });
+  }
 };
 
 const GotoWebinarCallback = async (req, res) => {
@@ -95,30 +81,8 @@ const GotoWebinarCallback = async (req, res) => {
     console.log("Ignoring authorization code with unexpected state");
     res.sendStatus(403);
   }
-
   var authorizationCode = req.query.code;
 
-  // if (Email === "ychoudhary320@gmail.com") {
-  //   oauthConfig = {
-  //     client: {
-  //       id: yogeshSir.OAUTH_CLIENT_ID,
-  //       secret: yogeshSir.OAUTH_CLIENT_SECRET,
-  //     },
-  //     auth: {
-  //       tokenHost: yogeshSir.OAUTH_SERVICE_URL,
-  //     },
-  //   };
-  // } else {
-  //   oauthConfig = {
-  //     client: {
-  //       id: NehaMam.OAUTH_CLIENT_ID,
-  //       secret: NehaMam.OAUTH_CLIENT_SECRET,
-  //     },
-  //     auth: {
-  //       tokenHost: NehaMam.OAUTH_SERVICE_URL,
-  //     },
-  //   };
-  // }
   const oauthClient = new AuthorizationCode(oauthConfig);
 
   var tokenParams = {
@@ -153,8 +117,7 @@ const GotoWebinarCallback = async (req, res) => {
     Email: Email,
     Account_number: GetAccountNumber.data.id,
     Client_id: oauthConfig.client.id,
-    Client_secret:oauthConfig.client.secret
-
+    Client_secret: oauthConfig.client.secret,
   });
 
   try {
@@ -170,35 +133,82 @@ const GotoWebinarCallback = async (req, res) => {
   }
 };
 
-const SendRegistrantDataToAPI = async (WebinarId, GTWAutomationData, email) => {
-  const userRecords = await GotoWebinerListInDB.findOne({ UserEmail: email });
+const SendRegistrantDataToAPI = async (
+  WebinarId,
+  GTWAutomationData,
+  email,
+  SubscriberDetailsInDB
+) => {
+  try {
+    console.log("Sending data to API...");
 
-  //Checking user's GotoWebinar token is valid or not
-  await CheckGTWRefreshToken(email);
+    const Records = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDB._id
+    ).select({ SubscriberRecords: { $slice: 400 } });
 
-  const registrantsArray = userRecords.RegistrantRecords.map((registrant) => ({
-    firstName: registrant.FirstName,
-    lastName: registrant.LastName,
-    email: registrant.Email,
-  }));
+    const RegistrantsList = [...Records.RegistrantRecords];
 
-  //Getting remaining registrant from list
-  const RemainingRegistrant = await GetRemainingRegistrant(
-    WebinarId,
-    email,
-    registrantsArray
-  );
+    //Checking user's GotoWebinar token is valid or not
+    await CheckGTWRefreshToken(email);
 
-  //Syncing the data in webinar
-  const sendDataPromises = RemainingRegistrant.map(
-    async (registrant, index) => {
-      await sendData(registrant, index, WebinarId, GTWAutomationData, email);
+    const registrantsArray = RegistrantsList.map((registrant) => ({
+      firstName: registrant.FirstName,
+      lastName: registrant.LastName,
+      email: registrant.Email,
+    }));
+
+    const account = await GoToWebinarTokenData.findOne({ Email: email });
+    const { Account_number, Access_token } = account;
+
+    //Getting remaining registrant from list
+    const RemainingRegistrant = await GetRemainingRegistrant(
+      WebinarId,
+      Account_number,
+      registrantsArray,
+      Access_token
+    );
+
+    //Syncing the data in webinar
+    const sendDataPromises = RemainingRegistrant.map(
+      async (registrant, index) => {
+        await sendData(
+          registrant,
+          index,
+          WebinarId,
+          GTWAutomationData,
+          Account_number,
+          Access_token
+        );
+      }
+    );
+
+    //Wait for all promises to resolve
+    await Promise.all(sendDataPromises);
+
+    console.log(RemainingRegistrant);
+
+    const document = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    if (document.SubscriberRecords) {
+      //getting document to remove data
+      //removing 100 records from db
+      document.SubscriberRecords.splice(0, 400);
+
+      // Save the modified document back to the database
+      const result = await document.save();
+    } else {
+      await GoToWebinarAutomationData.updateOne(
+        { _id: GTWAutomationData._id },
+        { $set: { Status: "Finished" } }
+      );
+      await GotoWebinerListInDB.findByIdAndDelete(SubscriberDetailsInDB._id);
+      console.log("No data in db. Automation is finished....");
     }
-  );
-
-  //Wait for all promises to resolve
-  await Promise.all(sendDataPromises);
-  await GotoWebinerListInDB.deleteMany({ UserEmail: email });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 async function sendData(
@@ -206,7 +216,8 @@ async function sendData(
   index,
   WebinarId,
   GTWAutomationData,
-  email
+  Account_number,
+  Access_token
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -216,14 +227,12 @@ async function sendData(
         email: registrant.email,
       };
 
-      const account = await GoToWebinarTokenData.findOne({ Email: email });
-
       const options = {
         method: "POST",
-        url: `https://api.getgo.com/G2W/rest/v2/organizers/${account.Account_number}/webinars/${WebinarId}/registrants`,
+        url: `https://api.getgo.com/G2W/rest/v2/organizers/${Account_number}/webinars/${WebinarId}/registrants`,
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${account.Access_token}`,
+          Authorization: `Bearer ${Access_token}`,
         },
         data: payload,
       };
@@ -244,7 +253,7 @@ async function sendData(
           }
           resolve(); // Resolve the promise even if there's an error
         }
-      }, index * 110); // Delay based on index
+      }, index * 200); // Delay based on index
     } catch (error) {
       console.error("Error fetching token data:", error);
       reject(error); // Reject the promise if an error occurs
@@ -271,64 +280,81 @@ const StartGoToWebinarAutomation = async (req, res) => {
 
   try {
     //creating an automation record in DB
+
+    const SubscriberDetailsInDB = await FetchDataFromSheet(
+      SpreadSheetId,
+      SheetName,
+      email
+    );
+
     const DocumentInstance = new GoToWebinarAutomationData({
       Name: Name,
       AppName: "GoToWebinar",
+      AppId: 5,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
       WebinarId: WebinarId,
       Status: "Running",
       Email: email,
+      Operation: {
+        sheetToApp: true,
+      },
+      DataInDB: SubscriberDetailsInDB._id,
       ErrorRecords: [],
     });
 
-    const GTWAutomationData = await DocumentInstance.save();
+    const Workflow = await DocumentInstance.save();
     console.log("Automation created...");
 
-    await GotoWebinerListInDB.deleteMany({ UserEmail: email });
-
-    res
-      .status(200)
-      .json({ message: `Automation started in background jobs name ${Name}` });
-
-    await FetchDataFromSheet(SpreadSheetId, SheetName, email);
-    await SendRegistrantDataToAPI(WebinarId, GTWAutomationData, email);
+    //await SendRegistrantDataToAPI(WebinarId, GTWAutomationData, email);
 
     const task = cron.schedule("* * * * *", async () => {
-      try {
-        const CheckDataInDB = await GotoWebinerListInDB.find();
-        console.log(CheckDataInDB);
-        if (CheckDataInDB.length <= 0) {
-          await GoToWebinarAutomationData.updateOne(
-            { _id: GTWAutomationData._id },
-            { $set: { Status: "Finished" } }
-          );
-          console.log("No data in db. Automation is finished....");
-          task.stop();
-        }
-      } catch (error) {
-        console.error("Error occurred:", error);
+
+
+      console.log("cron jobs started..")
+      const checkWorkFlowStatus = await GoToWebinarAutomationData.findOne({
+        _id: Workflow._id,
+      });
+
+      if (checkWorkFlowStatus.Status === "Running" && checkWorkFlowStatus) {
+        await SendRegistrantDataToAPI(
+          WebinarId,
+          Workflow,
+          email,
+          SubscriberDetailsInDB
+        );
+      } else {
+        console.log("Automation is finished no data found in DB");
+        task.stop();
+        
       }
     });
 
     task.start();
+
+    
+    res
+      .status(200)
+      .json({ message: `Automation started in background jobs name ${Name}` });
   } catch (error) {
     console.log(error);
     res.status(401).json(error);
   }
 };
 
-const GetRemainingRegistrant = async (WebinarId, email, registrantsArray) => {
-  const account = await GoToWebinarTokenData.findOne({ Email: email });
-
+const GetRemainingRegistrant = async (
+  WebinarId,
+  Account_number,
+  registrantsArray,
+  Access_token
+) => {
   const RemainingRegistrant = [];
 
   try {
     var options = {
       method: "GET",
-      url: `https://api.getgo.com/G2W/rest/v2/organizers/${account.Account_number}/webinars/${WebinarId}/registrants`,
-      //params: {page: 'SOME_INTEGER_VALUE', limit: 'SOME_INTEGER_VALUE'},
-      headers: { Authorization: `Bearer ${account.Access_token}` },
+      url: `https://api.getgo.com/G2W/rest/v2/organizers/${Account_number}/webinars/${WebinarId}/registrants`,
+      headers: { Authorization: `Bearer ${Access_token}` },
     };
 
     const response = await axios.request(options);
@@ -347,14 +373,14 @@ const GetRemainingRegistrant = async (WebinarId, email, registrantsArray) => {
   } catch (error) {
     console.log(error);
   }
-  //console.log(response)
 };
 
 const CheckGTWRefreshToken = async (email) => {
   let base64EncodedString;
-   
-  const {Client_id,Client_secret}= await GoToWebinarTokenData.findOne({Email:email})
 
+  const { Client_id, Client_secret } = await GoToWebinarTokenData.findOne({
+    Email: email,
+  });
 
   // if (email === "ychoudhary320@gmail.com") {
   //   const combinedString = `${yogeshSir.OAUTH_CLIENT_ID}:${yogeshSir.OAUTH_CLIENT_SECRET}`;
@@ -365,7 +391,7 @@ const CheckGTWRefreshToken = async (email) => {
   //   console.log(combinedString);
   //   base64EncodedString = Buffer.from(combinedString).toString("base64");
   // }
-  
+
   const combinedString = `${Client_id}:${Client_secret}`;
   base64EncodedString = Buffer.from(combinedString).toString("base64");
 
@@ -442,10 +468,15 @@ const GetOnlyRegistrants = async (email, WebinarId) => {
 
 const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
   try {
-    const { name, SpreadSheetId, SheetName, WebinarId } = req.body;
+    const { Name, SpreadSheetId, SheetName, WebinarId } = req.body;
     const { email } = req.query;
 
-    console.log(name);
+    if (!Name || !SpreadSheetId || !SheetName || !WebinarId) {
+      return res
+        .status(401)
+        .json({ message: "Fields are missing..bad request" });
+    }
+
     const auth = new google.auth.OAuth2();
     await getAccessTokenFromRefreshToken(email);
 
@@ -468,6 +499,9 @@ const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
       SheetName: SheetName,
       WebinarId: WebinarId,
       Status: "Running",
+      Operation: {
+        sheetToApp: false,
+      },
       Email: email,
     });
 
@@ -518,9 +552,76 @@ const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
       { _id: automationData._id },
       { $set: { Status: "Finished" } }
     );
+    console.log("Automation is finished...");
   } catch (error) {
     console.error("Error while writting the data in sheet...", error.message);
     res.status(403).json({ message: `error occured.. ${error.message}` });
+  }
+};
+
+const handleEditAutomation = async (req, res) => {
+  const { DataInDB, Name, SpreadSheetId, SheetName, WebinarId, Item } =
+    req.body;
+
+  const { email } = req.query;
+  if (
+    !Name ||
+    !SpreadSheetId ||
+    !SheetName ||
+    !WebinarId ||
+    !email ||
+    !DataInDB ||
+    !Item
+  ) {
+    return res.status(400).json({ message: "fields are invalid" });
+  }
+
+  try {
+    const token = req.headers.authorization;
+
+    const resultRemoveSheetData = await GotoWebinerListInDB.findByIdAndDelete(DataInDB);
+   console.log(resultRemoveSheetData)
+     
+
+      console.log("Sheet is clear...");
+
+      const headers = {
+        Authorization: `${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const body = {
+        Name: Name,
+        SpreadSheetId: SpreadSheetId,
+        SheetName: SheetName,
+        WebinarId: WebinarId,
+      };
+
+      await GoToWebinarAutomationData.findByIdAndDelete(Item._id);
+
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    
+  
+  } catch (error) {
+    res.status(500).json({ message: `Automation failed to start.${error}` });
+    console.log(error);
   }
 };
 
@@ -545,4 +646,5 @@ module.exports = {
   StartGoToWebinarAutomation,
   StartAutomationWriteDataInSheetFromWebinar,
   RemoveGTWAccount,
+  handleEditAutomation,
 };

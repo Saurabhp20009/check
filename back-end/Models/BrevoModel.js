@@ -10,11 +10,19 @@ const BrevoUserAccountSchemaInDb = new Schema({
 const BrevoAutomationDataSchema = new Schema({
   Name: String,
   AppName: String,
+  AppId: Number,
   SpreadSheetId: String,
   SheetName: String,
   Status: String,
   Email: String,
   ListIds: [Number],
+  Operation: {
+    sheetToApp: Boolean,
+  },
+  DataInDB: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "BrevoSubscriberListInDB",
+  },
   ErrorRecords: [
     {
       firstName: String,

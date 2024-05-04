@@ -20,11 +20,23 @@ const GTWUserTokenSchema = new Schema({
 const GTWAutomationDataSchema = new Schema({
   Name: String,
   AppName: String,
+  AppId: Number,
   SpreadSheetId: String,
   SheetName: String,
   WebinarId: String,
   Status: String,
   Email: String,
+  Operation: {
+    sheetToApp: Boolean
+  },
+  timestamp: {
+   type: Date,
+   default: Date.now
+  },
+  DataInDB: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "GotoWebinerListInDB",
+  },
   ErrorRecords: [
     {
       firstName: String,
@@ -42,6 +54,13 @@ const GTWToGoogleSheetAutomationDataSchema = new Schema({
   WebinarId: String,
   Status: String,
   Email: String,
+  Operation: {
+    sheetToApp: Boolean
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+   }
 });
 
 const GotoWebinerListInDB = mongoose.model(

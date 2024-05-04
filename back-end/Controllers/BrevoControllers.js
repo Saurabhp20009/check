@@ -144,11 +144,6 @@ const FetchSheetDataFromDBToBrevoAPI = async (
     const account = await BrevoUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
 
-    //sending 100 records through apis
-    // dataInDB.SubscriberRecords.forEach(async (item) => {
-    //   await SendDataToAPI(item, ApiKey, listIds, workflow_id);
-    // });
-
     for (const item of dataInDB.SubscriberRecords) {
       try {
         await SendDataToAPI(item, ApiKey, listIds, workflow_id);
@@ -206,15 +201,17 @@ const SendDataToAPI = (item, ApiKey, listIds, workflow_id) => {
       })
       .catch(async function (error) {
         console.error(error);
-        await BrevoAutomationData.findByIdAndUpdate(workflow_id, {
-          $push: {
-            ErrorRecords: {
-              firstName: item.FirstName,
-              lastName: item.LastName,
-              email: item.Email,
+        if (error.response.status!= 400) {
+          await BrevoAutomationData.findByIdAndUpdate(workflow_id, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
             },
-          },
-        });
+          });
+        }
       });
   } catch (error) {
     console.error(error);
@@ -226,23 +223,38 @@ const StartAutomation = async (req, res) => {
 
   const { email } = req.query;
 
-  if (!email || !name || !spreadsheetId || !sheetName || !listIds) {
-    
-    console.log(name, spreadsheetId, sheetName, listIds)
-    return res
-      .status(401)
-      .json({ message: "Bad request,please check the fields" });
-  }
+  console.log(name, spreadsheetId, sheetName, listIds, email);
+
+  // if (!email || !name || !spreadsheetId || !sheetName || !listIds) {
+  //   console.log(name, spreadsheetId, sheetName, listIds,email);
+  //   return res
+  //     .status(401)
+  //     .json({ message: "Bad request,please check the fields" });
+  // }
 
   try {
+    //fetching google sheet data
+    const SubscriberDetailsInDB = await FetchSheetData(
+      spreadsheetId,
+      sheetName,
+      email
+    );
+
+    console.log(SubscriberDetailsInDB);
+
     const DocumentInstance = await new BrevoAutomationData({
       Name: name,
       AppName: "Brevo",
+      AppId: 3,
       SpreadSheetId: spreadsheetId,
       SheetName: sheetName,
       Status: "Running",
       Email: email,
       ListIds: [listIds],
+      Operation: {
+        sheetToApp: true,
+      },
+      DataInDB: SubscriberDetailsInDB._id,
       ErrorRecords: [],
     });
 
@@ -254,15 +266,6 @@ const StartAutomation = async (req, res) => {
         .json({ message: "Unable to save workflow record in DB" });
     }
 
-    //fetching google sheet data
-    const SubscriberDetailsInDB = await FetchSheetData(
-      workflow.SpreadSheetId,
-      workflow.SheetName,
-      workflow.Email
-    );
-
-    console.log(SubscriberDetailsInDB);
-
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs started..");
@@ -270,7 +273,7 @@ const StartAutomation = async (req, res) => {
         workflow._id
       );
 
-      if (checkAutomationRunning.Status === "Running") {
+      if (checkAutomationRunning.Status === "Running" && checkAutomationRunning) {
         console.log("running...");
         await FetchSheetDataFromDBToBrevoAPI(
           SubscriberDetailsInDB,
@@ -281,6 +284,7 @@ const StartAutomation = async (req, res) => {
       } else {
         console.log("Automation finished....");
         task.stop();
+        return
       }
     });
 
@@ -289,6 +293,73 @@ const StartAutomation = async (req, res) => {
     res.status(200).json({ message: `Automation started ${workflow.Name}` });
   } catch (error) {
     return res.status(502).json({ message: error.message });
+  }
+};
+
+const handleEditAutomation = async (req, res) => {
+  const { DataInDB, name, spreadSheetId, sheetName, listIds, Item } = req.body;
+
+  const { email } = req.query;
+
+  if (
+    !email ||
+    !name ||
+    !spreadSheetId ||
+    !sheetName ||
+    !listIds ||
+    !Item ||
+    !DataInDB
+  ) {
+    console.log(name, spreadSheetId, sheetName, listIds);
+    return res
+      .status(401)
+      .json({ message: "Bad request,please check the fields" });
+  }
+
+  try {
+    const token = req.headers.authorization;
+
+    const resultRemoveSheetData =
+      await BrevoSubscriberListInDB.findByIdAndDelete(DataInDB);
+    console.log(resultRemoveSheetData);
+
+    console.log("Sheet is clear...");
+
+    const headers = {
+      Authorization: `${token}`,
+      "Content-Type": "application/json",
+    };
+
+    const body = {
+      name: name,
+      spreadsheetId: spreadSheetId,
+      sheetName: sheetName,
+      listIds: listIds,
+    };
+
+    await BrevoAutomationData.findByIdAndDelete(Item._id);
+
+    const response = await axios
+      .post(
+        `http://connectsyncdata.com:5000/brevo/api/start/automation?email=${email}`,
+        body,
+        {
+          headers: headers,
+        }
+      )
+      .then(async (response) => {
+        res.status(200).json({ message: "Automation started." });
+        console.log("Automation started..");
+      })
+      .catch((error) => {
+        res
+          .status(500)
+          .json({ message: `Automation failed to start.${error}` });
+        console.log(error);
+      });
+  } catch (error) {
+    res.status(500).json({ message: `Automation failed to start.${error}` });
+    console.log(error);
   }
 };
 
@@ -325,4 +396,9 @@ const GetAllBrevoContacts = async (ApiKey) => {
   }
 };
 
-module.exports = { createBrevoAccountInDB, StartAutomation, RemoveAccount };
+module.exports = {
+  createBrevoAccountInDB,
+  StartAutomation,
+  RemoveAccount,
+  handleEditAutomation,
+};

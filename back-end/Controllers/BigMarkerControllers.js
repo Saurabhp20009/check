@@ -1,9 +1,10 @@
 const { default: axios } = require("axios");
 const {
-  GetResponseUserData,
-  GetResponseSubscriberListInDB,
-  GetResponseAutomationData,
-} = require("../Models/GoToResponseModel");
+  BigmarkerUserData,
+  BigmarkerAutomationData,
+  BigmarkerRegistrantsInDb,
+  BigmarkerToGoogleSheetAutomationData,
+} = require("../Models/BigMarkerModel");
 const { getAccessTokenFromRefreshToken } = require("./GoogleControllers");
 const { google } = require("googleapis");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
@@ -25,21 +26,21 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
-const createGetResponseAccountInDB = async (req, res) => {
+const handleCreateAccount = async (req, res) => {
   try {
     const { email } = req.query;
     const { apiKey } = req.body;
 
     const options = {
       method: "GET",
-      url: "https://api.getresponse.com/v3/campaigns",
-      headers: { "X-Auth-Token": `api-key ${apiKey}` },
+      url: "https://www.bigmarker.com/api/v1/conferences/",
+      headers: { "API-KEY": `${apiKey}`, "Content-Type": "application/json" },
     };
 
     await axios.request(options).then(async function (response) {
       console.log(response.data);
 
-      const DocumentInstance = new GetResponseUserData({
+      const DocumentInstance = new BigmarkerUserData({
         UserEmail: email,
         ApiKey: apiKey,
       });
@@ -47,11 +48,11 @@ const createGetResponseAccountInDB = async (req, res) => {
       const account = await DocumentInstance.save();
       console.log(account);
 
-      res.status(200).json({ GetResponse: account });
+      res.status(200).json({ Bigmarker: account });
     });
   } catch (error) {
-    console.error("Error creating get response account:", error.response.data);
-    res.status(error.response.status).json({ error: error.response.data });
+    console.error("Error creating get response account:", error);
+    res.status(401).json({ error: error });
   }
 };
 
@@ -96,7 +97,7 @@ const FetchSheetData = async (SpreadSheetId, SheetName, email) => {
 
     const rows = rowContainingData;
 
-    const DocumentInstance = new GetResponseSubscriberListInDB({
+    const DocumentInstance = new BigmarkerRegistrantsInDb({
       UserEmail: email,
       SubscriberRecords: [],
     });
@@ -114,7 +115,7 @@ const FetchSheetData = async (SpreadSheetId, SheetName, email) => {
       // //Getting only updated data from the sheet
     }
 
-    const updateCheck = await GetResponseSubscriberListInDB.updateOne(
+    const updateCheck = await BigmarkerRegistrantsInDb.updateOne(
       {
         _id: SubscriberDetailsInDB._id,
       },
@@ -129,33 +130,34 @@ const FetchSheetData = async (SpreadSheetId, SheetName, email) => {
   }
 };
 
-const SendingSheetDataToGetResponse = async (
+const SendingSheetDataToBigMarker = async (
   SubscriberDetailsInDB,
   email,
-  CampaignId,
+  ConferenceId,
   workflow_id
 ) => {
   try {
     console.log("Sending data from sheet...");
 
-    const dataInDB = await GetResponseSubscriberListInDB.findById(
+    const dataInDB = await BigmarkerRegistrantsInDb.findById(
       SubscriberDetailsInDB._id
     ).select({ SubscriberRecords: { $slice: 100 } });
 
-    const account = await GetResponseUserData.findOne({ UserEmail: email });
+    const account = await BigmarkerUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
+
     //sending data to api
     for (const item of dataInDB.SubscriberRecords) {
       try {
-       await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
-       await new Promise((resolve) => setTimeout(resolve, 500));
+        await SendDataToAPI(item, ApiKey, ConferenceId, workflow_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error sending data for item ${item}: ${error}`);
       }
     }
 
     //getting document to remove data
-    const document = await GetResponseSubscriberListInDB.findById(
+    const document = await BigmarkerRegistrantsInDb.findById(
       SubscriberDetailsInDB._id
     );
 
@@ -165,13 +167,13 @@ const SendingSheetDataToGetResponse = async (
     // Save the modified document back to the database
     const result = await document.save();
 
-    const TotalDataInDB = await GetResponseSubscriberListInDB.findById(
+    const TotalDataInDB = await BigmarkerRegistrantsInDb.findById(
       SubscriberDetailsInDB._id
     );
 
     //checking for db is empty or not?
     if (TotalDataInDB.SubscriberRecords.length <= 0) {
-      const result = await GetResponseAutomationData.findByIdAndUpdate(
+      const result = await BigmarkerAutomationData.findByIdAndUpdate(
         workflow_id,
         {
           $set: {
@@ -180,7 +182,7 @@ const SendingSheetDataToGetResponse = async (
         }
       );
 
-      const deleteResult = await GetResponseSubscriberListInDB.deleteOne({
+      const deleteResult = await BigmarkerRegistrantsInDb.deleteOne({
         _id: SubscriberDetailsInDB._id,
       });
     }
@@ -189,33 +191,32 @@ const SendingSheetDataToGetResponse = async (
   }
 };
 
-const SendDataToAPI = (item, ApiKey, CampaignId, workflow_id) => {
+const SendDataToAPI = (item, ApiKey, ConferenceId, workflow_id) => {
   try {
     const options = {
-      method: "POST",
-      url: "https://api.getresponse.com/v3/contacts",
+      method: "PUT",
+      url: "https://www.bigmarker.com/api/v1/conferences/register",
       headers: {
-        Accept: "application/json",
-        "Content-type": "application/json",
-        "X-Auth-Token": `api-key ${ApiKey}`,
+        accept: "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+        "API-KEY": ApiKey,
       },
       data: {
-        name: item.FirstName + item.LastName,
-        campaign: {
-          campaignId: CampaignId,
-        },
+        id: ConferenceId,
         email: item.Email,
+        first_name: item.FirstName,
+        last_name: item.LastName,
       },
     };
 
     axios
       .request(options)
-      .then(async function (response) {
-        console.log(response);
+      .then(function (response) {
+        console.log(response.data);
       })
       .catch(async function (error) {
         console.error(error);
-        await GetResponseAutomationData.findByIdAndUpdate(workflow_id, {
+        await BigmarkerAutomationData.findByIdAndUpdate(workflow_id, {
           $push: {
             ErrorRecords: {
               firstName: item.FirstName,
@@ -226,42 +227,159 @@ const SendDataToAPI = (item, ApiKey, CampaignId, workflow_id) => {
         });
       });
   } catch (error) {
-    console.error(error.response.data.context);
+    console.error(error);
+  }
+};
+
+const handleStartAutomationWebinarToSheet = async (req, res) => {
+  try {
+    const { Name, SpreadSheetId, SheetName, ConferenceId } = req.body;
+    const { email } = req.query;
+
+    if (!Name || !SpreadSheetId || !SheetName || !ConferenceId) {
+      return res
+        .status(401)
+        .json({ message: "Fields are missing..bad request" });
+    }
+
+    const auth = new google.auth.OAuth2();
+    await getAccessTokenFromRefreshToken(email);
+
+    const TokenData = await ModelGoogleTokenData.findOne({
+      Email: email,
+    });
+
+    const user = await BigmarkerUserData.findOne({ UserEmail: email });
+
+    if (!user) {
+      return res
+        .status(500)
+        .json({ message: "Doesn't found any Api Key for this account" });
+    }
+
+    const { ApiKey } = user;
+
+    const DocumentInstance = new BigmarkerToGoogleSheetAutomationData({
+      Name: Name,
+      AppName: "BigMarker to Sheet",
+      SpreadSheetId: SpreadSheetId,
+      SheetName: SheetName,
+      ConferenceId: ConferenceId,
+      Status: "Running",
+      Email: email,
+      Operation: {
+        sheetToApp: false,
+      },
+    });
+
+    const automationData = await DocumentInstance.save();
+
+    console.log(automationData);
+
+    if (automationData) {
+      console.log("Automation created...");
+    }
+
+    res
+      .status(200)
+      .json({ message: `Automation started.. ${automationData.Name}` });
+
+    auth.setCredentials({
+      access_token: TokenData.Access_token,
+    });
+
+    // Load Google Sheets API
+    const sheets = google.sheets({ version: "v4", auth });
+
+    const spreadsheetId = SpreadSheetId;
+    const range = `${SheetName}!A1:C`; // Specify the range where you want to write data
+
+    // Data to be written to the sheet
+    const values = [["firstname", "lastname", "email"]];
+
+    //getting registrant data
+
+    const registrantData = await GetOnlyRegistrants(ApiKey, ConferenceId);
+
+    console.log(registrantData, registrantData.length);
+
+    registrantData.forEach((obj) => {
+      // Extract firstname, lastname, and email from the object
+      const { first_name, last_name, email } = obj;
+      // Append them to the resultArray
+      values.push([first_name, last_name, email]);
+    });
+
+    const response = await sheets.spreadsheets.values.update({
+      spreadsheetId: spreadsheetId,
+      range: range,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: values,
+      },
+    });
+
+    console.log("Data written successfully:", response.data);
+    await BigmarkerToGoogleSheetAutomationData.updateOne(
+      { _id: automationData._id },
+      { $set: { Status: "Finished" } }
+    );
+    console.log("Automation is finished...");
+  } catch (error) {
+    console.error("Error while writting the data in sheet...", error.message);
+    res.status(403).json({ message: `error occured.. ${error.message}` });
+  }
+};
+
+const GetOnlyRegistrants = async (ApiKey, ConferenceId) => {
+  try {
+    var options = {
+      method: "GET",
+      url: `https://www.bigmarker.com/api/v1/conferences/registrations/${ConferenceId}?per_page=30000`,
+      headers: { "Api-Key": ApiKey },
+    };
+
+    const response = await axios.request(options);
+    console.log(response.data);
+    return response.data.registrations;
+  } catch (error) {
+    // Handle any errors that occurred during the database operation
+    console.error("Error while retrieving Bigmarker  data:", error);
   }
 };
 
 const handleStartAutomation = async (req, res) => {
-  const { Name, SpreadSheetId, SheetName, CampaignId } = req.body;
+  const { Name, SpreadSheetId, SheetName, ConferenceId } = req.body;
 
   const { email } = req.query;
 
-  console.log(Name, SpreadSheetId, SheetName, CampaignId, email);
+  // console.log(Name,SpreadsheetId,SheetName,ConferenceId,email)
 
-  if (!email || !Name || !SpreadSheetId || !SheetName || !CampaignId) {
+  if (!email || !Name || !SpreadSheetId || !SheetName || !ConferenceId) {
     return res
       .status(401)
       .json({ message: "Bad request,please check the fields" });
   }
 
   try {
-   
-
     //fetching google sheet data
     const SubscriberDetailsInDB = await FetchSheetData(
       SpreadSheetId,
       SheetName,
       email
     );
-   
-    const DocumentInstance = await new GetResponseAutomationData({
+
+    console.log(SubscriberDetailsInDB);
+
+    const DocumentInstance = await new BigmarkerAutomationData({
       Name: Name,
-      AppName: "Sheet to GetResponse",
-      AppId:4,
+      AppName: "Bigmarker",
+      AppId: 2,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
       Status: "Running",
       Email: email,
-      CampaignId: CampaignId,
+      ConferenceId: ConferenceId,
       Operation: {
         sheetToApp: true,
       },
@@ -276,23 +394,20 @@ const handleStartAutomation = async (req, res) => {
         .status(500)
         .json({ message: "Unable to save workflow record in DB" });
     }
-   
-
-    console.log(SubscriberDetailsInDB);
 
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs started..");
-      const checkAutomationRunning = await GetResponseAutomationData.findById(
+      const checkAutomationRunning = await BigmarkerAutomationData.findById(
         workflow._id
       );
 
-      if (checkAutomationRunning.Status === "Running" && checkAutomationRunning) {
+      if (checkAutomationRunning.Status === "Running"&& checkAutomationRunning) {
         console.log("running...");
-        await SendingSheetDataToGetResponse(
+        await SendingSheetDataToBigMarker(
           SubscriberDetailsInDB,
           email,
-          workflow.CampaignId,
+          workflow.ConferenceId,
           workflow._id
         );
       } else {
@@ -310,61 +425,28 @@ const handleStartAutomation = async (req, res) => {
   }
 };
 
-const GetCampaign = async (req, res) => {
-  const { email } = req.query;
-
-  const userData = await GetResponseUserData.findOne({ UserEmail: email });
- 
-
-  if (!userData) {
-    return res
-      .status(500)
-      .json({ message: "Api key doesn't found , please connect the account" });
-  }
- 
-  const ApiKey = userData.ApiKey;
-  try {
-    const options = {
-      method: "GET",
-      url: "https://api.getresponse.com/v3/campaigns",
-      headers: { "X-Auth-Token": `api-key ${ApiKey}` },
-    };
-
-    await axios.request(options).then(async function (response) {
-      console.log(response.data);
-
-      res.status(200).json({ data: response.data });
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.response.data.message });
-  }
-};
-
-const handleEditAutomation=async(req,res)=>{
-  const { DataInDB, Name, SpreadSheetId, SheetName, CampaignId, Item } = req.body;
+const handleEditAutomation = async (req, res) => {
+  const { DataInDB, Name, SpreadSheetId, SheetName, ConferenceId, Item } =
+    req.body;
 
   const { email } = req.query;
-
   if (
-    !email ||
     !Name ||
     !SpreadSheetId ||
     !SheetName ||
-    !CampaignId ||
-    !Item ||
-    !DataInDB
+    !ConferenceId ||
+    !email ||
+    !DataInDB ||
+    !Item
   ) {
-    // console.log(name, spreadSheetId, sheetName, listIds);
-    return res
-      .status(401)
-      .json({ message: "Bad request,please check the fields" });
+    return res.status(400).json({ message: "fields are invalid" });
   }
 
   try {
     const token = req.headers.authorization;
 
     const resultRemoveSheetData =
-      await GetResponseSubscriberListInDB.findByIdAndDelete(DataInDB);
+      await BigmarkerRegistrantsInDb.findByIdAndDelete(DataInDB);
     console.log(resultRemoveSheetData);
 
     console.log("Sheet is clear...");
@@ -374,21 +456,18 @@ const handleEditAutomation=async(req,res)=>{
       "Content-Type": "application/json",
     };
 
-   
-
     const body = {
       Name: Name,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
-      CampaignId: CampaignId,
+      ConferenceId: ConferenceId,
     };
-    
 
-    await GetResponseAutomationData.findByIdAndDelete(Item._id);
+    await BigmarkerAutomationData.findByIdAndDelete(Item._id);
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
+        `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,
@@ -408,24 +487,30 @@ const handleEditAutomation=async(req,res)=>{
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
   }
-}
+};
 
+const handleRemoveAccount = async (req, res) => {
+  const { id } = req.query;
 
-const RemoveAccount = async (req, res) => {
-  const { id } = req.body;
+  console.log(id);
 
   try {
-    const response = await GetResponseUserData.deleteOne({ _id: id });
-    res.status(200).json({ message: "Account removed" });
+    const response = await BigmarkerUserData.deleteOne({ _id: id });
+
+    if (response.deletedCount > 0) {
+      return res.status(200).json({ message: "Account removed" });
+    }
+
+    return res.status(500).json({ message: "unable to delete the account" });
   } catch (error) {
     res.status(502).json({ error: error });
   }
 };
 
 module.exports = {
-  createGetResponseAccountInDB,
-  GetCampaign,
-  RemoveAccount,
+  handleCreateAccount,
+  handleRemoveAccount,
   handleStartAutomation,
-  handleEditAutomation
+  handleStartAutomationWebinarToSheet,
+  handleEditAutomation,
 };

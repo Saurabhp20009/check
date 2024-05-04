@@ -10,11 +10,19 @@ const GetResponseUserAccountSchemaInDb = new Schema({
 const GetResponseAutomationDataSchema = new Schema({
   Name: String,
   AppName: String,
+  AppId: Number,
   SpreadSheetId: String,
   SheetName: String,
   CampaignId: String,
   Status: String,
   Email: String,
+  Operation: {
+    sheetToApp: Boolean
+  },
+  DataInDB: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "GetResponseSubscriberListInDB",
+  },
   ErrorRecords: [
     {
       firstName: String,
@@ -43,3 +51,10 @@ const GetResponseUserData = mongoose.model(
     "GetResponseUserDetailsInDb",
     GetResponseUserDetailsSchemaInDb
   );
+
+
+  module.exports={
+    GetResponseSubscriberListInDB,
+    GetResponseAutomationData,
+    GetResponseUserData
+  }

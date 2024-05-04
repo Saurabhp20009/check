@@ -10,24 +10,7 @@ const UserSchema = new Schema([
   }
 ]);
 
-const AutomationDataSchema = new Schema([
-  { 
-    Name: String,
-    Email: String,
-    SheetId: String,
-    SheetName: String,
-    AweberListId: String,
-    LastTimeTrigged: String,
-    LastFetchedRowHashValue: String,
-    Status: String,
-    ErrorDatas : [{Email: String, HashValue: String}]
-  },
-]);
 
 const ModelUserData = mongoose.model("UserData", UserSchema);
-const ModelAutomationData = mongoose.model(
-  "AutomationData",
-  AutomationDataSchema
-);
 
-module.exports = { ModelUserData, ModelAutomationData };
+module.exports = { ModelUserData };

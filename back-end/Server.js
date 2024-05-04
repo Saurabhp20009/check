@@ -10,6 +10,9 @@ const { default: mongoose } = require("mongoose");
 const GoToWebinarRouter = require("./Routes/GoToWebinarRoutes");
 const GoogleRouter = require("./Routes/GoogleRoutes");
 const BrevoRouter = require("./Routes/BrevoRoutes");
+const GetResponseRouter = require("./Routes/GetResponseRoutes");
+const BigmarkerRouter = require("./Routes/BigmarkerRoutes");
+const SendyRouter = require("./Routes/SendyRoutes");
 require("dotenv").config();
 
 
@@ -20,8 +23,11 @@ app.use("/aweber/api", aweberRouter);
 app.use("/gotowebinar/api", GoToWebinarRouter);
 app.use("/goauth/api", GoogleRouter);
 app.use("/brevo/api",BrevoRouter);
+app.use("/getresponse/api",GetResponseRouter);
+app.use("/bigmarker/api",BigmarkerRouter);
+app.use("/sendy/api",SendyRouter);
 
-//app.use("/getresponse/api",GetResponseRouter);
+
 
 
 app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
