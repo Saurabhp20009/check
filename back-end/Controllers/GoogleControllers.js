@@ -7,7 +7,7 @@ const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [

@@ -6,25 +6,34 @@ const {
   GoToWebinarAutomationData,
   GoToWebinarTokenData,
   GoToWebinarToGoogleSheetAutomationData,
+  GotoWebinerListInDB,
 } = require("../Models/GoToWebinarModel");
 const {
   ModelAweberAutomationData,
   ModelAweberTokenData,
+  ModelAweberSubscriberList,
 } = require("../Models/AweberModel");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
-const { BrevoUserData, BrevoAutomationData } = require("../Models/BrevoModel");
+const {
+  BrevoUserData,
+  BrevoAutomationData,
+  BrevoSubscriberListInDB,
+} = require("../Models/BrevoModel");
 const {
   GetResponseUserData,
   GetResponseAutomationData,
+  GetResponseSubscriberListInDB,
 } = require("../Models/GoToResponseModel");
 const {
   BigmarkerUserData,
   BigmarkerAutomationData,
   BigmarkerToGoogleSheetAutomationData,
+  BigmarkerRegistrantsInDb,
 } = require("../Models/BigMarkerModel");
 const {
   SendyUserDetails,
   SendyAutomationData,
+  SendyRegistrants,
 } = require("../Models/SendyModel");
 
 const createHash = async (password) => {
@@ -124,7 +133,6 @@ const handleGettingUserInfo = async (req, res) => {
     return res.json({ status: 403, message: "user didn't found" });
   }
 
-  
   const checkGoogleAcountLinked = await ModelGoogleTokenData.findOne({
     Email: email,
   });
@@ -215,59 +223,60 @@ const handleGetAutomationData = async (req, res) => {
 };
 
 const handleDeleteWorkflow = async (req, res) => {
+
   const { id } = req.query;
+  const { RecordInDBId } = req.body;
 
   try {
     const collections = [
-      ModelAweberAutomationData,
-      BigmarkerAutomationData,
-      BigmarkerToGoogleSheetAutomationData,
-      BrevoAutomationData,
-      GetResponseAutomationData,
-      GoToWebinarAutomationData,
-      GoToWebinarToGoogleSheetAutomationData,
-      SendyAutomationData,
+      {
+        Automation: ModelAweberAutomationData,
+        DataModel: ModelAweberSubscriberList,
+      },
+      {
+        Automation: BigmarkerAutomationData,
+        DataModel: BigmarkerRegistrantsInDb,
+      },
+      { Automation: BigmarkerToGoogleSheetAutomationData, DataModel: null },
+      { Automation: BrevoAutomationData, DataModel: BrevoSubscriberListInDB },
+      {
+        Automation: GetResponseAutomationData,
+        DataModel: GetResponseSubscriberListInDB,
+      },
+      { Automation: GoToWebinarAutomationData, DataModel: GotoWebinerListInDB },
+      { Automation: GoToWebinarToGoogleSheetAutomationData, DataModel: null },
+      { Automation: SendyAutomationData, DataModel: SendyRegistrants },
     ];
 
-    for (const model of collections) {
-      const delItem = await model.findByIdAndDelete(id);
+    let workflowDeleted = false;
+
+    for (const item of collections) {
+      const delItem = await item.Automation.findByIdAndDelete(id);
 
       if (delItem) {
-        return res
-          .status(200)
-          .json({ message: "workflow deleted successfully." });
+        workflowDeleted = true;
+
+        if (item.DataModel && RecordInDBId) {
+          await item.DataModel.findByIdAndDelete(RecordInDBId);
+        }
+
+        // If you've found and deleted the workflow, you may not need to check further collections.
+        break;
       }
     }
-    
-    res
-    .status(401)
-    .json({ message: "workflow doesn't found..." });
 
-    
-    return;
-    // const model = await GoToWebinarAutomationData.findById(id).exec();
-    // if (model) {
-    //   await GoToWebinarAutomationData.deleteOne({ _id: id });
-    //   return res
-    //     .status(200)
-    //     .json({ message: "Document deleted successfully." });
-    // } else {
-    //   const modelB = await ModelAweberAutomationData.findById(id).exec();
-    //   if (modelB) {
-    //     await ModelAweberAutomationData.deleteOne({ _id: id });
-    //     return res
-    //       .status(200)
-    //       .json({ message: "Document deleted successfully." });
-    //   } else {
-    //     console.log(
-    //       "Document not found in either GoToWebinarAutomationData or ModelAweberAutomationData"
-    //     );
-    //     return res.status(404).json({ message: "Document not found." });
-    //   }
-    // }
+    if (!workflowDeleted) {
+      res.status(404).json({ message: "Workflow not found..." });
+    } else {
+      res
+        .status(200)
+        .json({
+          message: "Workflow deleted successfully, and DB record cleared.",
+        });
+    }
   } catch (error) {
     console.error("Error querying documents:", error);
-    return res.status(500).json({ message: "Internal server error." });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

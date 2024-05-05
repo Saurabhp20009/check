@@ -64,10 +64,8 @@ const ExistingWorkFlows = ({ item }) => {
   };
 
   const handleEdit = async () => {
-
-    if(item.Status==="Finished")
-    {
-      return
+    if (item.Status === "Finished") {
+      return;
     }
     console.log(EditAutomationCards);
     setShowAutomationCard(true);
@@ -81,13 +79,23 @@ const ExistingWorkFlows = ({ item }) => {
 
   const [isOpen, setIsOpen] = React.useState(false);
 
+
+
   const handleConfirm = async () => {
+    const body = {
+      RecordInDBId: item.DataInDB,
+    };
+
     await axios
-      .delete(`http://connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`, {
-        headers: headers,
-      })
+      .post(
+        `http://localhost:5000/user/api/delete/workflow?id=${item._id}`,
+        body,
+        {
+          headers: headers,
+        }
+      )
       .then((response) => window.location.reload())
-      .catch((error) => toast.error(error));
+      .catch((error) => toast.error(error.response.data.message));
 
     setIsOpen(false);
   };

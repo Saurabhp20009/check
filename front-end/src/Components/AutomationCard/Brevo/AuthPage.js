@@ -21,7 +21,7 @@ const BrevoAuthPage = () => {
   const handleConnect = async () => {
     await axios
       .post(
-        `http://connectsyncdata.com:5000/brevo/api/create/account?email=${user.email}`,
+        `http://localhost:5000/brevo/api/create/account?email=${user.email}`,
         body,
         {
           headers: headers,

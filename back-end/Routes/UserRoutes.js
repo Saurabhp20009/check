@@ -8,6 +8,6 @@ userRouter.post('/signup',handleSignUp)
 userRouter.post('/login',handleLogin)
 userRouter.post('/gettinguser',handleGettingUserInfo)
 userRouter.get('/get/workflows',verifyToken ,handleGetAutomationData)
-userRouter.delete('/delete/workflow',verifyToken,handleDeleteWorkflow)
+userRouter.post('/delete/workflow',verifyToken,handleDeleteWorkflow)
 
 module.exports={userRouter}

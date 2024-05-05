@@ -61,7 +61,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
     // if (operation == 2) {
     //   await axios
     //     .post(
-    //       `http://connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
+    //       `http://localhost:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
     //       body,
     //       {
     //         headers: headers,
@@ -81,7 +81,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/gotowebinar/api/edit/automation?email=${user.email}`,
+        `http://localhost:5000/gotowebinar/api/edit/automation?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -100,7 +100,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -119,7 +119,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,
