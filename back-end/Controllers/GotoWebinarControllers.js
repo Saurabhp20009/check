@@ -23,7 +23,7 @@ let Email;
 const GTWUrls = {
   OAUTH_SERVICE_URL: "https://authentication.logmeininc.com",
   OAUTH_REDIRECT_URI:
-    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 let oauthConfig = {
@@ -632,7 +632,7 @@ const handleEditAutomation = async (req, res) => {
 
     const response = await axios
       .post(
-        `http://localhost:5000/gotowebinar/api/start/automation?email=${email}`,
+        `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,
