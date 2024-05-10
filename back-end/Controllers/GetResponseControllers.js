@@ -11,7 +11,7 @@ const cron = require("node-cron");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -140,15 +140,17 @@ const SendingSheetDataToGetResponse = async (
 
     const dataInDB = await GetResponseSubscriberListInDB.findById(
       SubscriberDetailsInDB._id
-    ).select({ SubscriberRecords: { $slice: 100 } });
+    )
+   
+    const data= dataInDB.SubscriberRecords.slice(0,100)
 
     const account = await GetResponseUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
     //sending data to api
-    for (const item of dataInDB.SubscriberRecords) {
+    for (const item of data) {
       try {
-       await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
-       await new Promise((resolve) => setTimeout(resolve, 500));
+        await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error sending data for item ${item}: ${error}`);
       }
@@ -244,19 +246,17 @@ const handleStartAutomation = async (req, res) => {
   }
 
   try {
-   
-
     //fetching google sheet data
     const SubscriberDetailsInDB = await FetchSheetData(
       SpreadSheetId,
       SheetName,
       email
     );
-   
+
     const DocumentInstance = await new GetResponseAutomationData({
       Name: Name,
       AppName: "Sheet to GetResponse",
-      AppId:4,
+      AppId: 4,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
       Status: "Running",
@@ -276,33 +276,40 @@ const handleStartAutomation = async (req, res) => {
         .status(500)
         .json({ message: "Unable to save workflow record in DB" });
     }
-   
 
     console.log(SubscriberDetailsInDB);
 
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
-      console.log("cron jobs started..");
-      const checkAutomationRunning = await GetResponseAutomationData.findById(
+      console.log("cron jobs running..");
+
+      await SendingSheetDataToGetResponse(
+        SubscriberDetailsInDB,
+        email,
+        workflow.CampaignId,
         workflow._id
       );
-
-      if (checkAutomationRunning.Status === "Running" && checkAutomationRunning) {
-        console.log("running...");
-        await SendingSheetDataToGetResponse(
-          SubscriberDetailsInDB,
-          email,
-          workflow.CampaignId,
-          workflow._id
-        );
-      } else {
-        console.log("Automation finished....");
-        task.stop();
-        return
-      }
     });
 
-    task.start();
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await GetResponseAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
 
     res.status(200).json({ message: `Automation started ${workflow.Name}` });
   } catch (error) {
@@ -314,14 +321,13 @@ const GetCampaign = async (req, res) => {
   const { email } = req.query;
 
   const userData = await GetResponseUserData.findOne({ UserEmail: email });
- 
 
   if (!userData) {
     return res
       .status(500)
       .json({ message: "Api key doesn't found , please connect the account" });
   }
- 
+
   const ApiKey = userData.ApiKey;
   try {
     const options = {
@@ -340,8 +346,9 @@ const GetCampaign = async (req, res) => {
   }
 };
 
-const handleEditAutomation=async(req,res)=>{
-  const { DataInDB, Name, SpreadSheetId, SheetName, CampaignId, Item } = req.body;
+const handleEditAutomation = async (req, res) => {
+  const { DataInDB, Name, SpreadSheetId, SheetName, CampaignId, Item } =
+    req.body;
 
   const { email } = req.query;
 
@@ -374,21 +381,18 @@ const handleEditAutomation=async(req,res)=>{
       "Content-Type": "application/json",
     };
 
-   
-
     const body = {
       Name: Name,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
       CampaignId: CampaignId,
     };
-    
 
     await GetResponseAutomationData.findByIdAndDelete(Item._id);
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
+        `http://localhost:5000/getresponse/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,
@@ -408,8 +412,7 @@ const handleEditAutomation=async(req,res)=>{
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
   }
-}
-
+};
 
 const RemoveAccount = async (req, res) => {
   const { id } = req.body;
@@ -427,5 +430,5 @@ module.exports = {
   GetCampaign,
   RemoveAccount,
   handleStartAutomation,
-  handleEditAutomation
+  handleEditAutomation,
 };

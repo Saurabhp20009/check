@@ -54,7 +54,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
 
       console.log(body)
     const response = await axios
-      .post(`http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${user.email}`, body, {
+      .post(`http://localhost:5000/getresponse/api/start/automation?email=${user.email}`, body, {
         headers: headers,
       })
       .then((response) => window.location.reload());
@@ -65,7 +65,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
   const gettingCampaignLists = async () => {
    await axios
       .get(
-        `http://connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        `http://localhost:5000/getresponse/api/get/campaign?email=${user.email}`,
         {
           headers: headers,
         }
@@ -74,7 +74,6 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
         console.log(response.data)
          setCampaignaLists([...response.data.data]);
          setCampaignListId(response.data[0].id);
-         console.log('e',CampaignListsId)
       })
       .catch((error) => console.log(error));
   };
@@ -82,7 +81,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -101,7 +100,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

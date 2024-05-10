@@ -12,7 +12,7 @@ const cron = require("node-cron");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -397,27 +397,37 @@ const handleStartAutomation = async (req, res) => {
 
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
-      console.log("cron jobs started..");
-      const checkAutomationRunning = await BigmarkerAutomationData.findById(
+      console.log("cron jobs running...");
+      await SendingSheetDataToBigMarker(
+        SubscriberDetailsInDB,
+        email,
+        workflow.ConferenceId,
         workflow._id
       );
-
-      if (checkAutomationRunning.Status === "Running"&& checkAutomationRunning) {
-        console.log("running...");
-        await SendingSheetDataToBigMarker(
-          SubscriberDetailsInDB,
-          email,
-          workflow.ConferenceId,
-          workflow._id
-        );
-      } else {
-        console.log("Automation finished....");
-        task.stop();
-        return
-      }
     });
 
-    task.start();
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await BigmarkerAutomationData.findOne({
+          _id: workflow._id,
+        });
+       
+
+        
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+    
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
 
     res.status(200).json({ message: `Automation started ${workflow.Name}` });
   } catch (error) {
@@ -467,7 +477,7 @@ const handleEditAutomation = async (req, res) => {
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${email}`,
+        `http://localhost:5000/bigmarker/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,

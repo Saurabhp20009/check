@@ -19,7 +19,7 @@ const { ModelGoogleTokenData } = require("../Models/GoogleModel.js");
 
 const CLIENT_ID = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const CLIENT_SECRET = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -60,7 +60,6 @@ const buildAuthUrlAweber = async (req, res) => {
 
 const createTokenAweberAndStoreInDB = async (req, res) => {
   const { authorizationResponse, email } = req.body;
-  console.log(email);
   try {
     const user = await aweberAuth.code.getToken(authorizationResponse);
 
@@ -81,7 +80,7 @@ const createTokenAweberAndStoreInDB = async (req, res) => {
       await fetch(url, { headers: headers })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           Account_id = data.entries[0].id;
         });
 
@@ -93,7 +92,7 @@ const createTokenAweberAndStoreInDB = async (req, res) => {
         Account_id: Account_id,
       });
 
-      console.log(TokenDataInstance);
+      //console.log(TokenDataInstance);
 
       TokenDataInstance.save();
       console.log("Access token and refresh token created successfully...");
@@ -146,7 +145,7 @@ const gettingAweberLists = async (req, res) => {
             list_data: data.entries,
           });
         } else {
-          console.log(data);
+          //console.log(data);
           res.status(401).json({
             message: "expired token",
           });
@@ -187,7 +186,7 @@ const savingAutomationData = async (
     const workflow = await automationInstance.save();
     console.log("automation data is created in db...");
 
-    console.log(workflow);
+    //console.log(workflow);
 
     return workflow;
   } catch (error) {
@@ -227,47 +226,61 @@ const startAutomation = async (req, res) => {
       sheetName
     );
 
-    const workflow = await savingAutomationData(
-      name,
-      email,
-      sheetId,
-      sheetName,
-      listId,
-      SubscriberDetailsInDB
-    );
+    const automationInstance = new ModelAweberAutomationData({
+      Name: name,
+      AppName: "Aweber",
+      AppId: 1,
+      Email: email,
+      SheetId: sheetId,
+      SheetName: sheetName,
+      AweberListId: listId,
+      Status: "Running",
+      Operation: {
+        sheetToApp: true,
+      },
+      DataInDB: SubscriberDetailsInDB._id,
+      ErrorDatas: [],
+    });
+
+    const workflow = await automationInstance.save();
+    console.log("automation data is created in db...");
 
     if (!workflow) {
       return res.status(500).json({
         message: "Unable to save automation data in DB!",
       });
     }
-
+    
+    
     const task = cron.schedule("* * * * *", async () => {
-      const checkWorkFlowStatus = await ModelAweberAutomationData.findOne({
-        _id: workflow._id,
-      });
-
-      if (checkWorkFlowStatus.Status === "Running" && checkWorkFlowStatus) {
-        await fetchDataFromDBAndSendToAPI(
-          workflow,
-          email,
-          SubscriberDetailsInDB
-        );
-      } else {
-        console.log("Automation is finished no data found in DB");
-        task.stop();
-        return
-      }
+      console.log("cron-jobs started...")
+      await fetchDataFromDBAndSendToAPI(workflow, email, SubscriberDetailsInDB);
     });
-    task.start();
 
-     
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await ModelAweberAutomationData.findOne({
+          _id: workflow._id,
+        });
 
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
 
     res.status(200).json({ message: `Automation started ${workflow.Name} ` });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: `Automation failed ` });
+    //console.log(error);
+    res.status(500).json({ message: `Automation failed ${error}` });
   }
 };
 
@@ -346,7 +359,7 @@ const revokeAweberToken = async (email) => {
   const currentTimeInMilliseconds = Date.now();
   const currentTimeInSeconds = Math.floor(currentTimeInMilliseconds / 1000);
   const time = Number(tokenData.Refresh_time) - 3600;
-  console.log(currentTimeInSeconds, time);
+  //console.log(currentTimeInSeconds, time);
 
   if (currentTimeInSeconds < time) {
     return console.log("Aweber token is valid...");
@@ -357,7 +370,7 @@ const revokeAweberToken = async (email) => {
     clientSecret: clientSecret,
     accessTokenUri: TOKEN_URL,
     authorizationUri: `${OAUTH_URL}/authorize`,
-    redirectUri: "https://connectsyncdata.com/callback/aweber",
+    redirectUri: "https://localhost/callback/aweber",
     scopes,
   });
 
@@ -374,7 +387,7 @@ const revokeAweberToken = async (email) => {
       },
     }
   );
-  console.log(u);
+  // console.log(u);
 };
 
 const handleRemove = async (req, res) => {
@@ -383,7 +396,7 @@ const handleRemove = async (req, res) => {
   try {
     const result = await ModelAweberTokenData.deleteOne({ _id: id });
 
-    console.log(result);
+    // console.log(result);
 
     if (result.deletedCount > 0) {
       return res.status(200).json({ message: "Account removed" });
@@ -391,7 +404,7 @@ const handleRemove = async (req, res) => {
 
     res.status(500).json({ message: "unable to delete the account" });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(502).json({ error: error });
   }
 };
@@ -479,14 +492,14 @@ async function fetchDataFromDBAndSendToAPI(
 
   const Record = await ModelAweberSubscriberList.findById(
     SubscriberDetailsInDB._id
-  ).select({ SubscriberRecords: { $slice: 100 } });
+  )
 
   const userTokenData = await ModelAweberTokenData.findOne({ email: email });
   const { Account_id, access_token } = userTokenData;
   const { AweberListId } = Workflow;
-  const dataInDB = [...Record.SubscriberRecords];
+  const dataInDB = Record.SubscriberRecords.slice(0,100)
 
-  console.log(dataInDB);
+  // console.log(dataInDB);
 
   for (let i = 0; i <= dataInDB.length - 1; i++) {
     const response = await addingSubscribers(
@@ -561,20 +574,20 @@ async function addingSubscribers(data, Account_id, AweberListId, access_token) {
   });
 
   if (response.status === 201) {
-    console.log(`Subscriber created for email ${data.Email}`, response.status);
+    // console.log(`Subscriber created for email ${data.Email}`, response.status);
     return true;
   } else {
-    console.log(
-      `Subscriber not created for email ${data.Email}`,
-      response.status
-    );
+    // console.log(
+    //   `Subscriber not created for email ${data.Email}`,
+    //   response.status
+    // );
 
     return false;
   }
 }
 
 const handleEditAutomation = async (req, res) => {
-  const { dataInDB, name, email, sheetId, sheetName, listId,item } = req.body;
+  const { dataInDB, name, email, sheetId, sheetName, listId, item } = req.body;
 
   if (!dataInDB || !name || !email || !sheetId || !sheetName || !listId) {
     return res.status(401).json({ message: "Please check the fields" });
@@ -583,7 +596,9 @@ const handleEditAutomation = async (req, res) => {
   try {
     const token = req.headers.authorization;
 
-    const resultRemoveSheetData = await ModelAweberSubscriberList.findById(dataInDB);
+    const resultRemoveSheetData = await ModelAweberSubscriberList.findById(
+      dataInDB
+    );
     if (resultRemoveSheetData) {
       resultRemoveSheetData.SubscriberRecords = [];
       await resultRemoveSheetData.save();
@@ -601,28 +616,27 @@ const handleEditAutomation = async (req, res) => {
         sheetName: sheetName,
         listId: listId,
       };
-         
-      await ModelAweberAutomationData.findByIdAndDelete(item._id)
+
+      await ModelAweberAutomationData.findByIdAndDelete(item._id);
 
       const response = await axios
-        .post("http://connectsyncdata.com:5000/aweber/api/startautomation", body, {
+        .post("http://localhost:5000/aweber/api/startautomation", body, {
           headers: headers,
         })
-        .then(async(response) =>
-        {  res.status(200).json({ message: "Automation started." });
-           console.log("Automation started..")
-         }
-        )
-        .catch((error) =>
-          {res
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
             .status(500)
-            .json({ message: `Automation failed to start.${error}` })
-          console.log(error)}
-        );
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
     }
   } catch (error) {
     res.status(500).json({ message: `Automation failed to start.${error}` });
-    console.log(error)
+    console.log(error);
   }
 };
 

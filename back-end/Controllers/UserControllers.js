@@ -215,7 +215,6 @@ const handleGetAutomationData = async (req, res) => {
       GetResponseWorkflows,
       SendyWorkflows
     );
-    console.log(TotalWorkflows);
     res.status(200).json({ Workflows: TotalWorkflows });
   } catch (error) {
     console.log(error);

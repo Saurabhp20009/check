@@ -15,7 +15,7 @@ require("./Connection.js");
 
 const CLIENT_ID = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const CLIENT_SECRET = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -147,13 +147,13 @@ async function addingSubscribers(data, Workflow) {
   });
 
   if (response.status === 201) {
-    console.log(`Subscriber created for email ${data.Email}`, response.status);
+    //console.log(`Subscriber created for email ${data.Email}`, response.status);
     return true;
   } else {
-    console.log(
-      `Subscriber not created for email ${data.Email}`,
-      response.status
-    );
+    // console.log(
+    //   `Subscriber not created for email ${data.Email}`,
+    //   response.status
+    // );
 
     return false;
   }

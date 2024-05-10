@@ -7,7 +7,8 @@ const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI =
+  "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -47,7 +48,7 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
   const code = req.query.code;
   try {
     const { tokens } = await oauth2Client.getToken(code);
-    console.log(tokens);
+    // console.log(tokens);
     const accessToken = tokens.access_token;
     const refreshToken = tokens.refresh_token; // This will contain the refresh token
 
@@ -73,7 +74,7 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
 const GetSpreadSheetRecords = async (req, res) => {
   const { email } = req.query;
 
-  console.log(email);
+
   await getAccessTokenFromRefreshToken(email);
 
   const TokenData = await ModelGoogleTokenData.findOne({
@@ -81,7 +82,7 @@ const GetSpreadSheetRecords = async (req, res) => {
   });
 
   if (!TokenData) {
-     res.status(401).json({ message: "Please connect google account" });
+    res.status(401).json({ message: "Please connect google account" });
 
     return console.log("Token data is null");
   }
@@ -96,7 +97,7 @@ const GetSpreadSheetRecords = async (req, res) => {
       fields: "files(name,id)",
     });
 
-    console.log(response);
+
 
     if (response.status === 200) {
       const files = response.data.files;
@@ -112,7 +113,6 @@ const GetSheetNames = async (req, res) => {
   const { SheetId } = req.body;
   const { email } = req.query;
 
-  console.log(SheetId, email);
 
   if (!SheetId || !email) {
     return res.status(400).json({ message: "Fields are missing" });
@@ -126,7 +126,7 @@ const GetSheetNames = async (req, res) => {
     });
 
     if (!tokenData) {
-      return res.status(401).json({ message: "Please connect google account" });;
+      return res.status(401).json({ message: "Please connect google account" });
     }
 
     oauth2Client.setCredentials({ access_token: tokenData.Access_token });
@@ -156,7 +156,7 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
   });
 
   if (!TokenData) {
-    return console.log("Token data of user not found while fetching..")
+    return console.log("Token data of user not found while fetching..");
   }
 
   oauth2Client.setCredentials({ access_token: TokenData.Access_token });
@@ -194,7 +194,7 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
         UserEmail: email,
         RegistrantRecords: [],
       });
-      const SubscriberDetailsInDB= await DocumentInstance.save();
+      const SubscriberDetailsInDB = await DocumentInstance.save();
 
       let tempRegistrant = [];
       //looping for accessing every elements of rows
@@ -207,14 +207,13 @@ const FetchDataFromSheet = async (SpreadSheetId, SheetName, email) => {
         // //Getting only updated data from the sheet
       }
 
-
-       await GotoWebinerListInDB.findOneAndUpdate(
+      await GotoWebinerListInDB.findOneAndUpdate(
         { _id: SubscriberDetailsInDB._id },
         { $set: { RegistrantRecords: tempRegistrant } }
       );
-      
-      console.log(SubscriberDetailsInDB)
-      return SubscriberDetailsInDB
+
+      // console.log(SubscriberDetailsInDB);
+      return SubscriberDetailsInDB;
     }
   } catch (error) {
     console.log("Unable to fetch data", error);
@@ -258,7 +257,7 @@ async function getAccessTokenFromRefreshToken(Email) {
       grant_type: "refresh_token",
     });
 
-    console.log(tokenResponse);
+    
 
     try {
       if (tokenResponse.status === 200) {
@@ -277,11 +276,11 @@ async function getAccessTokenFromRefreshToken(Email) {
   }
 }
 
-const UnlinkGoogleAccount = async (req,res) => {
-  const {email}=req.query
+const UnlinkGoogleAccount = async (req, res) => {
+  const { email } = req.query;
   try {
     const result = await ModelGoogleTokenData.deleteOne({ Email: email });
-    console.log(result,"google account unlinked successfully...");
+    console.log("google account unlinked successfully...");
 
     if (result.acknowledged) {
       res.status(200).json({ message: "account unlinked successfully" });
@@ -291,9 +290,6 @@ const UnlinkGoogleAccount = async (req,res) => {
   }
 };
 
-
-
-
 module.exports = {
   LinkGoogleAccount,
   GoogleOAuthCallBackHandle,
@@ -301,5 +297,5 @@ module.exports = {
   GetSheetNames,
   FetchDataFromSheet,
   getAccessTokenFromRefreshToken,
-  UnlinkGoogleAccount
+  UnlinkGoogleAccount,
 };

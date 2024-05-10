@@ -16,6 +16,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [workflowName, setWorkflowName] = useState("");
   const [operation, setOperation] = useState(1);
   const user = JSON.parse(localStorage.getItem("userInfo"));
+  const [loading, setLoading] = useState(false);
 
   const headers = {
     Authorization: `Bearer ${user.token} `,
@@ -39,7 +40,10 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   };
 
   const handleStartAutomation = async () => {
+    setLoading(true);
+
     if (!workflowName || !WebinarId) {
+      setLoading(false);
       return toast.error("Please fill the input fields correctly");
     }
 
@@ -56,7 +60,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     if (operation == 2) {
       await axios
         .post(
-          `http://connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
+          `http://localhost:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -71,12 +75,14 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           return toast.error(error.response.data.message);
         });
 
+      setLoading(false);
+
       return;
     }
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${user.email}`,
+        `http://localhost:5000/gotowebinar/api/start/automation?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -90,12 +96,14 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         console.log(error.response);
         return toast.error(error.response.data.message);
       });
+
+    setLoading(false);
   };
 
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -114,7 +122,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -133,6 +141,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
   useEffect(() => {
     gettingSpreadsheetList();
+
     //gettingSpreadsheetSheetList();
   }, []);
 

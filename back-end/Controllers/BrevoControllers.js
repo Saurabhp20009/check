@@ -11,7 +11,7 @@ const cron = require("node-cron");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -139,12 +139,14 @@ const FetchSheetDataFromDBToBrevoAPI = async (
 
     const dataInDB = await BrevoSubscriberListInDB.findById(
       SubscriberDetailsInDB._id
-    ).select({ SubscriberRecords: { $slice: 100 } });
+    )
+
+    const data= dataInDB.SubscriberRecords.slice(0,100) 
 
     const account = await BrevoUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
 
-    for (const item of dataInDB.SubscriberRecords) {
+    for (const item of data) {
       try {
         await SendDataToAPI(item, ApiKey, listIds, workflow_id);
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -201,7 +203,7 @@ const SendDataToAPI = (item, ApiKey, listIds, workflow_id) => {
       })
       .catch(async function (error) {
         console.error(error);
-        if (error.response.status!= 400) {
+        if (error.response.status != 400) {
           await BrevoAutomationData.findByIdAndUpdate(workflow_id, {
             $push: {
               ErrorRecords: {
@@ -224,13 +226,6 @@ const StartAutomation = async (req, res) => {
   const { email } = req.query;
 
   console.log(name, spreadsheetId, sheetName, listIds, email);
-
-  // if (!email || !name || !spreadsheetId || !sheetName || !listIds) {
-  //   console.log(name, spreadsheetId, sheetName, listIds,email);
-  //   return res
-  //     .status(401)
-  //     .json({ message: "Bad request,please check the fields" });
-  // }
 
   try {
     //fetching google sheet data
@@ -269,26 +264,34 @@ const StartAutomation = async (req, res) => {
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs started..");
-      const checkAutomationRunning = await BrevoAutomationData.findById(
+
+      await FetchSheetDataFromDBToBrevoAPI(
+        SubscriberDetailsInDB,
+        email,
+        workflow.ListIds,
         workflow._id
       );
-
-      if (checkAutomationRunning.Status === "Running" && checkAutomationRunning) {
-        console.log("running...");
-        await FetchSheetDataFromDBToBrevoAPI(
-          SubscriberDetailsInDB,
-          email,
-          workflow.ListIds,
-          workflow._id
-        );
-      } else {
-        console.log("Automation finished....");
-        task.stop();
-        return
-      }
     });
 
-    task.start();
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await BrevoAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
 
     res.status(200).json({ message: `Automation started ${workflow.Name}` });
   } catch (error) {
@@ -341,7 +344,7 @@ const handleEditAutomation = async (req, res) => {
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/brevo/api/start/automation?email=${email}`,
+        `http://localhost:5000/brevo/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,

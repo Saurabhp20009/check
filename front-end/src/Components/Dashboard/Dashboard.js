@@ -69,10 +69,10 @@ const Dashboard = () => {
   };
 
   const getWorkFlows = async () => {
-    setLoading(false);
+    
 
     await axios
-      .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://localhost:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then(async(response) => {
@@ -80,7 +80,8 @@ const Dashboard = () => {
         await setWorkFlows([...response.data.Workflows]);
       })
       .catch((error) => console.log(error));
-  };
+      setLoading(false);
+    };
 
   const handlePagesDropDown = () => {
     setPagesDropDown(!pagesDropDown);

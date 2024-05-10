@@ -59,7 +59,7 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
     if (operation ==="2") {
       await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${user.email}`,
+          `http://localhost:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -79,7 +79,7 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${user.email}`,
+        `http://localhost:5000/bigmarker/api/start/automation?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -98,7 +98,7 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -117,7 +117,7 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

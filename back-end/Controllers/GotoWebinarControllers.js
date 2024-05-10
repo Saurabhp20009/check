@@ -23,7 +23,7 @@ let Email;
 const GTWUrls = {
   OAUTH_SERVICE_URL: "https://authentication.logmeininc.com",
   OAUTH_REDIRECT_URI:
-    "http://connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://localhost:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 let oauthConfig = {
@@ -49,7 +49,7 @@ const linkGotoWebinarAccount = async (req, res) => {
   try {
     Email = email;
 
-    console.log(Email);
+    // console.log(Email);
 
     oauthConfig = {
       client: {
@@ -61,7 +61,7 @@ const linkGotoWebinarAccount = async (req, res) => {
       },
     };
 
-    console.log(oauthConfig);
+    // console.log(oauthConfig);
     const oauthClient = new AuthorizationCode(oauthConfig);
 
     const authorizationUrl = oauthClient.authorizeURL({
@@ -101,7 +101,7 @@ const GotoWebinarCallback = async (req, res) => {
     return;
   }
 
-  console.log(tokenResponse.token);
+  // console.log(tokenResponse.token);
 
   const GetAccountNumber = await axios.get(
     "https://api.getgo.com/identity/v1/Users/me",
@@ -144,10 +144,16 @@ const SendRegistrantDataToAPI = async (
 
     const Records = await GotoWebinerListInDB.findById(
       SubscriberDetailsInDB._id
-    ).select({ SubscriberRecords: { $slice: 400 } });
+    );
 
+    //Data record didn't found means automation failed
     if (!Records) {
-      return console.error("Registrant records didn't found in db");
+      console.error("Registrant records didn't found in db");
+      await GoToWebinarAutomationData.updateOne(
+        { _id: GTWAutomationData._id },
+        { $set: { Status: "Failed" } }
+      );
+      return;
     } else if (Records.RegistrantRecords.length <= 0) {
       await GoToWebinarAutomationData.updateOne(
         { _id: GTWAutomationData._id },
@@ -171,31 +177,32 @@ const SendRegistrantDataToAPI = async (
 
     const { Account_number, Access_token } = account;
 
-    //Syncing the data in webinar
-    const sendDataPromises = Records.RegistrantRecords.map(
-      async (registrant, index) => {
-        await sendData(
-          registrant,
-          index,
-          WebinarId,
-          GTWAutomationData,
-          Account_number,
-          Access_token
-        );
-      }
-    );
-
-    //Wait for all promises to resolve
-    await Promise.all(sendDataPromises);
+    const data = Records.RegistrantRecords.slice(0, 300);
 
     const document = await GotoWebinerListInDB.findById(
       SubscriberDetailsInDB._id
     );
+
     //removing 100 records from db
-    document.RegistrantRecords.splice(0, 400);
+    const resultSplice = document.RegistrantRecords.splice(0, 300);
+    const result = await document.save();
+
+    //Syncing the data in webinar
+    const sendDataPromises = data.map(async (registrant, index) => {
+      await sendData(
+        registrant,
+        index,
+        WebinarId,
+        GTWAutomationData,
+        Account_number,
+        Access_token
+      );
+    });
+
+    // //Wait for all promises to resolve
+    await Promise.all(sendDataPromises);
 
     // Save the modified document back to the database
-    const result = await document.save();
   } catch (error) {
     console.error(error);
   }
@@ -207,7 +214,8 @@ async function sendData(
   WebinarId,
   GTWAutomationData,
   Account_number,
-  Access_token
+  Access_token,
+  Errors
 ) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -231,12 +239,12 @@ async function sendData(
       setTimeout(async () => {
         try {
           const response = await axios.request(options);
-          console.log(response.data);
+          // console.log(response.data);
           resolve(); // Resolve the promise when the operation is successful
         } catch (error) {
           if (error) {
             console.log(error?.response?.data);
-            if (error.response.status !== 409) {
+            if (error?.response?.status !== 409) {
               await GoToWebinarAutomationData.updateOne(
                 { _id: GTWAutomationData._id },
                 { $push: { ErrorRecords: payload } }
@@ -271,10 +279,6 @@ const StartGoToWebinarAutomation = async (req, res) => {
   }
 
   try {
-    res
-      .status(200)
-      .json({ message: `Automation started in background jobs name ${Name}` });
-
     const SubscriberDetailsInDB = await FetchDataFromSheet(
       SpreadSheetId,
       SheetName,
@@ -302,19 +306,29 @@ const StartGoToWebinarAutomation = async (req, res) => {
     console.log("Automation created...");
 
     //Getting remaining registrant from list
-     await GetRemainingRegistrant(SubscriberDetailsInDB, Workflow);
-
-
+    const error = await GetRemainingRegistrant(SubscriberDetailsInDB, Workflow);
+    if (error) {
+      return res.status(502).json(error);
+    }
 
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs running..");
 
-      await SendRegistrantDataToAPI(
-        WebinarId,
-        Workflow,
-        email,
-        SubscriberDetailsInDB
-      );
+      try {
+        await SendRegistrantDataToAPI(
+          WebinarId,
+          Workflow,
+          email,
+          SubscriberDetailsInDB
+        );
+      } catch (error) {
+        console.log(error);
+
+        await GoToWebinarAutomationData.updateOne(
+          { _id: Workflow._id },
+          { $set: { Status: "Failed" } }
+        );
+      }
     });
 
     const interval = setInterval(
@@ -323,7 +337,11 @@ const StartGoToWebinarAutomation = async (req, res) => {
           _id: Workflow._id,
         });
 
-        if (workflow && workflow.Status === "Finished") {
+        if (
+          !workflow ||
+          workflow.Status === "Finished" ||
+          workflow.Status === "Failed"
+        ) {
           task.stop();
           console.log("cron-jobs stopped...");
           StopInterval();
@@ -332,6 +350,10 @@ const StartGoToWebinarAutomation = async (req, res) => {
 
       1000
     );
+
+    res
+      .status(200)
+      .json({ message: `Automation started in background jobs name ${Name}` });
 
     const StopInterval = () => {
       clearInterval(interval);
@@ -373,8 +395,6 @@ const GetRemainingRegistrant = async (SubscriberDetailsInDB, Workflow) => {
 
     const AlreadyRegistredRegistrant = await axios.request(options);
 
-    console.log("already", AlreadyRegistredRegistrant);
-
     //checking the api response
     if (!AlreadyRegistredRegistrant.data) {
       return console.log("Didn't get data the Already registrant registrants ");
@@ -390,18 +410,19 @@ const GetRemainingRegistrant = async (SubscriberDetailsInDB, Workflow) => {
       }
     });
 
-    console.log(RemainingRegistrant);
+    // console.log(RemainingRegistrant);
     try {
       const updateResult = await GotoWebinerListInDB.findOneAndUpdate(
         { _id: SubscriberDetailsInDB._id },
         { $set: { RegistrantRecords: RemainingRegistrant } }
       );
-      console.log(updateResult); // Optional: Log the result for debugging
+      // console.log(updateResult); // Optional: Log the result for debugging
     } catch (error) {
       console.error("Error updating document:", error);
     }
   } catch (error) {
     console.log(error);
+    return error
   }
 };
 
@@ -412,20 +433,10 @@ const CheckGTWRefreshToken = async (email) => {
     Email: email,
   });
 
-  // if (email === "ychoudhary320@gmail.com") {
-  //   const combinedString = `${yogeshSir.OAUTH_CLIENT_ID}:${yogeshSir.OAUTH_CLIENT_SECRET}`;
-  //   console.log(combinedString);
-  //   base64EncodedString = Buffer.from(combinedString).toString("base64");
-  // } else {
-  //   const combinedString = `${NehaMam.OAUTH_CLIENT_ID}:${NehaMam.OAUTH_CLIENT_SECRET}`;
-  //   console.log(combinedString);
-  //   base64EncodedString = Buffer.from(combinedString).toString("base64");
-  // }
-
   const combinedString = `${Client_id}:${Client_secret}`;
   base64EncodedString = Buffer.from(combinedString).toString("base64");
 
-  console.log(base64EncodedString);
+  // console.log(base64EncodedString);
 
   const tokenData = await GoToWebinarTokenData.findOne({ Email: email });
 
@@ -450,8 +461,6 @@ const CheckGTWRefreshToken = async (email) => {
     }
   );
 
-  console.log("r", response);
-
   try {
     const updateCheck = await GoToWebinarTokenData.updateOne(
       { _id: tokenData._id },
@@ -467,8 +476,6 @@ const CheckGTWRefreshToken = async (email) => {
   } catch (error) {
     //console.log("Error.... ", error);
   }
-
-  console.log(response.data);
 };
 
 const GetOnlyRegistrants = async (email, WebinarId) => {
@@ -488,7 +495,6 @@ const GetOnlyRegistrants = async (email, WebinarId) => {
     };
 
     const response = await axios.request(options);
-    console.log(response.data);
     return response.data;
   } catch (error) {
     // Handle any errors that occurred during the database operation
@@ -523,7 +529,7 @@ const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
     }
 
     const DocumentInstance = new GoToWebinarToGoogleSheetAutomationData({
-      Name: name,
+      Name: Name,
       AppName: "GTWToSheet",
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
@@ -560,6 +566,10 @@ const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
     //getting registrant data
 
     const registrantData = await GetOnlyRegistrants(email, WebinarId);
+
+    if (!resgistrantData || registrantData.length <= 0) {
+      return console.log("No registrant found in Webinar");
+    }
 
     registrantData.forEach((obj) => {
       // Extract firstname, lastname, and email from the object
@@ -612,7 +622,6 @@ const handleEditAutomation = async (req, res) => {
     const resultRemoveSheetData = await GotoWebinerListInDB.findByIdAndDelete(
       DataInDB
     );
-    console.log(resultRemoveSheetData);
 
     console.log("Sheet is clear...");
 
@@ -632,7 +641,7 @@ const handleEditAutomation = async (req, res) => {
 
     const response = await axios
       .post(
-        `http://connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${email}`,
+        `http://localhost:5000/gotowebinar/api/start/automation?email=${email}`,
         body,
         {
           headers: headers,
