@@ -31,7 +31,7 @@ const LinkGoogleAccount = async (req, res) => {
   res.header(
     "Access-Control-Allow-Origin",
     "http://connectsyncdata.com:3000",
-    "http://localhost:3000"
+    "http://connectsyncdata.com:3000"
   );
   res.header("Referrer-Policy", "no-referrer-when-downgrade");
 

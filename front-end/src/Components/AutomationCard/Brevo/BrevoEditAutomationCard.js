@@ -60,7 +60,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
     console.log(body);
     await axios
       .post(
-        `http://localhost:5000/brevo/api/edit/automation?email=${user.email}`,
+        `http://connectsyncdata.com:5000/brevo/api/edit/automation?email=${user.email}`,
         body,{
           headers: headers
         }
@@ -78,7 +78,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
           headers: headers
         }
       )
@@ -95,7 +95,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
 
      await axios
       .post(
-        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,{
           headers: headers
         }

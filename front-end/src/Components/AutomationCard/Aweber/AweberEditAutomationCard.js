@@ -61,7 +61,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
   console.log(body)
      
     const response = await axios
-      .post("http://localhost:5000/aweber/api/edit/automation", body, {
+      .post("http://connectsyncdata.com:5000/aweber/api/edit/automation", body, {
         headers: headers,
       })
        .then((response) => window. location. reload());
@@ -72,7 +72,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
   const gettingAweberList = async () => {
    await axios
       .post(
-        "http://localhost:5000/aweber/api/gettinglists",
+        "http://connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -90,7 +90,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://localhost:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -108,7 +108,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
 
     const response = await axios
       .post(
-        `http://localhost:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

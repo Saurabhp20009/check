@@ -19,7 +19,7 @@ const Settings = () => {
   const getUserInfo = async () => {
     await axios
       .post(
-        "http://localhost:5000/user/api/gettinguser",
+        "http://connectsyncdata.com:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -36,7 +36,7 @@ const Settings = () => {
 
   const handleAweberButton = async () => {
     await axios
-      .get("http://localhost:5000/aweber/api/buildauthurl", {
+      .get("http://connectsyncdata.com:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://localhost:5000/goauth/api/link?email=${user.email}`, {
+      .get(`http://connectsyncdata.com:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => {
@@ -66,7 +66,7 @@ const Settings = () => {
   const handleUnlinkGTWAccount = async () => {
     await axios
       .delete(
-        `http://localhost:5000/gotowebinar/api/remove/account?email=${user.email}`,
+        `http://connectsyncdata.com:5000/gotowebinar/api/remove/account?email=${user.email}`,
         {
           headers: headers,
         }
@@ -78,7 +78,7 @@ const Settings = () => {
   const handleUnlinkGoogleAccount = async () => {
     await axios
       .delete(
-        `http://localhost:5000/goauth/api/unlink/googleaccount?email=${user.email}`,
+        `http://connectsyncdata.com:5000/goauth/api/unlink/googleaccount?email=${user.email}`,
         {
           headers: headers,
         }
@@ -94,7 +94,7 @@ const Settings = () => {
   const handleBrevoAccountRemove = async () => {
     await axios
       .delete(
-        `http://localhost:5000/brevo/api/delete/account?email=${user.email}`,
+        `http://connectsyncdata.com:5000/brevo/api/delete/account?email=${user.email}`,
         {
           headers: headers,
         }
@@ -113,7 +113,7 @@ const Settings = () => {
   const handleRemoveGetResponseAccount = async () => {
     const r = await axios
       .delete(
-        `http://localhost:5000/getresponse/api/remove/account?id=${displayLinked.GetResponse._id}`,
+        `http://connectsyncdata.com:5000/getresponse/api/remove/account?id=${displayLinked.GetResponse._id}`,
         {
           headers: headers,
         }
@@ -125,7 +125,7 @@ const Settings = () => {
   const handleAweberRemove = async () => {
     const r = await axios
       .delete(
-        `http://localhost:5000/aweber/api/remove/account?id=${displayLinked.Aweber._id}`,
+        `http://connectsyncdata.com:5000/aweber/api/remove/account?id=${displayLinked.Aweber._id}`,
         {
           headers: headers,
         }
@@ -141,7 +141,7 @@ const Settings = () => {
   const handleBigmarkerAccountRemove = async () => {
     const r = await axios
       .delete(
-        `http://localhost:5000/bigmarker/api/remove/account?id=${displayLinked.Bigmarker._id}`,
+        `http://connectsyncdata.com:5000/bigmarker/api/remove/account?id=${displayLinked.Bigmarker._id}`,
         {
           headers: headers,
         }
@@ -153,7 +153,7 @@ const Settings = () => {
   const handleSendyAccountRemove = async () => {
     const r = await axios
       .delete(
-        `http://localhost:5000/sendy/api/remove/account?id=${displayLinked.Sendy._id}`,
+        `http://connectsyncdata.com:5000/sendy/api/remove/account?id=${displayLinked.Sendy._id}`,
         {
           headers: headers,
         }
