@@ -567,7 +567,7 @@ const StartAutomationWriteDataInSheetFromWebinar = async (req, res) => {
 
     const registrantData = await GetOnlyRegistrants(email, WebinarId);
 
-    if (!resgistrantData || registrantData.length <= 0) {
+    if (!registrantData || registrantData.length <= 0) {
       return console.log("No registrant found in Webinar");
     }
 
