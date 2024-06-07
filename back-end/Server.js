@@ -20,40 +20,22 @@ const cluster = require("node:cluster");
 const numCPUs = require("node:os").availableParallelism();
 const process = require("node:process");
 
-if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
+// if (cluster.isPrimary) {
+//   console.log(`Primary ${process.pid} is running`);
 
-  // Fork workers.
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
+//   // Fork workers.
+//   for (let i = 0; i < numCPUs; i++) {
+//     cluster.fork();
+//   }
 
-  cluster.on("exit", (worker, code, signal) => {
-    console.log(`worker ${worker.process.pid} died`);
-    cluster.fork();
-  });
-} else {
-  // Workers can share any TCP connection
+//   cluster.on("exit", (worker, code, signal) => {
+//     console.log(`worker ${worker.process.pid} died`);
+//     cluster.fork();
+//   });
+// } else {
+//   // Workers can share any TCP connection
 
-  app.use(cors());
-  app.use(express.json());
-  app.use("/user/api", userRouter);
-  app.use("/aweber/api", aweberRouter);
-  app.use("/gotowebinar/api", GoToWebinarRouter);
-  app.use("/goauth/api", GoogleRouter);
-  app.use("/brevo/api", BrevoRouter);
-  app.use("/getresponse/api", GetResponseRouter);
-  app.use("/bigmarker/api", BigmarkerRouter);
-  app.use("/sendy/api", SendyRouter);
-
-  app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
-
-  console.log(`Worker ${process.pid} started`);
-}
-
-
-
-// app.use(cors());
+//   app.use(cors());
 //   app.use(express.json());
 //   app.use("/user/api", userRouter);
 //   app.use("/aweber/api", aweberRouter);
@@ -63,5 +45,23 @@ if (cluster.isPrimary) {
 //   app.use("/getresponse/api", GetResponseRouter);
 //   app.use("/bigmarker/api", BigmarkerRouter);
 //   app.use("/sendy/api", SendyRouter);
+
+//   app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
+
+//   console.log(`Worker ${process.pid} started`);
+// }
+
+
+
+app.use(cors());
+  app.use(express.json());
+  app.use("/user/api", userRouter);
+  app.use("/aweber/api", aweberRouter);
+  app.use("/gotowebinar/api", GoToWebinarRouter);
+  app.use("/goauth/api", GoogleRouter);
+  app.use("/brevo/api", BrevoRouter);
+  app.use("/getresponse/api", GetResponseRouter);
+  app.use("/bigmarker/api", BigmarkerRouter);
+  app.use("/sendy/api", SendyRouter);
 
   app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
