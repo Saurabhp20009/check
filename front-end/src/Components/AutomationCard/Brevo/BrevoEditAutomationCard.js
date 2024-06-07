@@ -14,6 +14,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
+  const [operation, setOperation] = useState(item.Operation);
   const [listId, setListId] = useState(item.ListIds[0]);
   const [workflowName, setWorkflowName] = useState(item.Name);
 
@@ -110,6 +111,10 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
   const handleNameChange = (e) => {
     setWorkflowName(e.target.value);
   };
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
+  };
+
   
 
 
@@ -150,7 +155,17 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Brevo</option>
+        </select>
+      </div>
+
+
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -180,7 +195,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Enter List ID</label>
+        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
         <input
           value={listId}
           className="NameInput"
@@ -188,6 +203,8 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
           onChange={handleListId}
           type="number"/>
       </div>
+
+
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
         <TbSettingsAutomation className="start-icon" />

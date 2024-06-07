@@ -16,9 +16,7 @@ const BrevoAutomationDataSchema = new Schema({
   Status: String,
   Email: String,
   ListIds: [Number],
-  Operation: {
-    sheetToApp: Boolean,
-  },
+  Operation: Number,
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "BrevoSubscriberListInDB",

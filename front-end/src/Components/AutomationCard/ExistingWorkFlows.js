@@ -13,7 +13,7 @@ import GetResponseEditAutomationCard from "./GetResponse/GetResponseEditAutomati
 import GTWEditAutomationCard from "./GoToWebinar/GTWEditAutomationCard";
 import SendyEditAutomationCard from "./Sendy/SendyEditAutomationCard";
 
-const ExistingWorkFlows = ({ item }) => {
+const ExistingWorkFlows = ({ item, workflowId }) => {
   console.log(item);
 
   const [id, setId] = useState("");
@@ -54,7 +54,7 @@ const ExistingWorkFlows = ({ item }) => {
     const keysArray = Object.keys(item);
     console.log(keysArray);
     for (let key of keysArray) {
-      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id") {
+      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id" && key !=="AppId") {
         console.log(key);
         setId(key);
       }
@@ -69,7 +69,7 @@ const ExistingWorkFlows = ({ item }) => {
     }
     console.log(EditAutomationCards);
     setShowAutomationCard(true);
-    console.log(ShowAutomationCard);
+    console.log(index);
   };
 
   const headers = {
@@ -78,8 +78,6 @@ const ExistingWorkFlows = ({ item }) => {
   };
 
   const [isOpen, setIsOpen] = React.useState(false);
-
-
 
   const handleConfirm = async () => {
     const body = {
@@ -128,26 +126,31 @@ const ExistingWorkFlows = ({ item }) => {
 
       {ShowAutomationCard && <div>{EditAutomationCards[index]}</div>}
 
-      <div className="flex-content">
-        <div className="content">
+      <div className="flex-content-automation"   >
+        <div className="sno-content"  onClick={handleEdit}>
+          <label>S.no</label>
+          <p>{workflowId + 1}</p>
+        </div>
+
+        <div className="content-automation"  onClick={handleEdit}>
           <label>Name</label>
           <p>{item?.Name}</p>
         </div>
 
-        <div className="content">
+        <div className="content-automation"  onClick={handleEdit}>
           <label>Operation</label>
-          <p>{item?.Operation?.sheetToApp ? "Sheet to App" : "App to Sheet"}</p>
+          <p>{item?.AppName}</p>
         </div>
 
-        <div className="content">
-          <label>Sheet Name</label>
-          <p>{item?.SheetName}</p>
+        <div className="content-automation"  onClick={handleEdit}>
+          <label>{item.SheetName ? "Sheet Name" : "Webinar Id"}</label>
+          <p>{item.SheetName ? item.SheetName : item.WebinarId}</p>
         </div>
-        <div className="content">
+        <div className="content-automation">
           <label>{id}</label>
           <p>{item[id]}</p>
         </div>
-        <div className="content">
+        <div className="content-automation"  onClick={handleEdit}>
           <label>Status</label>
           <p style={{ display: "flex", alignItems: "center" }}>
             <div className="status-spinner-overlay">
@@ -178,13 +181,15 @@ const ExistingWorkFlows = ({ item }) => {
               item?.Status === "Running" ? "odd-remove-button" : "remove-button"
             }
             onClick={() => {
-              {
+              { 
                 setIsOpen(true);
+                
+
               }
             }}
           >
             <IoIosRemoveCircle className="removeIcon" />
-            Remove
+            Delete
           </button>
         </div>
       </div>

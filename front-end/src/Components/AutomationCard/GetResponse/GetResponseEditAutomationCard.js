@@ -15,6 +15,7 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
     []
   );
   const [workflowName, setWorkflowName] = useState(item.Name);
+  const [operation, setOperation] = useState(item.Operation);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -25,6 +26,10 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
+  };
+
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
   };
 
   const handleSheetNameChange = (event) => {
@@ -153,7 +158,16 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Get Response</option>
+        </select>
+      </div>
+
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -183,7 +197,7 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Campaign List:</label>
+        <label htmlFor="aweberList"><b>Destination:</b> Campaign List</label>
         <select
           id="aweberList"
           value={campaignListId}

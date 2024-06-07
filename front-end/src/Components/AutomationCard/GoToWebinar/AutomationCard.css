@@ -8,7 +8,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  width: 50%;
+  width: 30%;
 
 }
 
@@ -142,7 +142,7 @@ select {
   background-color: #13c56b; /* Green */
   border: none;
   color: white;
-  padding: 2vh;
+  padding: 1vh;
   text-align: center;
   text-decoration: none;
   display: flex;
@@ -158,12 +158,12 @@ select {
 }
 
 .start-button svg{
-  height: 5vh;
-  width: 5vh;
+  height: 3vh;
+  width: 3vh;
 }
 
 .start-icon {
-  margin-right: 1vh;
+  margin-right: 0.5vh;
   display: flex;
   align-items: center;
    /* Adjust the spacing between the icon and the text */
@@ -180,7 +180,7 @@ select {
   flex-direction: row;
   align-items: flex-start;  
   justify-content: space-between;
-  width: 95%;
+  width: 100%;
 }
 
 .name-div{
@@ -196,6 +196,7 @@ select {
 
 .close-card{
   color: #333333;
+  margin-right: 1vh;
 }
 
 

@@ -16,9 +16,7 @@ const BigmarkerAutomationDataSchema = new Schema({
   ConferenceId: String,
   Status: String,
   Email: String,
-  Operation: {
-    sheetToApp: Boolean
-  },
+  Operation: Number ,
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "BigmarkerRegistrantsInDb",
@@ -36,14 +34,13 @@ const BigmarkerAutomationDataSchema = new Schema({
 const BigmarkerToGoogleSheetAutomationDataSchema = new Schema({
   Name: String,
   AppName: String,
+  AppId:Number,
   SpreadSheetId: String,
   SheetName: String,
   ConferenceId: String,
   Status: String,
   Email: String,
-  Operation: {
-    sheetToApp: Boolean
-  },
+  Operation: Number,
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "BigmarkerRegistrantsInDb",
@@ -51,6 +48,30 @@ const BigmarkerToGoogleSheetAutomationDataSchema = new Schema({
 });
 
 
+
+
+
+const BigmarkerToAppAutomationDataSchema = new Schema({
+  Name: String,
+  AppName: String,
+  AppId:Number,
+  WebinarId: String,
+  ListId: String,
+  Status: String,
+  Email: String,
+  Operation: Number,
+  DataInDB: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "BigmarkerRegistrantsInDb",
+  },
+  ErrorRecords: [
+    {
+      firstName: String,
+      lastName: String,
+      email: String,
+    },
+  ],
+});
 
 
 
@@ -78,9 +99,17 @@ const BigmarkerToGoogleSheetAutomationData = mongoose.model(
     "BigmarkerToGoogleSheetAutomationDataSchema",
     BigmarkerToGoogleSheetAutomationDataSchema
   );
+
+  const BigmarkerToAppAutomationData = mongoose.model(
+    "BigmarkerToAppAutomationDataSchema",
+    BigmarkerToAppAutomationDataSchema
+  );
+  
+
   module.exports={
     BigmarkerRegistrantsInDb,
     BigmarkerAutomationData,
     BigmarkerUserData,
-    BigmarkerToGoogleSheetAutomationData
+    BigmarkerToGoogleSheetAutomationData,
+    BigmarkerToAppAutomationData
   }

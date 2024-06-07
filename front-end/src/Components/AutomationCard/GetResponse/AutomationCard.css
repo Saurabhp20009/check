@@ -8,7 +8,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  width: 50%;
+  width: 30%;
 
 }
 
@@ -158,12 +158,12 @@ select {
 }
 
 .start-button svg{
-  height: 5vh;
-  width: 5vh;
+  height: 3.5vh;
+  width: 3.5vh;
 }
 
 .start-icon {
-  margin-right: 1vh;
+  margin-right: 0.5vh;
   display: flex;
   align-items: center;
    /* Adjust the spacing between the icon and the text */

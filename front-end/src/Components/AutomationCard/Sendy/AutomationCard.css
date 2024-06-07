@@ -1,14 +1,14 @@
 .automation-card {
   position: fixed;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  width: 50%;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  z-index: 9990;
+  width: 30%;
 
 }
 
@@ -67,8 +67,9 @@ select {
 .input-group,select {
   padding: 10px;
   border: 0px solid #ccc;
-  font-size: 14px;
+  font-size: 13px;
   outline: none;
+  border-radius: 5px;
   transition: border-color 0.3s ease;
 }
 
@@ -142,7 +143,7 @@ select {
   background-color: #13c56b; /* Green */
   border: none;
   color: white;
-  padding: 2vh;
+  padding: 1vh;
   text-align: center;
   text-decoration: none;
   display: flex;
@@ -158,12 +159,12 @@ select {
 }
 
 .start-button svg{
-  height: 5vh;
-  width: 5vh;
+  height: 3.5vh;
+  width: 3.5vh;
 }
 
 .start-icon {
-  margin-right: 1vh;
+  margin-right: 0.5vh;
   display: flex;
   align-items: center;
    /* Adjust the spacing between the icon and the text */
@@ -180,7 +181,7 @@ select {
   flex-direction: row;
   align-items: flex-start;  
   justify-content: space-between;
-  width: 95%;
+  width: 100%;
 }
 
 .name-div{

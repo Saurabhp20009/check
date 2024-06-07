@@ -15,6 +15,8 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
     []
   );
   const [workflowName, setWorkflowName] = useState("");
+  const [operation, setOperation] = useState(1);
+
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const divRef = useRef(null);
@@ -27,6 +29,11 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
   };
+
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
+  };
+
 
   const handleSheetNameChange = (event) => {
     setSheetName(event.target.value);
@@ -140,6 +147,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
             value={workflowName}
             className="NameInput"
             onChange={handleNameChange}
+            placeholder="Enter workflow name"
           />
         </ div>
         <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
@@ -147,9 +155,18 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
         </div>  
 
       </div>
+      
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Get Response</option>
+        </select>
+      </div>
+
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -179,7 +196,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Campaign List:</label>
+        <label htmlFor="aweberList"> <b>Destination:</b> Campaign List</label>
         <select
           id="aweberList"
           value={campaignListId}
@@ -193,6 +210,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
           ))}
         </select>
       </div>
+
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
           <TbSettingsAutomation className="start-icon" />

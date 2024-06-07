@@ -248,102 +248,7 @@ const SendDataToAPI = (item, ApiKey, SendyUrl, ListId, workflow_id) => {
   }
 };
 
-// const handleStartAutomationWebinarToSheet = async (req, res) => {
-//   try {
-//     const { name, SpreadSheetId, SheetName, ConferenceId } = req.body;
-//     const { email } = req.query;
 
-//     console.log(name);
-//     const auth = new google.auth.OAuth2();
-//     await getAccessTokenFromRefreshToken(email);
-
-//     const TokenData = await ModelGoogleTokenData.findOne({
-//       Email: email,
-//     });
-
-//     const TotalAutomation = await BigmarkerAutomationData.find({
-//       Email: email,
-//       Status: "Running",
-//     });
-//     if (TotalAutomation.length > 0) {
-//       return res.status(400).json({ message: "Already an automation running" });
-//     }
-
-//     const user = await BigmarkerUserData.findOne({ UserEmail: email });
-
-//     if (!user) {
-//       return res
-//         .status(500)
-//         .json({ message: "Doesn't found any Api Key for this account" });
-//     }
-
-//     const { ApiKey } = user;
-
-//     const DocumentInstance = new BigmarkerToGoogleSheetAutomationData({
-//       Name: name,
-//       AppName: "BigMarker to Sheet",
-//       SpreadSheetId: SpreadSheetId,
-//       SheetName: SheetName,
-//       ConferenceId: ConferenceId,
-//       Status: "Running",
-//       Email: email,
-//     });
-
-//     const automationData = await DocumentInstance.save();
-
-//     if (automationData) {
-//       console.log("Automation created...");
-//     }
-
-//     res
-//       .status(200)
-//       .json({ message: `Automation started.. ${automationData.Name}` });
-
-//     auth.setCredentials({
-//       access_token: TokenData.Access_token,
-//     });
-
-//     // Load Google Sheets API
-//     const sheets = google.sheets({ version: "v4", auth });
-
-//     const spreadsheetId = SpreadSheetId;
-//     const range = `${SheetName}!A1:C`; // Specify the range where you want to write data
-
-//     // Data to be written to the sheet
-//     const values = [["firstname", "lastname", "email"]];
-
-//     //getting registrant data
-
-//     const registrantData = await GetOnlyRegistrants(ApiKey, ConferenceId);
-
-//     console.log(registrantData, registrantData.length);
-
-//     registrantData.forEach((obj) => {
-//       // Extract firstname, lastname, and email from the object
-//       const { first_name, last_name, email } = obj;
-//       // Append them to the resultArray
-//       values.push([first_name, last_name, email]);
-//     });
-
-//     const response = await sheets.spreadsheets.values.update({
-//       spreadsheetId: spreadsheetId,
-//       range: range,
-//       valueInputOption: "RAW",
-//       requestBody: {
-//         values: values,
-//       },
-//     });
-
-//     console.log("Data written successfully:", response.data);
-//     await BigmarkerAutomationData.updateOne(
-//       { _id: automationData._id },
-//       { $set: { Status: "Finished" } }
-//     );
-//   } catch (error) {
-//     console.error("Error while writting the data in sheet...", error.message);
-//     res.status(403).json({ message: `error occured.. ${error.message}` });
-//   }
-// };
 
 const GetOnlyRegistrants = async (ApiKey, ConferenceId) => {
   try {
@@ -392,9 +297,7 @@ const handleStartAutomation = async (req, res) => {
       Status: "Running",
       Email: email,
       ListId: ListId,
-      Operation: {
-        sheetToApp: true,
-      },
+      Operation: 1,
       DataInDB: SubscriberDetailsInDB._id,
       ErrorRecords: [],
     });

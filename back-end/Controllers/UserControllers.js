@@ -7,6 +7,7 @@ const {
   GoToWebinarTokenData,
   GoToWebinarToGoogleSheetAutomationData,
   GotoWebinerListInDB,
+  GoToWebinarToAppAutomationData,
 } = require("../Models/GoToWebinarModel");
 const {
   ModelAweberAutomationData,
@@ -29,6 +30,7 @@ const {
   BigmarkerAutomationData,
   BigmarkerToGoogleSheetAutomationData,
   BigmarkerRegistrantsInDb,
+  BigmarkerToAppAutomationData,
 } = require("../Models/BigMarkerModel");
 const {
   SendyUserDetails,
@@ -197,6 +199,15 @@ const handleGetAutomationData = async (req, res) => {
       Email: email,
     });
 
+   const GTWToAppWorkflows=  await GoToWebinarToAppAutomationData.find({
+    Email: email,
+  });
+
+  const BigmarkerToAppWorkflows=  await BigmarkerToAppAutomationData.find({
+    Email: email,
+  });
+
+     
     const BigmarkerToSheetWorkflows =
       await BigmarkerToGoogleSheetAutomationData.find({ Email: email });
 
@@ -213,7 +224,9 @@ const handleGetAutomationData = async (req, res) => {
       BigmarkerWorkflows,
       BigmarkerToSheetWorkflows,
       GetResponseWorkflows,
-      SendyWorkflows
+      SendyWorkflows,
+      GTWToAppWorkflows,
+      BigmarkerToAppWorkflows
     );
     res.status(200).json({ Workflows: TotalWorkflows });
   } catch (error) {
@@ -245,6 +258,10 @@ const handleDeleteWorkflow = async (req, res) => {
       { Automation: GoToWebinarAutomationData, DataModel: GotoWebinerListInDB },
       { Automation: GoToWebinarToGoogleSheetAutomationData, DataModel: null },
       { Automation: SendyAutomationData, DataModel: SendyRegistrants },
+      { Automation: GoToWebinarToAppAutomationData, DataModel: GotoWebinerListInDB },
+      { Automation: BigmarkerToAppAutomationData, DataModel: BigmarkerRegistrantsInDb }
+
+
     ];
 
     let workflowDeleted = false;

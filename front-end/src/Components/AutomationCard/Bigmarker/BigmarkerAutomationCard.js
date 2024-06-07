@@ -5,7 +5,10 @@ import { ToastContainer, toast } from "react-toastify";
 import { TfiClose } from "react-icons/tfi";
 import { TbSettingsAutomation } from "react-icons/tb";
 
-function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function BigmarkerAutomationCard({
+  setShowAutomationCard,
+  ShowAutomationCard,
+}) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
@@ -15,11 +18,64 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
   const [WebinarId, setWebinarId] = useState("");
   const [workflowName, setWorkflowName] = useState("");
   const [operation, setOperation] = useState(1);
+  const [aweberListId, setAweberListId] = useState("");
+  const [aweberDataList, setAweberDataList] = useState([]);
+  const [listId, setListId] = useState("");
+  const [campaignListId, setCampaignListId] = useState("");
+  const [CampaignLists, setCampaignaLists] = useState([]);
+
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
   const headers = {
     Authorization: `Bearer ${user.token} `,
     "Content-Type": "application/json",
+  };
+
+  const handleAweberListChange = (event) => {
+    setAweberListId(event.target.value);
+  };
+
+  const gettingAweberList = async () => {
+    await axios
+      .post(
+        "http://connectsyncdata.com:5000/aweber/api/gettinglists",
+        {
+          email: user.email,
+        },
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        setAweberDataList([...response.data.list_data]);
+        setAweberListId(response.data.list_data[0].id);
+      })
+      .catch((error) => {
+        console.log(error.response.data.message);
+        toast.error(
+          "Unable to aweber fetch sheet data :" + error.response.data.message
+        );
+      });
+  };
+
+  const handleCampaignListChange = (event) => {
+    setCampaignListId(event.target.value);
+  };
+
+  const gettingCampaignLists = async () => {
+    await axios
+      .get(
+        `http://connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        {
+          headers: headers,
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        setCampaignaLists([...response.data.data]);
+        setCampaignListId(response.data[0].id);
+      })
+      .catch((error) => console.log(error));
   };
 
   const handleSpreadsheetIdChange = (event) => {
@@ -34,9 +90,182 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
     setWebinarId(event.target.value);
   };
 
+  const handleListId = (event) => {
+    setListId(event.target.value);
+  };
+
   const handleOperation = (event) => {
     setOperation(event.target.value);
   };
+
+  const renderContentInOperation = [
+    null,
+    //sheet-to-bigmarker
+    <div>
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Source:</b> Spreadsheet</label>
+        {console.log(operation)}
+        <select
+          id="aweberList"
+          value={spreadsheetId}
+          onChange={handleSpreadsheetIdChange}
+        >
+          {googleSpreadDataList.map((item, index) => (
+            <option key={index} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="input-group">
+        <label htmlFor="sheetName"> Select the Sheet</label>
+        <select
+          id="aweberList"
+          value={sheetName}
+          onChange={handleSheetNameChange}
+        >
+          {googleSpreadDataSheetList.map((item, index) => (
+            <option key={index} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Destination</b>: Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+          placeholder="Enter webinar id"
+        />
+      </div>
+    </div>,
+
+    //gtwtosheet
+    <div>
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Source:</b> Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+          placeholder="Enter webinar id"
+        />
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Destination:</b> Spreadsheet</label>
+        {console.log(operation)}
+        <select
+          id="aweberList"
+          value={spreadsheetId}
+          onChange={handleSpreadsheetIdChange}
+        >
+          {googleSpreadDataList.map((item, index) => (
+            <option key={index} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="input-group">
+        <label htmlFor="sheetName"> Select the Sheet</label>
+        <select
+          id="aweberList"
+          value={sheetName}
+          onChange={handleSheetNameChange}
+        >
+          {googleSpreadDataSheetList.map((item, index) => (
+            <option key={index} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>,
+
+    //gtwtoaweber
+    <div>
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Source </b>: Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+          placeholder="Enter webinar id"
+        />
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Destination :</b> Aweber List</label>
+        <select
+          id="aweberList"
+          value={aweberListId}
+          onChange={handleAweberListChange}
+        >
+          {aweberDataList.map((item, index) => (
+            <option key={index} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>,
+
+    //gtwtobrevo
+
+    <div>
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Source :</b> Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+          placeholder="Enter webinar id"
+        />
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
+        <input
+          value={listId}
+          className="NameInput"
+          placeholder="Enter the list id"
+          onChange={handleListId}
+          type="number"
+        />
+      </div>
+    </div>,
+    //gtwtogetresponse
+    <div>
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Source :</b> Webinar ID</label>
+        <input
+          value={WebinarId}
+          className="NameInput"
+          onChange={handleWebinarId}
+          placeholder="Enter webinar id"
+        />
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="aweberList"><b>Destination:</b> Campaign List</label>
+        <select
+          id="aweberList"
+          value={campaignListId}
+          onChange={handleCampaignListChange}
+        >
+          {CampaignLists.map((item, index) => (
+            <option key={index} value={item.campaignId}>
+              {console.log(item.name)}
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>,
+  ];
 
   const handleStartAutomation = async () => {
     if (!workflowName || !WebinarId) {
@@ -52,11 +281,10 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
       SheetName: sheetName,
       ConferenceId: WebinarIdWithoutHyphens,
     };
-   
-    console.log(body,typeof operation)
-    
-    
-    if (operation ==="2") {
+
+    console.log(body, typeof operation);
+
+    if (operation === "2") {
       await axios
         .post(
           `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${user.email}`,
@@ -75,24 +303,93 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
         });
 
       return;
-    }
+    } else if (operation == 1) {
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error?.response?.data?.message);
+        });
+    } else if (operation == 3) {
+      let body = {
+        Name: workflowName,
+        WebinarId: WebinarId,
+        AweberListId: aweberListId,
+      };
 
-    await axios
-      .post(
-        `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${user.email}`,
-        body,
-        {
-          headers: headers,
-        }
-      )
-      .then((response) => {
-        console.log(response);
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error.response);
-        return toast.error(error.response.data.message);
-      });
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error?.response?.data?.message);
+        });
+    } else if (operation == 4) {
+      let body = {
+        Name: workflowName,
+        WebinarId: WebinarId,
+        BrevoListId: listId,
+      };
+
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error?.response?.data?.message);
+        });
+    } else {
+      let body = {
+        Name: workflowName,
+        WebinarId: WebinarId,
+        CampaignId: campaignListId,
+      };
+
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error?.response?.data?.message);
+        });
+    }
   };
 
   const gettingSpreadsheetList = async () => {
@@ -134,8 +431,15 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
     setWorkflowName(e.target.value);
   };
 
+  console.log("repeat");
+
   useEffect(() => {
-    gettingSpreadsheetList();
+    setTimeout(() => {
+      gettingAweberList();
+      gettingSpreadsheetList();
+      gettingCampaignLists();
+    }, 1000);
+
     //gettingSpreadsheetSheetList();
   }, []);
 
@@ -154,6 +458,8 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
             value={workflowName}
             className="NameInput"
             onChange={handleNameChange}
+            placeholder="Enter workflow name"
+
           />
         </div>
         <div
@@ -171,47 +477,14 @@ function BigmarkerAutomationCard({ setShowAutomationCard, ShowAutomationCard }) 
           <option value={1}>Google Sheet --- BigMarker</option>
 
           <option value={2}>BigMarker --- Google Sheet</option>
+          <option value={3}>BigMarker --- Aweber</option>
+          <option value={4}>BigMarker --- Brevo</option>
+          <option value={5}>BigMarker --- Get Response</option>
         </select>
       </div>
 
-      <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+      <div>{renderContentInOperation[operation]}</div>
 
-        <select
-          id="aweberList"
-          value={spreadsheetId}
-          onChange={handleSpreadsheetIdChange}
-        >
-          {googleSpreadDataList.map((item, index) => (
-            <option key={index} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="input-group">
-        <label htmlFor="sheetName">Select the Sheet</label>
-        <select
-          id="aweberList"
-          value={sheetName}
-          onChange={handleSheetNameChange}
-        >
-          {googleSpreadDataSheetList.map((item, index) => (
-            <option key={index} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="input-group">
-        <label htmlFor="aweberList">Enter Webinar ID</label>
-        <input
-          value={WebinarId}
-          className="NameInput"
-          onChange={handleWebinarId}
-        />
-      </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
           <TbSettingsAutomation className="start-icon" />

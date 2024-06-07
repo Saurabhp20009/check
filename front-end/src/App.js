@@ -14,6 +14,7 @@ import GoToWebinarAuthPage from "./Components/AutomationCard/GoToWebinar/AuthPag
 import GetResponseAuthPage from "./Components/AutomationCard/GetResponse/AuthPage";
 import BigmarkerAuthPage from "./Components/AutomationCard/Bigmarker/AuthPage";
 import SendyAuthPage from "./Components/AutomationCard/Sendy/AuthPage";
+import Training from "./Components/TraningPage/Training";
 
 function App() {
   const [checkUserLogin, setCheckUserLogin] = useState(false);
@@ -44,6 +45,7 @@ function App() {
           <Route index element={<Dashboard />}/>
             <Route path="/workflows" element={<DisplayWorkflows />} />
             <Route path="/error" element={<ErrorRecords />} />
+            <Route path="/training" element={<Training />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="/aweberauth" element={<AweberAuthLinkPage />} />

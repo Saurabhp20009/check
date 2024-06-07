@@ -16,6 +16,7 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   );
   const [listId, setListId] = useState("");
   const [workflowName, setWorkflowName] = useState("");
+  const [operation, setOperation] = useState(1);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
    
@@ -32,6 +33,13 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const handleSheetNameChange = (event) => {
     setSheetName(event.target.value);
   };
+
+  
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
+  };
+
+
 
   const handleListId = (event) => {
     setListId(event.target.value);
@@ -146,8 +154,17 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </div>  
       </div>
 
+      
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Sendy</option>
+        </select>
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -177,7 +194,7 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Enter List ID</label>
+        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
         <input
           value={listId}
           className="NameInput"

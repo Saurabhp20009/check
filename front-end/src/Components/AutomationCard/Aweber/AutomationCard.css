@@ -5,10 +5,10 @@
   transform: translate(-50%, -50%);
   background-color: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  width: 50%;
+  width: 30%;
 
 }
 
@@ -92,16 +92,16 @@ select {
   color: #666;
 }
 
-.start-button {
+/* .start-button {
   background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 20px;
-  padding: 12px 20px;
+  padding: 1vh;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
+} */
 
 select {
   background-color: #333333;
@@ -149,6 +149,7 @@ select {
   font-weight: lighter;
   align-items: center;
   border-radius: 5px;
+  height: 5vh;
   cursor: pointer;
   transition-duration: 0.4s;
 }
@@ -158,12 +159,12 @@ select {
 }
 
 .start-button svg{
-  height: 5vh;
-  width: 5vh;
+  height: 3vh;
+  width: 3vh;
 }
 
 .start-icon {
-  margin-right: 1vh;
+  margin-right: 0.3vh;
   display: flex;
   align-items: center;
    /* Adjust the spacing between the icon and the text */

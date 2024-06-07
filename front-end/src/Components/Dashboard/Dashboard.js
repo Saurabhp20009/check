@@ -6,13 +6,13 @@ import ExistingWorkFlows from "../AutomationCard/ExistingWorkFlows";
 import AweberAutomationCard from "../AutomationCard/Aweber/AweberAutomationCard";
 import GTWAutomationCard from "../AutomationCard/GoToWebinar/GTWAutomationCard";
 import { RiPagesLine } from "react-icons/ri";
-import { useNavigate } from "react-router-dom";
-import { RiErrorWarningFill } from "react-icons/ri";
+import { Link, useNavigate } from "react-router-dom";
 import BrevoAutomationCard from "../AutomationCard/Brevo/BrevoAutomationCard";
 import Spinner from "../LoadingSpinner/Spinner";
 import GetResponseAutomationCard from "../AutomationCard/GetResponse/GetResponseAutomationCard";
 import BigmarkerAutomationCard from "../AutomationCard/Bigmarker/BigmarkerAutomationCard";
 import SendyAutomationCard from "../AutomationCard/Sendy/SendyAutomationCard";
+import { ImArrowUp } from "react-icons/im";
 
 const Dashboard = () => {
   const [automationLimit, setAutomationLimit] = useState([]);
@@ -22,6 +22,7 @@ const Dashboard = () => {
   const [workFlows, setWorkFlows] = useState([]);
   const [pagesDropDown, setPagesDropDown] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [ShowLists, setShowLists] = useState(false);
 
   const Applications = [
     <AweberAutomationCard
@@ -66,22 +67,31 @@ const Dashboard = () => {
       ]);
 
     setIsDropdownOpen(!isDropdownOpen);
+    setShowLists(true);
   };
 
   const getWorkFlows = async () => {
-    
-
     await axios
       .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
-      .then(async(response) => {
+      .then(async (response) => {
         console.log(response.data.Workflows);
-        await setWorkFlows([...response.data.Workflows]);
+
+        const runningFlows = response.data.Workflows.filter(
+          (item) => item.Status === "Running"
+        );
+
+        const finishedFlows = response.data.Workflows.filter(
+          (item) => item.Status === "Finished"
+        );
+
+        const sortedWorkflow = runningFlows.concat(finishedFlows);
+        await setWorkFlows([...sortedWorkflow]);
       })
       .catch((error) => console.log(error));
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
   const handlePagesDropDown = () => {
     setPagesDropDown(!pagesDropDown);
@@ -111,41 +121,63 @@ const Dashboard = () => {
             Pages
             <div className="pagesDropDown">
               <ul>
-                <li onClick={handlePages}>
-                  <RiErrorWarningFill className="error-icon" /> Error Records
-                </li>
+                <li onClick={handlePages}>Error Records</li>
+                <Link style={{textDecoration:"none"}} to={"/training"}>
+                  {" "}
+                  <li   onClick={handlePages}>Traning</li>
+                </Link>
               </ul>
             </div>
           </div>
 
-          
-      
-          <button className="add-automation-button" onClick={handleClick}>
+          <button
+            className="add-automation-button"
+            onClick={handleClick}
+            onMouseEnter={() => setShowLists(true)}
+            onMouseLeave={() => setShowLists(false)}
+          >
             Add Automation
-            <div className="dropdown-list">
-              <ul>
-                <li onClick={() => handleList(0)}>Aweber</li>
-                <li onClick={() => handleList(1)}>BigMarker</li>
-                <li onClick={() => handleList(2)}>Brevo</li>
-                <li onClick={() => handleList(3)}>GetResponse</li>
-                <li onClick={() => handleList(4)}>GoToWebinar</li>
-                <li onClick={() => handleList(5)}>Sendy</li>
-              </ul>
-            </div>
+            {ShowLists && (
+              <div className="dropdown-list">
+                <ul>
+                  <li onClick={() => handleList(0)}>Aweber</li>
+                  <li onClick={() => handleList(1)}>BigMarker</li>
+                  <li onClick={() => handleList(2)}>Brevo</li>
+                  <li onClick={() => handleList(3)}>GetResponse</li>
+                  <li onClick={() => handleList(4)}>GoToWebinar</li>
+                  <li onClick={() => handleList(5)}>Sendy</li>
+                </ul>
+              </div>
+            )}
           </button>
         </div>
 
-        {ShowAutomationCard && <div>{Applications[ShowApps]}</div>}
-
+        {ShowAutomationCard && (
+          <div style={{ transition: "0.2" }}>{Applications[ShowApps]}</div>
+        )}
 
         {loading ? (
           <Spinner />
         ) : workFlows.length > 0 ? (
           workFlows.map((item, index) => {
-            return <ExistingWorkFlows key={index} item={item} />;
+            return (
+              <ExistingWorkFlows key={index} item={item} workflowId={index} />
+            );
           })
         ) : (
-          <h1 className="no-workflow-found">No workflow found!</h1>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "50vh",
+            }}
+            className="div-no-workflow-found"
+          >
+            {" "}
+            <h2 className="no-workflow-found">Add automation to start</h2>
+            <ImArrowUp />
+          </div>
         )}
       </div>
 

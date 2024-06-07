@@ -8,6 +8,8 @@ const { getAccessTokenFromRefreshToken } = require("./GoogleControllers");
 const { google } = require("googleapis");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const cron = require("node-cron");
+const { GotoWebinerListInDB, GoToWebinarToAppAutomationData } = require("../Models/GoToWebinarModel");
+const { BigmarkerRegistrantsInDb, BigmarkerToAppAutomationData } = require("../Models/BigMarkerModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
@@ -139,16 +141,27 @@ const FetchSheetDataFromDBToBrevoAPI = async (
 
     const dataInDB = await BrevoSubscriberListInDB.findById(
       SubscriberDetailsInDB._id
-    )
+    );
 
-    const data= dataInDB.SubscriberRecords.slice(0,100) 
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
 
     const account = await BrevoUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
 
     for (const item of data) {
       try {
-        await SendDataToAPI(item, ApiKey, listIds, workflow_id);
+       const result=await SendDataToAPI(item, ApiKey, listIds);
+        if (!result) {
+          await BrevoAutomationData.findByIdAndUpdate(workflow_id, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error sending data for item ${item}: ${error}`);
@@ -193,7 +206,7 @@ const SendDataToAPI = (item, ApiKey, listIds, workflow_id) => {
         "content-type": "application/json",
         "api-key": ApiKey,
       },
-      data: { email: item.Email, listIds: listIds, updateEnabled: false },
+      data: { email: item.Email, listIds: [listIds], updateEnabled: false },
     };
 
     axios
@@ -204,15 +217,7 @@ const SendDataToAPI = (item, ApiKey, listIds, workflow_id) => {
       .catch(async function (error) {
         console.error(error);
         if (error.response.status != 400) {
-          await BrevoAutomationData.findByIdAndUpdate(workflow_id, {
-            $push: {
-              ErrorRecords: {
-                firstName: item.FirstName,
-                lastName: item.LastName,
-                email: item.Email,
-              },
-            },
-          });
+          return false;
         }
       });
   } catch (error) {
@@ -225,7 +230,7 @@ const StartAutomation = async (req, res) => {
 
   const { email } = req.query;
 
-  console.log(name, spreadsheetId, sheetName, listIds, email);
+  // console.log(name, spreadsheetId, sheetName, listIds, email);
 
   try {
     //fetching google sheet data
@@ -246,9 +251,7 @@ const StartAutomation = async (req, res) => {
       Status: "Running",
       Email: email,
       ListIds: [listIds],
-      Operation: {
-        sheetToApp: true,
-      },
+      Operation: 1,
       DataInDB: SubscriberDetailsInDB._id,
       ErrorRecords: [],
     });
@@ -381,6 +384,162 @@ const RemoveAccount = async (req, res) => {
   }
 };
 
+async function GTWToBrevoSync(
+  email,
+  SubscriberDetailsInDBId,
+  automationId,
+  ListId
+) {
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDBId
+    );
+
+    const data = dataInDB.RegistrantRecords.slice(0, 100);
+    const NumberListID = parseInt(ListId);
+
+    const account = await BrevoUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    for (const item of data) {
+      try {
+        const result = await SendDataToAPI(
+          item,
+          ApiKey,
+          NumberListID,
+          automationId
+        );
+        if (!result) {
+          await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+
+
+    //removing 100 records from db
+    dataInDB.RegistrantRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await dataInDB.save();
+
+    const TotalDataInDB = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDBId
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.RegistrantRecords.length <= 0) {
+      const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+        $set: {
+          Status: "Finished",
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+      $set: {
+        Status: "Failed",
+      },
+    });
+  }
+}
+
+async function BigmarkerToBrevoSync(
+  email,
+  SubscriberDetailsInDBId,
+  automationId,
+  ListId
+) {
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDBId
+    );
+
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
+    const NumberListID = parseInt(ListId);
+
+    const account = await BrevoUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    for (const item of data) {
+      try {
+        const result = await SendDataToAPI(
+          item,
+          ApiKey,
+          NumberListID,
+          automationId
+        );
+        if (!result) {
+          await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+
+
+    //removing 100 records from db
+    dataInDB.SubscriberRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await dataInDB.save();
+
+    const TotalDataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDBId
+    );
+
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.SubscriberRecords.length <= 0) {
+      const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+        $set: {
+          Status: "Finished",
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+      $set: {
+        Status: "Failed",
+      },
+    });
+  }
+}
+
+
+
+
+
+
 //Extra functions
 const GetAllBrevoContacts = async (ApiKey) => {
   try {
@@ -404,4 +563,6 @@ module.exports = {
   StartAutomation,
   RemoveAccount,
   handleEditAutomation,
+  GTWToBrevoSync,
+  BigmarkerToBrevoSync
 };

@@ -17,6 +17,8 @@ function SendyEditAutomationCard({
   );
   const [listId, setListId] = useState(item.ListId);
   const [workflowName, setWorkflowName] = useState(item.Name);
+  const [operation, setOperation] = useState(1);
+
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -32,6 +34,11 @@ function SendyEditAutomationCard({
   const handleSheetNameChange = (event) => {
     setSheetName(event.target.value);
   };
+
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
+  };
+
 
   const handleListId = (event) => {
     setListId(event.target.value);
@@ -143,9 +150,17 @@ function SendyEditAutomationCard({
           <TfiClose />
         </div>
       </div>
+   
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Sendy</option>
+        </select>
+      </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -175,7 +190,7 @@ function SendyEditAutomationCard({
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Enter List ID</label>
+        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
         <input
           value={listId}
           className="NameInput"

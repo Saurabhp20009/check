@@ -26,13 +26,7 @@ const GTWAutomationDataSchema = new Schema({
   WebinarId: String,
   Status: String,
   Email: String,
-  Operation: {
-    sheetToApp: Boolean
-  },
-  timestamp: {
-   type: Date,
-   default: Date.now
-  },
+  Operation: Number,
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "GotoWebinerListInDB",
@@ -49,18 +43,35 @@ const GTWAutomationDataSchema = new Schema({
 const GTWToGoogleSheetAutomationDataSchema = new Schema({
   Name: String,
   AppName: String,
+  AppId: Number,
   SpreadSheetId: String,
   SheetName: String,
   WebinarId: String,
   Status: String,
   Email: String,
-  Operation: {
-    sheetToApp: Boolean
+  Operation: Number,
+});
+
+const GTWToAppAutomationDataSchema = new Schema({
+  Name: String,
+  AppName: String,
+  AppId: Number,
+  WebinarId: String,
+  ListId: String,
+  Status: String,
+  Email: String,
+  Operation: Number ,
+  DataInDB: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "GotoWebinerListInDB",
   },
-  timestamp: {
-    type: Date,
-    default: Date.now
-   }
+  ErrorRecords: [
+    {
+      firstName: String,
+      lastName: String,
+      email: String,
+    },
+  ],
 });
 
 const GotoWebinerListInDB = mongoose.model(
@@ -81,9 +92,15 @@ const GoToWebinarToGoogleSheetAutomationData = mongoose.model(
   GTWToGoogleSheetAutomationDataSchema
 );
 
+const GoToWebinarToAppAutomationData = mongoose.model(
+  "GTWToAppAutomationData",
+  GTWToAppAutomationDataSchema
+);
+
 module.exports = {
   GotoWebinerListInDB,
   GoToWebinarTokenData,
   GoToWebinarAutomationData,
   GoToWebinarToGoogleSheetAutomationData,
+  GoToWebinarToAppAutomationData
 };

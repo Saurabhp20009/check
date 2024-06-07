@@ -8,7 +8,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 9999;
-  width: 50%;
+  width: 30%;
 
 }
 
@@ -91,7 +91,7 @@ select {
 .last-triggered-label {
   color: #666;
 }
-
+/* 
 .start-button {
   background-color: #007bff;
   color: #fff;
@@ -101,7 +101,7 @@ select {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-}
+} */
 
 select {
   background-color: #333333;
@@ -142,7 +142,7 @@ select {
   background-color: #13c56b; /* Green */
   border: none;
   color: white;
-  padding: 2vh;
+  padding: 1vh;
   text-align: center;
   text-decoration: none;
   display: flex;

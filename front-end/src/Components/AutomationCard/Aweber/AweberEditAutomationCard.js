@@ -15,6 +15,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
     []
   );
   const [workflowName, setWorkflowName] = useState(item.Name);
+  const [operation, setOperation] = useState(item.Operation);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -54,7 +55,8 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
       sheetName: sheetName,
       listId: aweberListId,
       dataInDB: item.DataInDB,
-      item: item
+      item: item,
+      operation: operation
     };
       
    
@@ -67,6 +69,11 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
        .then((response) => window. location. reload());
 
     return toast.error("error oc");
+  };
+
+
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
   };
 
   const gettingAweberList = async () => {
@@ -162,7 +169,20 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Aweber</option>
+
+          <option value={2}>
+            Google Sheet --- Aweber (Delete subscribers)
+          </option>
+        </select>
+      </div>
+
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId"><b>Source :</b>Spreadsheet</label>
 
         <select
           id="aweberList"
@@ -192,7 +212,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Aweber List:</label>
+        <label htmlFor="aweberList"><b>Destination: </b>Aweber List</label>
         <select
           id="aweberList"
           value={aweberListId}

@@ -14,6 +14,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
+  const [operation, setOperation] = useState(1);
   const [workflowName, setWorkflowName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
@@ -36,33 +37,55 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setAweberListId(event.target.value);
   };
 
+  const handleOperation = (event) => {
+    setOperation(event.target.value);
+  };
+
   const handleStartAutomation = async () => {
     // Your logic to start automation goes here
     // For demo purposes, update lastTriggered with current time
-  
+
     if (!workflowName) {
       return toast.error("Please fill the workflow name");
     }
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-    const body = {
-      name: workflowName,
-      email: user.email,
-      sheetId: spreadsheetId,
-      sheetName: sheetName,
-      listId: aweberListId,
-    };
 
-    const response = await axios
-      .post("http://connectsyncdata.com:5000/aweber/api/startautomation", body, {
-        headers: headers,
-      })
-      .then((response) => window.location.reload());
+    if (operation == 1) {
+      const user = JSON.parse(localStorage.getItem("userInfo"));
+      const body = {
+        name: workflowName,
+        email: user.email,
+        sheetId: spreadsheetId,
+        sheetName: sheetName,
+        listId: aweberListId,
+      };
 
-    return toast.error(response.data.message);
+      const response = await axios
+        .post("http://connectsyncdata.com:5000/aweber/api/startautomation", body, {
+          headers: headers,
+        })
+        .then((response) => window.location.reload());
+
+      return toast.error(response.data.message);
+    } else {
+      const body = {
+        name: workflowName,
+        email: user.email,
+        sheetId: spreadsheetId,
+        sheetName: sheetName,
+        listId: aweberListId,
+      };
+      const response = await axios
+        .post("http://connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
+          headers: headers,
+        })
+        .then((response) => window.location.reload());
+
+      return toast.error(response.data.message);
+    }
   };
 
   const gettingAweberList = async () => {
-   await axios
+    await axios
       .post(
         "http://connectsyncdata.com:5000/aweber/api/gettinglists",
         {
@@ -76,7 +99,10 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         setAweberDataList([...response.data.list_data]);
         setAweberListId(response.data.list_data[0].id);
       })
-      .catch((error) =>{ console.log(error); toast.error("Unable to aweber fetch sheet data") });
+      .catch((error) => {
+        console.log(error);
+        toast.error("Unable to aweber fetch sheet data");
+      });
   };
 
   const gettingSpreadsheetList = async () => {
@@ -91,7 +117,9 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log("spread")});
+      .catch((error) => {
+        console.log("spread");
+      });
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -118,22 +146,16 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setWorkflowName(e.target.value);
   };
 
-   useEffect(() => {
-     gettingAweberList();
-     gettingSpreadsheetList();
-   }, []);
-
-
+  useEffect(() => {
+    gettingAweberList();
+    gettingSpreadsheetList();
+  }, []);
 
   useEffect(() => {
-    if(spreadsheetId)
-    {
+    if (spreadsheetId) {
       gettingSpreadsheetSheetList();
     }
-    
   }, [spreadsheetId]);
-
-
 
   return (
     <div className="automation-card" tabIndex={0} ref={divRef}>
@@ -146,16 +168,33 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
             value={workflowName}
             className="NameInput"
             onChange={handleNameChange}
+            placeholder="Enter workflow name"
           />
-        </ div>
-        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
-        <TfiClose />
-        </div>  
-
+        </div>
+        <div
+          className="close-card"
+          onClick={() => setShowAutomationCard(!ShowAutomationCard)}
+        >
+          <TfiClose />
+        </div>
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"> Select Spreadsheet</label>
+        <label htmlFor="spreadsheetId"> Select Operation</label>
+
+        <select id="aweberList" value={operation} onChange={handleOperation}>
+          <option value={1}>Google Sheet --- Aweber</option>
+
+          <option value={2}>
+            Google Sheet --- Aweber (Delete subscribers)
+          </option>
+        </select>
+      </div>
+
+      <div className="input-group">
+        <label htmlFor="spreadsheetId">
+          <b>Source:</b> Spreadsheet
+        </label>
 
         <select
           id="aweberList"
@@ -185,7 +224,9 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList">Aweber List:</label>
+        <label htmlFor="aweberList">
+          <b>Destination:</b> Aweber List:
+        </label>
         <select
           id="aweberList"
           value={aweberListId}
@@ -199,13 +240,13 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="buttons">
-        <button className="start-button" onClick={handleStartAutomation}>
-          <TbSettingsAutomation className="start-icon" />
-          Start
-        </button>
+  
+          <button className="start-button" onClick={handleStartAutomation}>
+            <TbSettingsAutomation className="start-icon" />
+            Start
+          </button>
+    
       </div>
-
-      
     </div>
   );
 }

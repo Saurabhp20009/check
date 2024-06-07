@@ -16,9 +16,7 @@ const GetResponseAutomationDataSchema = new Schema({
   CampaignId: String,
   Status: String,
   Email: String,
-  Operation: {
-    sheetToApp: Boolean
-  },
+  Operation: Number, 
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "GetResponseSubscriberListInDB",

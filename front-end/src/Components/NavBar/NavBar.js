@@ -25,7 +25,7 @@ const NavBar = () => {
     <div>
       <nav className="navbar">
         <div className="navbar__left">
-          <h1> Dashboard</h1>
+          <Link to={"/"} style={{color: "white",textDecoration: "none"}}><h1>Dashboard</h1></Link>
           <BsSliders className="top-nav-icon" />
         </div>
         <div className="navbar__right">

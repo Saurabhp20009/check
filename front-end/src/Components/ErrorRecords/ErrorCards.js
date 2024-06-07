@@ -18,7 +18,7 @@ const ErrorCards = ({ item }) => {
     const keysArray = Object.keys(item);
     console.log(keysArray);
     for (let key of keysArray) {
-      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id") {
+      if (key.includes("Id") && key !== "SpreadSheetId" && key !== "_id"  && key!=="AppId") {
         console.log(key);
         setId(key);
       }
@@ -52,6 +52,14 @@ const ErrorCards = ({ item }) => {
           <label>Name</label>
           <p>{item?.Name}</p>
         </div>
+       
+        <div className="content">
+          <label>Operation</label>
+          <p>{item.AppName}</p>
+        </div>
+
+
+
         <div className="content">
           <label>Sheet Name</label>
           <p>{item?.SheetName}</p>

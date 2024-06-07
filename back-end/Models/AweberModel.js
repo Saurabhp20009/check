@@ -31,9 +31,7 @@ const AweberAutomationDataSchema = new Schema([
     SheetName: String,
     AweberListId: String,
     Status: String,
-    Operation: {
-      sheetToApp: Boolean,
-    },
+    Operation: Number ,
     DataInDB: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ModelAweberSubscriberList",

@@ -2,6 +2,7 @@
   background-color: #f9f9f9;
   box-shadow: 0 0 2px #dcdcdc;
   padding: 1.5vh;
+  border-radius: 2px  #333333;
 }
 
 .flex-content {
@@ -17,6 +18,23 @@
   align-items: center;
   width: 25%;
   cursor: pointer;
+}
+
+.content label{
+  color: #495057;
+  font-weight: 600;
+  font-family: sans-serif;
+  font-size: 14px;
+  width: 35%;
+}
+
+
+.content p{
+  color: #818492;
+    font-weight: 500;
+    margin-left: 2vh;
+    width: 25%;
+    font-size: smaller;
 }
 
 .downloadIcon {

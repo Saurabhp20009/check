@@ -8,6 +8,8 @@ const { getAccessTokenFromRefreshToken } = require("./GoogleControllers");
 const { google } = require("googleapis");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const cron = require("node-cron");
+const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
+const { BigmarkerRegistrantsInDb, BigmarkerToAppAutomationData } = require("../Models/BigMarkerModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
@@ -149,7 +151,18 @@ const SendingSheetDataToGetResponse = async (
     //sending data to api
     for (const item of data) {
       try {
-        await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
+       const result= await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
+       if (!result) {
+        await GetResponseAutomationData.findByIdAndUpdate(automationId, {
+          $push: {
+            ErrorRecords: {
+              firstName: item.FirstName,
+              lastName: item.LastName,
+              email: item.Email,
+            },
+          },
+        });
+      }
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error sending data for item ${item}: ${error}`);
@@ -191,7 +204,7 @@ const SendingSheetDataToGetResponse = async (
   }
 };
 
-const SendDataToAPI = (item, ApiKey, CampaignId, workflow_id) => {
+const SendDataToAPI = (item, ApiKey, CampaignId) => {
   try {
     const options = {
       method: "POST",
@@ -217,15 +230,7 @@ const SendDataToAPI = (item, ApiKey, CampaignId, workflow_id) => {
       })
       .catch(async function (error) {
         console.error(error);
-        await GetResponseAutomationData.findByIdAndUpdate(workflow_id, {
-          $push: {
-            ErrorRecords: {
-              firstName: item.FirstName,
-              lastName: item.LastName,
-              email: item.Email,
-            },
-          },
-        });
+        return false
       });
   } catch (error) {
     console.error(error.response.data.context);
@@ -262,9 +267,7 @@ const handleStartAutomation = async (req, res) => {
       Status: "Running",
       Email: email,
       CampaignId: CampaignId,
-      Operation: {
-        sheetToApp: true,
-      },
+      Operation: 1,
       DataInDB: SubscriberDetailsInDB._id,
       ErrorRecords: [],
     });
@@ -414,8 +417,153 @@ const handleEditAutomation = async (req, res) => {
   }
 };
 
+async function GTWToGetResponse( email,
+  SubscriberDetailsInDBId,
+  automationId,
+  ListId)
+{
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDBId
+    );
+
+    const data = dataInDB.RegistrantRecords.slice(0, 100);
+
+    const account = await GetResponseUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    for (const item of data) {
+      try {
+        const result = await SendDataToAPI(
+          item,
+          ApiKey,
+          ListId,
+        );
+        if (!result) {
+          await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+
+    //removing 100 records from db
+    dataInDB.RegistrantRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await dataInDB.save();
+
+    const TotalDataInDB = await GotoWebinerListInDB.findById(
+      SubscriberDetailsInDBId
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.RegistrantRecords.length <= 0) {
+      const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+        $set: {
+          Status: "Finished",
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
+      $set: {
+        Status: "Failed",
+      },
+    });
+  }
+}
+
+async function BigmarkerToGetResponse( email,
+  SubscriberDetailsInDBId,
+  automationId,
+  ListId)
+{
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDBId
+    );
+
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
+
+    const account = await GetResponseUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    for (const item of data) {
+      try {
+        const result = await SendDataToAPI(
+          item,
+          ApiKey,
+          ListId,
+        );
+        if (!result) {
+          await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+
+    //removing 100 records from db
+    dataInDB.SubscriberRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await dataInDB.save();
+
+    const TotalDataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDBId
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.SubscriberRecords.length <= 0) {
+      const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+        $set: {
+          Status: "Finished",
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
+      $set: {
+        Status: "Failed",
+      },
+    });
+  }
+}
+
+
+
+
 const RemoveAccount = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.query;
 
   try {
     const response = await GetResponseUserData.deleteOne({ _id: id });
@@ -431,4 +579,6 @@ module.exports = {
   RemoveAccount,
   handleStartAutomation,
   handleEditAutomation,
+  GTWToGetResponse,
+  BigmarkerToGetResponse
 };

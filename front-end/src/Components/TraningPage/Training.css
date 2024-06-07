@@ -1,0 +1,15 @@
+.Traning-outside-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#main-heading {
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+
+  font-stretch: expanded;
+  font-weight: 400;
+  color: #333333;
+  margin-top: 5vh;
+}

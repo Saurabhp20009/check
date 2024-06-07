@@ -11,3 +11,10 @@
     font-weight: bold;
 }   
 
+.div-no-workflow-found{
+    display: flex;
+  justify-content: center;
+  min-height: 80vh;
+  align-content: center;
+  align-items: center;
+}
