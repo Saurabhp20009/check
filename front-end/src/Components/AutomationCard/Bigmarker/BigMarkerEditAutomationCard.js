@@ -55,9 +55,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       })
       .catch((error) => {
         console.log(error.response.data.message);
-        toast.error(
-          "Unable to aweber fetch sheet data :" + error.response.data.message
-        );
+        // toast.error(
+        //   "Unable to aweber fetch sheet data :" + error.response.data.message
+        // );
       });
   };
 

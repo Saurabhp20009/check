@@ -49,7 +49,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       })
       .catch((error) => {
         console.log(error);
-        toast.error("Unable to aweber fetch sheet data");
+        //toast.error("Unable to aweber fetch sheet data");
       });
   };
 
