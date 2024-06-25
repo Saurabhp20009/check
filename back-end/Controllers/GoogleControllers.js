@@ -66,7 +66,7 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
         "Google account connected successfully,token details successfully save in db",
     });
   } catch (error) {
-    console.error("Error exchanging code for tokens:", error);
+    //console.error("Error exchanging code for tokens:", error);
     res.status(500).send("Failed to authenticate with Google.");
   }
 };

@@ -1,5 +1,5 @@
 const express=require('express')
-const { GotoWebinarCallback, linkGotoWebinarAccount, StartGoToWebinarAutomation, StartAutomationWriteDataInSheetFromWebinar, RemoveGTWAccount, handleEditAutomation, StartAutomationGotoWebinarToApp } = require('../Controllers/GotoWebinarControllers')
+const { GotoWebinarCallback, linkGotoWebinarAccount, StartGoToWebinarAutomation, StartAutomationWriteDataInSheetFromWebinar, RemoveGTWAccount, handleEditAutomation, StartAutomationGotoWebinarToApp, StartGoToWebinarDelAutomation } = require('../Controllers/GotoWebinarControllers')
 const verifyToken = require('../Middleware/JWTMiddleware')
 
 const GoToWebinarRouter= express.Router()
@@ -11,6 +11,7 @@ GoToWebinarRouter.post('/start/gtwtosheet/automation',verifyToken,StartAutomatio
 GoToWebinarRouter.delete('/remove/account',verifyToken,RemoveGTWAccount)
 GoToWebinarRouter.post('/edit/automation',verifyToken,handleEditAutomation)
 GoToWebinarRouter.post('/start/gtwtoapp/automation',verifyToken,StartAutomationGotoWebinarToApp)
+GoToWebinarRouter.post('/start/del/automation',verifyToken,StartGoToWebinarDelAutomation)
 
 
 

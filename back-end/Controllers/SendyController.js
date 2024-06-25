@@ -146,11 +146,9 @@ const SendingSheetDataToSendy = async (
   try {
     console.log("Sending data from sheet...");
 
-    const dataInDB = await SendyRegistrants.findById(
-      SubscriberDetailsInDB._id
-    )
+    const dataInDB = await SendyRegistrants.findById(SubscriberDetailsInDB._id);
 
-    const data= dataInDB.SubscriberRecords.slice(0,100)
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
 
     const account = await SendyUserDetails.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
@@ -248,22 +246,55 @@ const SendDataToAPI = (item, ApiKey, SendyUrl, ListId, workflow_id) => {
   }
 };
 
-
-
-const GetOnlyRegistrants = async (ApiKey, ConferenceId) => {
+const SendDataToDelAPI = (item, ApiKey, SendyUrl, ListId, workflow_id) => {
   try {
-    var options = {
-      method: "GET",
-      url: `https://www.bigmarker.com/api/v1/conferences/registrations/${ConferenceId}?per_page=30000`,
-      headers: { "Api-Key": ApiKey },
+    const options = {
+      method: "POST",
+      url: `${SendyUrl}/api/subscribers/delete.php`,
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/x-www-form-urlencoded",
+      },
+      data: {
+        api_key: ApiKey,
+        list_id: ListId,
+        email: item.Email,
+      },
     };
 
-    const response = await axios.request(options);
-    console.log(response.data);
-    return response.data.registrations;
+    axios
+      .request(options)
+      .then(async function (response) {
+        const $ = cheerio.load(response.data);
+        const data = $("div#wrapper > h2").text();
+        console.log(data, typeof data);
+
+        if (!data) {
+          await SendyAutomationData.findByIdAndUpdate(workflow_id, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+      })
+      .catch(async function (error) {
+        console.error(error);
+        await SendyAutomationData.findByIdAndUpdate(workflow_id, {
+          $push: {
+            ErrorRecords: {
+              firstName: item.FirstName,
+              lastName: item.LastName,
+              email: item.Email,
+            },
+          },
+        });
+      });
   } catch (error) {
-    // Handle any errors that occurred during the database operation
-    console.error("Error while retrieving Bigmarker  data:", error);
+    console.error(error);
   }
 };
 
@@ -310,7 +341,6 @@ const handleStartAutomation = async (req, res) => {
         .json({ message: "Unable to save workflow record in DB" });
     }
 
-
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs running..");
@@ -349,8 +379,145 @@ const handleStartAutomation = async (req, res) => {
   }
 };
 
+const SendingSheetDataToDelSendy = async (
+  SubscriberDetailsInDB,
+  email,
+  ListId,
+  workflow_id
+) => {
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await SendyRegistrants.findById(SubscriberDetailsInDB._id);
+
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
+
+    const account = await SendyUserDetails.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+    const SendyUrl = account.SendyUrl;
+    //sending data to api
+    for (const item of data) {
+      try {
+        await SendDataToDelAPI(item, ApiKey, SendyUrl, ListId, workflow_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+    //getting document to remove data
+    const document = await SendyRegistrants.findById(SubscriberDetailsInDB._id);
+
+    //removing 100 records from db
+    document.SubscriberRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await document.save();
+
+    const TotalDataInDB = await SendyRegistrants.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.SubscriberRecords.length <= 0) {
+      const result = await SendyAutomationData.findByIdAndUpdate(workflow_id, {
+        $set: {
+          Status: "Finished",
+        },
+      });
+
+      const deleteResult = await SendyRegistrants.deleteOne({
+        _id: SubscriberDetailsInDB._id,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleStartAutomationDel = async (req, res) => {
+  const { Name, SpreadSheetId, SheetName, ListId } = req.body;
+
+  const { email } = req.query;
+
+  // console.log(Name,SpreadsheetId,SheetName,ConferenceId,email)
+
+  if (!email || !Name || !SpreadSheetId || !SheetName || !ListId) {
+    return res
+      .status(401)
+      .json({ message: "Bad request,please check the fields" });
+  }
+
+  try {
+    //fetching google sheet data
+    const SubscriberDetailsInDB = await FetchSheetData(
+      SpreadSheetId,
+      SheetName,
+      email
+    );
+
+    const DocumentInstance = await new SendyAutomationData({
+      Name: Name,
+      AppName: "SheetToSendy(Del)",
+      AppId: 6,
+      SpreadSheetId: SpreadSheetId,
+      SheetName: SheetName,
+      Status: "Running",
+      Email: email,
+      ListId: ListId,
+      Operation: 2,
+      DataInDB: SubscriberDetailsInDB._id,
+      ErrorRecords: [],
+    });
+
+    const workflow = await DocumentInstance.save();
+
+    if (!workflow) {
+      return res
+        .status(500)
+        .json({ message: "Unable to save workflow record in DB" });
+    }
+
+    //starting cron jobs
+    const task = cron.schedule("* * * * *", async () => {
+      console.log("cron jobs running..");
+
+      await SendingSheetDataToDelSendy(
+        SubscriberDetailsInDB,
+        email,
+        workflow.ListId,
+        workflow._id
+      );
+    });
+
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await SendyAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
+
+    res.status(200).json({ message: `Automation started ${workflow.Name}` });
+  } catch (error) {
+    return res.status(502).json({ message: error.message });
+  }
+};
+
 const handleEditAutomation = async (req, res) => {
-  const { DataInDB, Name, SpreadSheetId, SheetName, ListId, Item } = req.body;
+  const { DataInDB, Name, SpreadSheetId, SheetName, ListId, Item,Operation } = req.body;
 
   const { email } = req.query;
 
@@ -361,7 +528,8 @@ const handleEditAutomation = async (req, res) => {
     !SheetName ||
     !ListId ||
     !Item ||
-    !DataInDB
+    !DataInDB ||
+    !Operation
   ) {
     // console.log(name, spreadSheetId, sheetName, listIds);
     return res
@@ -375,6 +543,9 @@ const handleEditAutomation = async (req, res) => {
     const resultRemoveSheetData = await SendyRegistrants.findByIdAndDelete(
       DataInDB
     );
+
+    await SendyAutomationData.findByIdAndDelete(Item._id);
+
     console.log(resultRemoveSheetData);
 
     console.log("Sheet is clear...");
@@ -384,33 +555,59 @@ const handleEditAutomation = async (req, res) => {
       "Content-Type": "application/json",
     };
 
-    const body = {
-      Name: Name,
-      SpreadSheetId: SpreadSheetId,
-      SheetName: SheetName,
-      ListId: ListId,
-    };
+    if (Operation == 1) {
+      const body = {
+        Name: Name,
+        SpreadSheetId: SpreadSheetId,
+        SheetName: SheetName,
+        ListId: ListId,
+      };
 
-    await SendyAutomationData.findByIdAndDelete(Item._id);
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/sendy/api/start/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    } else if (Operation == 2) {
+      const body = {
+        Name: Name,
+        SpreadSheetId: SpreadSheetId,
+        SheetName: SheetName,
+        ListId: ListId,
+      };
 
-    const response = await axios
-      .post(
-        `http://connectsyncdata.com:5000/sendy/api/start/automation?email=${email}`,
-        body,
-        {
-          headers: headers,
-        }
-      )
-      .then(async (response) => {
-        res.status(200).json({ message: "Automation started." });
-        console.log("Automation started..");
-      })
-      .catch((error) => {
-        res
-          .status(500)
-          .json({ message: `Automation failed to start.${error}` });
-        console.log(error);
-      });
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/sendy/api/start/del/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    }
   } catch (error) {
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
@@ -440,4 +637,5 @@ module.exports = {
   handleRemoveAccount,
   handleStartAutomation,
   handleEditAutomation,
+  handleStartAutomationDel,
 };

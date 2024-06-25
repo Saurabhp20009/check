@@ -4,7 +4,9 @@ const Schema = mongoose.Schema;
 
 const GetResponseUserAccountSchemaInDb = new Schema({
   UserEmail: String,
-  SubscriberRecords: [{ FirstName: String, LastName: String, Email: String }],
+  SubscriberRecords: [
+    { FirstName: String, LastName: String, Email: String, contactId: String },
+  ],
 });
 
 const GetResponseAutomationDataSchema = new Schema({
@@ -16,7 +18,7 @@ const GetResponseAutomationDataSchema = new Schema({
   CampaignId: String,
   Status: String,
   Email: String,
-  Operation: Number, 
+  Operation: Number,
   DataInDB: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "GetResponseSubscriberListInDB",
@@ -46,13 +48,12 @@ const GetResponseAutomationData = mongoose.model(
 );
 
 const GetResponseUserData = mongoose.model(
-    "GetResponseUserDetailsInDb",
-    GetResponseUserDetailsSchemaInDb
-  );
+  "GetResponseUserDetailsInDb",
+  GetResponseUserDetailsSchemaInDb
+);
 
-
-  module.exports={
-    GetResponseSubscriberListInDB,
-    GetResponseAutomationData,
-    GetResponseUserData
-  }
+module.exports = {
+  GetResponseSubscriberListInDB,
+  GetResponseAutomationData,
+  GetResponseUserData,
+};

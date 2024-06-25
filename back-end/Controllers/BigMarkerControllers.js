@@ -235,6 +235,44 @@ const SendDataToAPI = (item, ApiKey, ConferenceId, workflow_id) => {
   }
 };
 
+const SendDataToDelAPI = (item, ApiKey, ConferenceId, workflow_id) => {
+  try {
+    const options = {
+      method: "DELETE",
+      url: "https://www.bigmarker.com/api/v1/conferences/register",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+        "API-KEY": ApiKey,
+      },
+      data: {
+        id: ConferenceId,
+        email: item.Email,
+      },
+    };
+
+    axios
+      .request(options)
+      .then(function (response) {
+        // console.log(response.data);
+      })
+      .catch(async function (error) {
+        console.error(error);
+        await BigmarkerAutomationData.findByIdAndUpdate(workflow_id, {
+          $push: {
+            ErrorRecords: {
+              firstName: item.FirstName,
+              lastName: item.LastName,
+              email: item.Email,
+            },
+          },
+        });
+      });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const handleStartAutomationWebinarToSheet = async (req, res) => {
   try {
     const { Name, SpreadSheetId, SheetName, ConferenceId } = req.body;
@@ -396,7 +434,7 @@ const handleStartAutomation = async (req, res) => {
 
     const DocumentInstance = await new BigmarkerAutomationData({
       Name: Name,
-      AppName: "Bigmarker",
+      AppName: "SheetToBigmarker",
       AppId: 2,
       SpreadSheetId: SpreadSheetId,
       SheetName: SheetName,
@@ -603,7 +641,7 @@ const handleEditAutomation = async (req, res) => {
           console.log(error);
           console.log(error.response);
         });
-    } else {
+    } else if (Operation == 5) {
       const { CampaignListId } = req.body;
 
       let body = {
@@ -632,6 +670,35 @@ const handleEditAutomation = async (req, res) => {
           console.log(error.response);
         });
     }
+   else if(Operation == 6)
+    {
+      const body = {
+        Name: Name,
+        SpreadSheetId: SpreadSheetId,
+        SheetName: SheetName,
+        ConferenceId: ConferenceId,
+      };
+
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/bigmarker/api/start/del/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    }
+
   } catch (error) {
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
@@ -682,7 +749,8 @@ const StartAutomationBigmarkerToApp = async (req, res) => {
       ListId = CampaignId;
       Operation=5
 
-    } else {
+    }
+    else {
       return res
         .status(401)
         .json({ message: "Fields are missing..bad request" });
@@ -829,6 +897,158 @@ const StartAutomationBigmarkerToApp = async (req, res) => {
   }
 };
 
+
+const handleSheetDataToBigMarkerDeleterRegistrants = async (
+  SubscriberDetailsInDB,
+  email,
+  ConferenceId,
+  workflow_id
+) => {
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDB._id
+    ).select({ SubscriberRecords: { $slice: 100 } });
+
+    const account = await BigmarkerUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    //sending data to api
+    for (const item of dataInDB.SubscriberRecords) {
+      try {
+        await SendDataToDelAPI(item, ApiKey, ConferenceId, workflow_id);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+    //getting document to remove data
+    const document = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    //removing 100 records from db
+    document.SubscriberRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await document.save();
+
+    const TotalDataInDB = await BigmarkerRegistrantsInDb.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.SubscriberRecords.length <= 0) {
+      const result = await BigmarkerAutomationData.findByIdAndUpdate(
+        workflow_id,
+        {
+          $set: {
+            Status: "Finished",
+          },
+        }
+      );
+
+      const deleteResult = await BigmarkerRegistrantsInDb.deleteOne({
+        _id: SubscriberDetailsInDB._id,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+
+
+const handleStartAutomationSheetToBigmarkerDeleteRegistrants=async(req,res)=>{
+  
+  const { Name, SpreadSheetId, SheetName, ConferenceId } = req.body;
+
+  const { email } = req.query;
+
+  // console.log(Name,SpreadsheetId,SheetName,ConferenceId,email)
+
+  if (!email || !Name || !SpreadSheetId || !SheetName || !ConferenceId) {
+    return res
+      .status(401)
+      .json({ message: "Bad request,please check the fields" });
+  }
+
+  try {
+    //fetching google sheet data
+    const SubscriberDetailsInDB = await FetchSheetData(
+      SpreadSheetId,
+      SheetName,
+      email
+    );
+
+
+    const DocumentInstance = await new BigmarkerAutomationData({
+      Name: Name,
+      AppName: "SheetToBigmarker(Del)",
+      AppId: 2,
+      SpreadSheetId: SpreadSheetId,
+      SheetName: SheetName,
+      Status: "Running",
+      Email: email,
+      ConferenceId: ConferenceId,
+      Operation: 6,
+      DataInDB: SubscriberDetailsInDB._id,
+      ErrorRecords: [],
+    });
+
+    const workflow = await DocumentInstance.save();
+
+    if (!workflow) {
+      return res
+        .status(500)
+        .json({ message: "Unable to save workflow record in DB" });
+    }
+
+    //starting cron jobs
+    const task = cron.schedule("* * * * *", async () => {
+      console.log("cron jobs running...");
+      await handleSheetDataToBigMarkerDeleterRegistrants (
+        SubscriberDetailsInDB,
+        email,
+        workflow.ConferenceId,
+        workflow._id
+      );
+      
+    });
+
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await BigmarkerAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
+
+    res.status(200).json({ message: `Automation started ${workflow.Name}` });
+  } catch (error) {
+    return res.status(502).json({ message: error.message });
+  }
+
+
+} 
+
+
+
 module.exports = {
   handleCreateAccount,
   handleRemoveAccount,
@@ -836,4 +1056,5 @@ module.exports = {
   handleStartAutomationWebinarToSheet,
   handleEditAutomation,
   StartAutomationBigmarkerToApp,
+  handleStartAutomationSheetToBigmarkerDeleteRegistrants
 };

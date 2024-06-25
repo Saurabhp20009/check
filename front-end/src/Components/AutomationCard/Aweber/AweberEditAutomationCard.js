@@ -150,7 +150,7 @@ function AweberEditAutomationCard({ setShowAutomationCard,item }) {
 
 
   return (
-    <div className="automation-card" tabIndex={0} >
+    <div className="automation-card"  >
       <ToastContainer autoClose={3000} />
       <div className="input-group card-head">
         <div className="name-div">

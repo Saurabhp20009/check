@@ -24,7 +24,8 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
     'Authorization': `Bearer ${user.token} `,
     'Content-Type': 'application/json'
   };
-
+ 
+  console.log(operation)
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -45,8 +46,6 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
   
    
     const numberlistId=parseInt(listId)
-  
-    console.log(spreadsheetId)
  
 
     const body = {
@@ -55,7 +54,8 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
       sheetName: sheetName,
       listIds: numberlistId,
       DataInDB: item.DataInDB,
-      Item:item
+      Item:item,
+      Operation : operation
     };
 
     console.log(body);
@@ -159,6 +159,7 @@ function BrevoEditAutomationCard({ setShowAutomationCard, item }) {
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
           <option value={1}>Google Sheet --- Brevo</option>
+          <option value={2}>Google Sheet --- Brevo(Delete Contacts)</option>
         </select>
       </div>
 

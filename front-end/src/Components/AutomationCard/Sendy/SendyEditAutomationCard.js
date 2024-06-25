@@ -56,6 +56,7 @@ function SendyEditAutomationCard({
       ListId: listId,
       DataInDB: item.DataInDB,
       Item: item,
+      Operation: operation
     };
 
     console.log(body);
@@ -156,6 +157,7 @@ function SendyEditAutomationCard({
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
           <option value={1}>Google Sheet --- Sendy</option>
+          <option value={2}>Google Sheet --- Sendy(Delete subscribers)</option>
         </select>
       </div>
 

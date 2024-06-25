@@ -10,7 +10,7 @@ const verifyToken = (req, res, next) => {
 
   jwt.verify(token.split(' ')[1], secretKey, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: 'Invalid token' });
+      return res.status(401).json({ message: 'User authentication is failed: Invalid token' });
     }
     req.user = decoded;
     next();

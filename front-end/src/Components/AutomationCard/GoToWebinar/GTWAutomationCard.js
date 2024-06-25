@@ -261,6 +261,46 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
     </div>,
+     <div>
+     <div className="input-group">
+       <label htmlFor="spreadsheetId"><b>Source:</b> Spreadsheet</label>
+       {console.log(operation)}
+       <select
+         id="aweberList"
+         value={spreadsheetId}
+         onChange={handleSpreadsheetIdChange}
+       >
+         {googleSpreadDataList.map((item, index) => (
+           <option key={index} value={item.id}>
+             {item.name}
+           </option>
+         ))}
+       </select>
+     </div>
+     <div className="input-group">
+       <label htmlFor="sheetName"> Select the Sheet</label>
+       <select
+         id="aweberList"
+         value={sheetName}
+         onChange={handleSheetNameChange}
+       >
+         {googleSpreadDataSheetList.map((item, index) => (
+           <option key={index} value={item}>
+             {item}
+           </option>
+         ))}
+       </select>
+     </div>
+     <div className="input-group">
+       <label htmlFor="aweberList"><b>Destination:</b> Webinar ID</label>
+       <input
+         value={WebinarId}
+         className="NameInput"
+         onChange={handleWebinarId}
+         placeholder="Enter webinar id"
+       />
+     </div>
+   </div>
   ];
 
   const handleStartAutomation = async () => {
@@ -365,7 +405,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           console.log(error.response);
           return toast.error(error.response.data.message);
         });
-    } else {
+    } else if (operation == 5)  {
       let body = {
         Name: workflowName,
         WebinarId: WebinarId,
@@ -375,6 +415,31 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       await axios
         .post(
           `http://connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error.response.data.message);
+        });
+    }
+    else if (operation == 6)  {
+      const body = {
+        Name: workflowName,
+        SpreadSheetId: spreadsheetId,
+        SheetName: sheetName,
+        WebinarId: WebinarIdWithoutHyphens,
+      };
+
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/gotowebinar/api/start/del/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -476,6 +541,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           <option value={3}>Go to Webinar --- Aweber</option>
           <option value={4}>Go to Webinar --- Brevo</option>
           <option value={5}>Go to Webinar --- Get Response</option>
+          <option value={6}>Google Sheet --- Go to webinar(Delete Registrants)</option>
         </select>
       </div>
 

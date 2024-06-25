@@ -7,7 +7,7 @@ import { TbSettingsAutomation } from "react-icons/tb";
 
 function GTWEditAutomationCard({ setShowAutomationCard, item }) {
   const [spreadsheetId, setSpreadsheetId] = useState(item.SpreadSheetId);
-  const [sheetName, setSheetName] = useState("");
+  const [sheetName, setSheetName] = useState(item?.SheetName);
   const [googleSpreadDataList, setGoogleSpreadDataList] = useState([]);
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
@@ -56,6 +56,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
       .catch((error) => {
         console.log(error);
         toast.error("Unable to aweber fetch sheet data");
+        // setAweberListId()
       });
   };
 
@@ -343,6 +344,46 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
         </select>
       </div>
     </div>,
+     <div>
+     <div className="input-group">
+       <label htmlFor="spreadsheetId"><b>Source:</b> Spreadsheet</label>
+       {console.log(operation)}
+       <select
+         id="aweberList"
+         value={spreadsheetId}
+         onChange={handleSpreadsheetIdChange}
+       >
+         {googleSpreadDataList.map((item, index) => (
+           <option key={index} value={item.id}>
+             {item.name}
+           </option>
+         ))}
+       </select>
+     </div>
+     <div className="input-group">
+       <label htmlFor="sheetName"> Select the Sheet</label>
+       <select
+         id="aweberList"
+         value={sheetName}
+         onChange={handleSheetNameChange}
+       >
+         {googleSpreadDataSheetList.map((item, index) => (
+           <option key={index} value={item}>
+             {item}
+           </option>
+         ))}
+       </select>
+     </div>
+     <div className="input-group">
+       <label htmlFor="aweberList"><b>Destination:</b> Webinar ID</label>
+       <input
+         value={WebinarId}
+         className="NameInput"
+         onChange={handleWebinarId}
+         placeholder="Enter webinar id"
+       />
+     </div>
+   </div>
   ];
 
 
@@ -396,6 +437,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
           <option value={3}>Go to Webinar --- Aweber</option>
           <option value={4}>Go to Webinar --- Brevo</option>
           <option value={5}>Go to Webinar --- Get Response</option>
+          <option value={6}>Google Sheet --- Go to webinar(Delete registrants)</option>
         </select>
       </div>
     

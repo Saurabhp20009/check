@@ -9,7 +9,10 @@ const { google } = require("googleapis");
 const { ModelGoogleTokenData } = require("../Models/GoogleModel");
 const cron = require("node-cron");
 const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
-const { BigmarkerRegistrantsInDb, BigmarkerToAppAutomationData } = require("../Models/BigMarkerModel");
+const {
+  BigmarkerRegistrantsInDb,
+  BigmarkerToAppAutomationData,
+} = require("../Models/BigMarkerModel");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
@@ -142,27 +145,32 @@ const SendingSheetDataToGetResponse = async (
 
     const dataInDB = await GetResponseSubscriberListInDB.findById(
       SubscriberDetailsInDB._id
-    )
-   
-    const data= dataInDB.SubscriberRecords.slice(0,100)
+    );
+
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
 
     const account = await GetResponseUserData.findOne({ UserEmail: email });
     const ApiKey = account.ApiKey;
     //sending data to api
     for (const item of data) {
       try {
-       const result= await SendDataToAPI(item, ApiKey, CampaignId, workflow_id);
-       if (!result) {
-        await GetResponseAutomationData.findByIdAndUpdate(automationId, {
-          $push: {
-            ErrorRecords: {
-              firstName: item.FirstName,
-              lastName: item.LastName,
-              email: item.Email,
+        const result = await SendDataToAPI(
+          item,
+          ApiKey,
+          CampaignId,
+          workflow_id
+        );
+        if (!result) {
+          await GetResponseAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
             },
-          },
-        });
-      }
+          });
+        }
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Error sending data for item ${item}: ${error}`);
@@ -226,11 +234,11 @@ const SendDataToAPI = (item, ApiKey, CampaignId) => {
     axios
       .request(options)
       .then(async function (response) {
-        console.log(response);
+        // console.log(response);
       })
       .catch(async function (error) {
         console.error(error);
-        return false
+        return false;
       });
   } catch (error) {
     console.error(error.response.data.context);
@@ -320,6 +328,200 @@ const handleStartAutomation = async (req, res) => {
   }
 };
 
+const SendingSheetDataToDelGetResponse = async (
+  SubscriberDetailsInDB,
+  email,
+  CampaignId,
+  workflow_id
+) => {
+  try {
+    console.log("Sending data from sheet...");
+
+    const dataInDB = await GetResponseSubscriberListInDB.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    const data = dataInDB.SubscriberRecords.slice(0, 100);
+
+    const account = await GetResponseUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+    //sending data to api
+    for (const item of data) {
+      try {
+        const result = await SendDataToDelAPI(item, ApiKey);
+        if (!result) {
+          await GetResponseAutomationData.findByIdAndUpdate(automationId, {
+            $push: {
+              ErrorRecords: {
+                firstName: item.FirstName,
+                lastName: item.LastName,
+                email: item.Email,
+              },
+            },
+          });
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error(`Error sending data for item ${item}: ${error}`);
+      }
+    }
+
+    //getting document to remove data
+    const document = await GetResponseSubscriberListInDB.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    //removing 100 records from db
+    document.SubscriberRecords.splice(0, 100);
+
+    // Save the modified document back to the database
+    const result = await document.save();
+
+    const TotalDataInDB = await GetResponseSubscriberListInDB.findById(
+      SubscriberDetailsInDB._id
+    );
+
+    //checking for db is empty or not?
+    if (TotalDataInDB.SubscriberRecords.length <= 0) {
+      const result = await GetResponseAutomationData.findByIdAndUpdate(
+        workflow_id,
+        {
+          $set: {
+            Status: "Finished",
+          },
+        }
+      );
+
+      const deleteResult = await GetResponseSubscriberListInDB.deleteOne({
+        _id: SubscriberDetailsInDB._id,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const SendDataToDelAPI = (item, ApiKey) => {
+  try {
+    const options = {
+      method: "DELETE",
+      url: `https://api.getresponse.com/v3/contacts/${item.contactId}`,
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+        "X-Auth-Token": `api-key ${ApiKey}`,
+      },
+    };
+
+    axios
+      .request(options)
+      .then(async function (response) {
+        console.log(response);
+      })
+      .catch(async function (error) {
+        console.error(error);
+        return false;
+      });
+  } catch (error) {
+    console.error(error.response.data.context);
+  }
+};
+
+const handleStartAutomationDel = async (req, res) => {
+  const { Name, SpreadSheetId, SheetName, CampaignId } = req.body;
+
+  const { email } = req.query;
+
+  console.log(Name, SpreadSheetId, SheetName, CampaignId, email);
+
+  if (!email || !Name || !SpreadSheetId || !SheetName || !CampaignId) {
+    return res
+      .status(401)
+      .json({ message: "Bad request,please check the fields" });
+  }
+
+  try {
+    //fetching google sheet data
+    const SubscriberDetailsInDB = await FetchSheetData(
+      SpreadSheetId,
+      SheetName,
+      email
+    );
+
+    const account = await GetResponseUserData.findOne({ UserEmail: email });
+    const ApiKey = account.ApiKey;
+
+    const Contacts = await GetContacts(CampaignId, ApiKey);
+
+    if (Contacts.data.length < 0) {
+      return res
+        .status(502)
+        .json({ message: "No contacts are present in specified campaign" });
+    }
+
+    await GetRemainingContacts(Contacts.data, SubscriberDetailsInDB);
+
+    const DocumentInstance = await new GetResponseAutomationData({
+      Name: Name,
+      AppName: "Sheet to GetResponse(Del)",
+      AppId: 4,
+      SpreadSheetId: SpreadSheetId,
+      SheetName: SheetName,
+      Status: "Running",
+      Email: email,
+      CampaignId: CampaignId,
+      Operation: 2,
+      DataInDB: SubscriberDetailsInDB._id,
+      ErrorRecords: [],
+    });
+
+    const workflow = await DocumentInstance.save();
+
+    if (!workflow) {
+      return res
+        .status(500)
+        .json({ message: "Unable to save workflow record in DB" });
+    }
+
+    //starting cron jobs
+    const task = cron.schedule("* * * * *", async () => {
+      console.log("cron jobs running..");
+
+      await SendingSheetDataToDelGetResponse(
+        SubscriberDetailsInDB,
+        email,
+        workflow.CampaignId,
+        workflow._id
+      );
+    });
+
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await GetResponseAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
+
+    res.status(200).json({ message: `Automation started ${workflow.Name}` });
+  } catch (error) {
+    console.log(error);
+    return res.status(502).json({ message: error.message });
+  }
+};
+
 const GetCampaign = async (req, res) => {
   const { email } = req.query;
 
@@ -350,7 +552,7 @@ const GetCampaign = async (req, res) => {
 };
 
 const handleEditAutomation = async (req, res) => {
-  const { DataInDB, Name, SpreadSheetId, SheetName, CampaignId, Item } =
+  const { DataInDB, Name, SpreadSheetId, SheetName, CampaignId, Item,Operation } =
     req.body;
 
   const { email } = req.query;
@@ -362,7 +564,8 @@ const handleEditAutomation = async (req, res) => {
     !SheetName ||
     !CampaignId ||
     !Item ||
-    !DataInDB
+    !DataInDB ||
+    !Operation
   ) {
     // console.log(name, spreadSheetId, sheetName, listIds);
     return res
@@ -375,7 +578,7 @@ const handleEditAutomation = async (req, res) => {
 
     const resultRemoveSheetData =
       await GetResponseSubscriberListInDB.findByIdAndDelete(DataInDB);
-    console.log(resultRemoveSheetData);
+    await GetResponseAutomationData.findByIdAndDelete(Item._id);
 
     console.log("Sheet is clear...");
 
@@ -391,37 +594,112 @@ const handleEditAutomation = async (req, res) => {
       CampaignId: CampaignId,
     };
 
-    await GetResponseAutomationData.findByIdAndDelete(Item._id);
-
-    const response = await axios
-      .post(
-        `http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
-        body,
-        {
-          headers: headers,
-        }
-      )
-      .then(async (response) => {
-        res.status(200).json({ message: "Automation started." });
-        console.log("Automation started..");
-      })
-      .catch((error) => {
-        res
-          .status(500)
-          .json({ message: `Automation failed to start.${error}` });
-        console.log(error);
-      });
+    if (Operation == 1) {
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    } else if (Operation == 2) {
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/getresponse/api/start/del/automation?email=${email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then(async (response) => {
+          res.status(200).json({ message: "Automation started." });
+          console.log("Automation started..");
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ message: `Automation failed to start.${error}` });
+          console.log(error);
+        });
+    }
   } catch (error) {
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
   }
 };
 
-async function GTWToGetResponse( email,
+async function GetContacts(CampaignId, ApiKey) {
+  try {
+    const options = {
+      method: "GET",
+      url: `https://api.getresponse.com/v3/campaigns/${CampaignId}/contacts`,
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+        "X-Auth-Token": `api-key ${ApiKey}`,
+      },
+    };
+
+    const response = axios.request(options).catch(async function (error) {
+      console.error(error);
+    });
+
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function GetRemainingContacts(Contacts, SubscriberDetailsInDB) {
+  const DataInDB = await GetResponseSubscriberListInDB.findById(
+    SubscriberDetailsInDB._id
+  );
+
+  if (DataInDB.SubscriberRecords.length < 0) {
+    return false;
+  }
+
+  // Create a map from contacts array with email as key and contactId as value
+  const contactMap = new Map();
+  Contacts.forEach((contact) => {
+    contactMap.set(contact.email, contact.contactId);
+  });
+
+  // Create a separate array with only common emails and contactId
+  const commonContactsArray = DataInDB.SubscriberRecords.filter((item) =>
+    contactMap.has(item.Email)
+  ).map((item) => ({
+    FirstName: item.FirstName,
+    LastName: item.LastName,
+    Email: item.Email,
+    contactId: contactMap.get(item.Email),
+  }));
+
+  console.log(commonContactsArray);
+
+  await GetResponseSubscriberListInDB.updateOne(
+    { _id: SubscriberDetailsInDB._id },
+    { $set: { SubscriberRecords: commonContactsArray } }
+  );
+}
+
+async function GTWToGetResponse(
+  email,
   SubscriberDetailsInDBId,
   automationId,
-  ListId)
-{
+  ListId
+) {
   try {
     console.log("Sending data from sheet...");
 
@@ -436,11 +714,7 @@ async function GTWToGetResponse( email,
 
     for (const item of data) {
       try {
-        const result = await SendDataToAPI(
-          item,
-          ApiKey,
-          ListId,
-        );
+        const result = await SendDataToAPI(item, ApiKey, ListId);
         if (!result) {
           await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
             $push: {
@@ -459,7 +733,6 @@ async function GTWToGetResponse( email,
       }
     }
 
-
     //removing 100 records from db
     dataInDB.RegistrantRecords.splice(0, 100);
 
@@ -472,27 +745,34 @@ async function GTWToGetResponse( email,
 
     //checking for db is empty or not?
     if (TotalDataInDB.RegistrantRecords.length <= 0) {
-      const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
-        $set: {
-          Status: "Finished",
-        },
-      });
+      const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(
+        automationId,
+        {
+          $set: {
+            Status: "Finished",
+          },
+        }
+      );
     }
   } catch (error) {
     console.error(error);
-    const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(automationId, {
-      $set: {
-        Status: "Failed",
-      },
-    });
+    const result = await GoToWebinarToAppAutomationData.findByIdAndUpdate(
+      automationId,
+      {
+        $set: {
+          Status: "Failed",
+        },
+      }
+    );
   }
 }
 
-async function BigmarkerToGetResponse( email,
+async function BigmarkerToGetResponse(
+  email,
   SubscriberDetailsInDBId,
   automationId,
-  ListId)
-{
+  ListId
+) {
   try {
     console.log("Sending data from sheet...");
 
@@ -507,11 +787,7 @@ async function BigmarkerToGetResponse( email,
 
     for (const item of data) {
       try {
-        const result = await SendDataToAPI(
-          item,
-          ApiKey,
-          ListId,
-        );
+        const result = await SendDataToAPI(item, ApiKey, ListId);
         if (!result) {
           await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
             $push: {
@@ -530,7 +806,6 @@ async function BigmarkerToGetResponse( email,
       }
     }
 
-
     //removing 100 records from db
     dataInDB.SubscriberRecords.splice(0, 100);
 
@@ -543,24 +818,27 @@ async function BigmarkerToGetResponse( email,
 
     //checking for db is empty or not?
     if (TotalDataInDB.SubscriberRecords.length <= 0) {
-      const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
-        $set: {
-          Status: "Finished",
-        },
-      });
+      const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(
+        automationId,
+        {
+          $set: {
+            Status: "Finished",
+          },
+        }
+      );
     }
   } catch (error) {
     console.error(error);
-    const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(automationId, {
-      $set: {
-        Status: "Failed",
-      },
-    });
+    const result = await BigmarkerToAppAutomationData.findByIdAndUpdate(
+      automationId,
+      {
+        $set: {
+          Status: "Failed",
+        },
+      }
+    );
   }
 }
-
-
-
 
 const RemoveAccount = async (req, res) => {
   const { id } = req.query;
@@ -580,5 +858,6 @@ module.exports = {
   handleStartAutomation,
   handleEditAutomation,
   GTWToGetResponse,
-  BigmarkerToGetResponse
+  BigmarkerToGetResponse,
+  handleStartAutomationDel,
 };

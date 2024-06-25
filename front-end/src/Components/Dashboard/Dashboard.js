@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Dasboard.css";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import ExistingWorkFlows from "../AutomationCard/ExistingWorkFlows";
 import AweberAutomationCard from "../AutomationCard/Aweber/AweberAutomationCard";
@@ -76,7 +76,7 @@ const Dashboard = () => {
         headers: headers,
       })
       .then(async (response) => {
-        console.log(response.data.Workflows);
+       
 
         const runningFlows = response.data.Workflows.filter(
           (item) => item.Status === "Running"
@@ -89,7 +89,9 @@ const Dashboard = () => {
         const sortedWorkflow = runningFlows.concat(finishedFlows);
         await setWorkFlows([...sortedWorkflow]);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {console.log(error);
+        toast.error(error?.response?.data?.message)
+      });
     setLoading(false);
   };
 
@@ -181,7 +183,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <ToastContainer />
+      <ToastContainer autoClose={3000} />
     </div>
   );
 };

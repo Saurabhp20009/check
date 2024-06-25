@@ -133,7 +133,7 @@ const gettingAweberLists = async (req, res) => {
     const tokenInfo = await ModelAweberTokenData.findOne({ email: email });
 
     if (!tokenInfo) {
-      return;
+      return res.status(400).json({ message: "Aweber account token can't be accessed,please connect the account" });;
     }
 
     const { Account_id, access_token } = tokenInfo;
@@ -156,7 +156,7 @@ const gettingAweberLists = async (req, res) => {
         } else {
           //console.log(data);
           res.status(401).json({
-            message: "expired token",
+            message: "Aweber token has been expired token",
           });
         }
       });

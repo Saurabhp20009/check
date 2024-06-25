@@ -7,6 +7,7 @@ const {
   handleStartAutomationWebinarToSheet,
   handleEditAutomation,
   StartAutomationBigmarkerToApp,
+  handleStartAutomationSheetToBigmarkerDeleteRegistrants,
 } = require("../Controllers/BigMarkerControllers");
 const BigmarkerRouter = express.Router();
 
@@ -16,6 +17,7 @@ BigmarkerRouter.post('/start/bigmarkertosheet/automation',verifyToken,handleStar
 BigmarkerRouter.delete("/remove/account",verifyToken, handleRemoveAccount);
 BigmarkerRouter.post('/edit/automation',verifyToken,handleEditAutomation)
 BigmarkerRouter.post('/start/bigmarkertoapp/automation',verifyToken,StartAutomationBigmarkerToApp)
+BigmarkerRouter.post('/start/del/automation',verifyToken,handleStartAutomationSheetToBigmarkerDeleteRegistrants)
 
 
 module.exports = BigmarkerRouter;

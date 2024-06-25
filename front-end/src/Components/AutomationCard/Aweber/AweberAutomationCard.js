@@ -18,7 +18,6 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [workflowName, setWorkflowName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-  const divRef = useRef(null);
 
   const headers = {
     Authorization: `Bearer ${user.token} `,
@@ -96,14 +95,17 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         }
       )
       .then((response) => {
+        console.log("res");
         setAweberDataList([...response.data.list_data]);
         setAweberListId(response.data.list_data[0].id);
       })
       .catch((error) => {
-        console.log(error);
-        toast.error("Unable to aweber fetch sheet data");
+
+        // toast.error(error?.response?.data?.message);
       });
   };
+
+
 
   const gettingSpreadsheetList = async () => {
     const response = await axios
@@ -118,7 +120,14 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
       .catch((error) => {
-        console.log("spread");
+        if (error?.response?.status == 401)
+          {
+            console.log("Google account credentials are invalid")
+          }
+          // toast.error(
+          //   "Google account credentials is invalid or connect your google account"
+          // );
+
       });
   };
 
@@ -147,19 +156,19 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   };
 
   useEffect(() => {
-    gettingAweberList();
-    gettingSpreadsheetList();
-  }, []);
-
-  useEffect(() => {
     if (spreadsheetId) {
       gettingSpreadsheetSheetList();
     }
   }, [spreadsheetId]);
 
+  useEffect(() => {
+    gettingAweberList();
+    gettingSpreadsheetList();
+    gettingSpreadsheetSheetList();
+  }, []);
+
   return (
-    <div className="automation-card" tabIndex={0} ref={divRef}>
-      <ToastContainer autoClose={3000} />
+    <div className="automation-card">
       <div className="input-group card-head">
         <div className="name-div">
           {" "}
@@ -201,11 +210,12 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           value={spreadsheetId}
           onChange={handleSpreadsheetIdChange}
         >
-          {googleSpreadDataList.map((item, index) => (
-            <option key={index} value={item.id}>
-              {item.name}
-            </option>
-          ))}
+          {googleSpreadDataList.length > 0 &&
+            googleSpreadDataList.map((item, index) => (
+              <option key={index} value={item.id}>
+                {item.name}
+              </option>
+            ))}
         </select>
       </div>
 
@@ -216,11 +226,12 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           value={sheetName}
           onChange={handleSheetNameChange}
         >
-          {googleSpreadDataSheetList.map((item, index) => (
-            <option key={index} value={item}>
-              {item}
-            </option>
-          ))}
+          {googleSpreadDataSheetList.length > 0 &&
+            googleSpreadDataSheetList.map((item, index) => (
+              <option key={index} value={item}>
+                {item}
+              </option>
+            ))}
         </select>
       </div>
       <div className="input-group">
@@ -232,21 +243,21 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           value={aweberListId}
           onChange={handleAweberListChange}
         >
-          {aweberDataList.map((item, index) => (
-            <option key={index} value={item.id}>
-              {item.name}
-            </option>
-          ))}
+          {aweberDataList.length > 0 &&
+            aweberDataList.map((item, index) => (
+              <option key={index} value={item.id}>
+                {item.name}
+              </option>
+            ))}
         </select>
       </div>
       <div className="buttons">
-  
-          <button className="start-button" onClick={handleStartAutomation}>
-            <TbSettingsAutomation className="start-icon" />
-            Start
-          </button>
-    
+        <button className="start-button" onClick={handleStartAutomation}>
+          <TbSettingsAutomation className="start-icon" />
+          Start
+        </button>
       </div>
+      {/* <ToastContainer autoClose={3000} /> */}
     </div>
   );
 }

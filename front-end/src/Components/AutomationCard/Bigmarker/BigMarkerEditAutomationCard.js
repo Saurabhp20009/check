@@ -12,15 +12,21 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
   const [googleSpreadDataSheetList, setGoogleSpreadDataSheetList] = useState(
     []
   );
-  const [WebinarId, setWebinarId] = useState(item.WebinarId);
+  const [WebinarId, setWebinarId] = useState(item?.ConferenceId);
   const [workflowName, setWorkflowName] = useState(item.Name);
   const [operation, setOperation] = useState(item.Operation);
   const [aweberDataList, setAweberDataList] = useState([]);
-  const [aweberListId, setAweberListId] = useState(item.AppName ==="BigmarkerToAweber" ? item.ListId : "");
-  const [listId, setListId] = useState(item.AppName ==="BigmarkerToBrevo" ? item.ListId : "");
-  const [campaignListId, setCampaignListId] = useState(item.AppName ==="BigmarkerToGetresponse" ? item.ListId: "");
+  const [aweberListId, setAweberListId] = useState(
+    item.AppName === "BigmarkerToAweber" ? item.ListId : ""
+  );
+  const [listId, setListId] = useState(
+    item.AppName === "BigmarkerToBrevo" ? item.ListId : ""
+  );
+  const [campaignListId, setCampaignListId] = useState(
+    item.AppName === "BigmarkerToGetresponse" ? item.ListId : ""
+  );
   const [CampaignLists, setCampaignaLists] = useState([]);
-  
+
   const user = JSON.parse(localStorage.getItem("userInfo"));
 
   const headers = {
@@ -68,14 +74,12 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
         }
       )
       .then((response) => {
-        
-        console.log("test",response.data.data)
+        console.log("test", response.data.data);
         setCampaignaLists([...response.data.data]);
         setCampaignListId(response.data.data[0].campaignId);
       })
       .catch((error) => console.log(error));
   };
-
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -93,7 +97,6 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
     setListId(event.target.value);
   };
 
-
   const handleOperation = (event) => {
     setOperation(event.target.value);
   };
@@ -103,7 +106,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
     //sheet-to-bigmarker
     <div>
       <div className="input-group">
-        <label htmlFor="spreadsheetId"><b>Source:</b> Spreadsheet</label>
+        <label htmlFor="spreadsheetId">
+          <b>Source:</b> Spreadsheet
+        </label>
         {console.log(operation)}
         <select
           id="aweberList"
@@ -132,7 +137,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Destination</b>: Webinar ID</label>
+        <label htmlFor="aweberList">
+          <b>Destination</b>: Webinar ID
+        </label>
         <input
           value={WebinarId}
           className="NameInput"
@@ -145,7 +152,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
     //gtwtosheet
     <div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Source:</b> Webinar ID</label>
+        <label htmlFor="aweberList">
+          <b>Source:</b> Webinar ID
+        </label>
         <input
           value={WebinarId}
           className="NameInput"
@@ -155,7 +164,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"><b>Destination:</b> Spreadsheet</label>
+        <label htmlFor="spreadsheetId">
+          <b>Destination:</b> Spreadsheet
+        </label>
         {console.log(operation)}
         <select
           id="aweberList"
@@ -188,7 +199,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
     //gtwtoaweber
     <div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Source </b>: Webinar ID</label>
+        <label htmlFor="aweberList">
+          <b>Source </b>: Webinar ID
+        </label>
         <input
           value={WebinarId}
           className="NameInput"
@@ -198,7 +211,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Destination :</b> Aweber List</label>
+        <label htmlFor="aweberList">
+          <b>Destination :</b> Aweber List
+        </label>
         <select
           id="aweberList"
           value={aweberListId}
@@ -217,7 +232,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
 
     <div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Source :</b> Webinar ID</label>
+        <label htmlFor="aweberList">
+          <b>Source :</b> Webinar ID
+        </label>
         <input
           value={WebinarId}
           className="NameInput"
@@ -227,7 +244,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
+        <label htmlFor="aweberList">
+          <b>Destination:</b> List ID
+        </label>
         <input
           value={listId}
           className="NameInput"
@@ -240,7 +259,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
     //gtwtogetresponse
     <div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Source :</b> Webinar ID</label>
+        <label htmlFor="aweberList">
+          <b>Source :</b> Webinar ID
+        </label>
         <input
           value={WebinarId}
           className="NameInput"
@@ -250,7 +271,9 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       </div>
 
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Destination:</b> Campaign List</label>
+        <label htmlFor="aweberList">
+          <b>Destination:</b> Campaign List
+        </label>
         <select
           id="aweberList"
           value={campaignListId}
@@ -264,8 +287,51 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
         </select>
       </div>
     </div>,
+    <div>
+    <div className="input-group">
+      <label htmlFor="spreadsheetId">
+        <b>Source:</b> Spreadsheet
+      </label>
+      {console.log(operation)}
+      <select
+        id="aweberList"
+        value={spreadsheetId}
+        onChange={handleSpreadsheetIdChange}
+      >
+        {googleSpreadDataList.map((item, index) => (
+          <option key={index} value={item.id}>
+            {item.name}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="input-group">
+      <label htmlFor="sheetName"> Select the Sheet</label>
+      <select
+        id="aweberList"
+        value={sheetName}
+        onChange={handleSheetNameChange}
+      >
+        {googleSpreadDataSheetList.map((item, index) => (
+          <option key={index} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="input-group">
+      <label htmlFor="aweberList">
+        <b>Destination</b>: Webinar ID
+      </label>
+      <input
+        value={WebinarId}
+        className="NameInput"
+        onChange={handleWebinarId}
+        placeholder="Enter webinar id"
+      />
+    </div>
+  </div>  
   ];
-
 
   const handleStartAutomation = async () => {
     if (!workflowName || !WebinarId) {
@@ -274,10 +340,8 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
 
     const temp = WebinarId;
     const WebinarIdWithoutHyphens = temp.replace(/-/g, "");
-    
-    console.log(campaignListId)
 
-    
+    console.log(campaignListId);
 
     const body = {
       Name: workflowName,
@@ -286,13 +350,12 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       ConferenceId: WebinarIdWithoutHyphens,
       DataInDB: item.DataInDB,
       Item: item,
-      Operation:operation,
+      Operation: operation,
       AweberListId: aweberListId,
-      ListId:listId,
-      CampaignListId: campaignListId
+      ListId: listId,
+      CampaignListId: campaignListId,
     };
-    console.log(body)
-
+    console.log(body);
 
     await axios
       .post(
@@ -354,7 +417,7 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
       gettingAweberList();
       gettingSpreadsheetList();
     }, 1000);
-    
+
     gettingCampaignLists();
     //gettingSpreadsheetSheetList();
   }, []);
@@ -393,13 +456,14 @@ function BigmarkerEditAutomationCard({ setShowAutomationCard, item }) {
           <option value={3}>BigMarker --- Aweber</option>
           <option value={4}>BigMarker --- Brevo</option>
           <option value={5}>BigMarker --- Get Response</option>
+          <option value={6}>
+            Google Sheet --- BigMarker(Delete registrants)
+          </option>
         </select>
       </div>
-   
-      
+
       <div>{renderContentInOperation[operation]}</div>
 
- 
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
           <TbSettingsAutomation className="start-icon" />

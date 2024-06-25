@@ -54,10 +54,11 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
       SheetName: sheetName,
       CampaignId: campaignListId,
       DataInDB: item.DataInDB,
-      Item: item
+      Item: item,
+      Operation:operation
     };
 
-    console.log(body);
+
     const response = await axios
       .post(
         `http://connectsyncdata.com:5000/getresponse/api/edit/automation?email=${user.email}`,
@@ -162,6 +163,7 @@ function GetResponseEditAutomationCard({ setShowAutomationCard, item }) {
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
           <option value={1}>Google Sheet --- Get Response</option>
+          <option value={2}>Google Sheet --- Get Response(Delete Contacts)</option>
         </select>
       </div>
 

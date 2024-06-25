@@ -6,6 +6,7 @@ const {
   RemoveAccount,
   handleStartAutomation,
   handleEditAutomation,
+  handleStartAutomationDel,
 } = require("../Controllers/GetResponseControllers");
 const GetResponseRouter = express.Router();
 
@@ -19,5 +20,7 @@ GetResponseRouter.post("/start/automation", verifyToken, handleStartAutomation);
 GetResponseRouter.post("/edit/automation", verifyToken, handleEditAutomation);
 
 GetResponseRouter.delete("/remove/account", verifyToken, RemoveAccount);
+GetResponseRouter.post('/start/del/automation',verifyToken,handleStartAutomationDel)
+
 
 module.exports = GetResponseRouter;

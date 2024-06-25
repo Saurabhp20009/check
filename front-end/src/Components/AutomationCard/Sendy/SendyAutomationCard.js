@@ -5,8 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import { TfiClose } from "react-icons/tfi";
 import { TbSettingsAutomation } from "react-icons/tb";
 
-
-
 function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
@@ -19,12 +17,11 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [operation, setOperation] = useState(1);
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
-   
-  const headers = {
-    'Authorization': `Bearer ${user.token} `,
-    'Content-Type': 'application/json'
-  };
 
+  const headers = {
+    Authorization: `Bearer ${user.token} `,
+    "Content-Type": "application/json",
+  };
 
   const handleSpreadsheetIdChange = (event) => {
     setSpreadsheetId(event.target.value);
@@ -34,12 +31,10 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     setSheetName(event.target.value);
   };
 
-  
   const handleOperation = (event) => {
+    console.log(event.target.value)
     setOperation(event.target.value);
   };
-
-
 
   const handleListId = (event) => {
     setListId(event.target.value);
@@ -49,48 +44,71 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     if (!workflowName || !listId) {
       return toast.error("Please fill the input fields correctly");
     }
-  
-   
-
- 
 
     const body = {
       Name: workflowName,
       SpreadSheetId: spreadsheetId,
       SheetName: sheetName,
       ListId: listId,
+      Operation: operation
     };
 
-    console.log(body);
-    await axios
-      .post(
-        `http://connectsyncdata.com:5000/sendy/api/start/automation?email=${user.email}`,
-        body,{
-          headers: headers
-        }
-      )
-      .then((response) => {
-        console.log(response);
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error.response);
-        return toast.error(error.response.data.message);
-      });
+    
+    console.log(operation)
+
+
+    if (operation == 1) {
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/sendy/api/start/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error.response.data.message);
+        });
+    } else if (operation == 2) {
+      await axios
+        .post(
+          `http://connectsyncdata.com:5000/sendy/api/start/del/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.log(error.response);
+          return toast.error(error.response.data.message);
+        });
+    }
   };
 
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
-          headers: headers
+        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        {
+          headers: headers,
         }
       )
       .then((response) => {
         setGoogleSpreadDataList([...response.data.SpreadSheetData]);
         setSpreadsheetId(response.data.SpreadSheetData[0].id);
       })
-      .catch((error) => {console.log(error); });
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const gettingSpreadsheetSheetList = async () => {
@@ -98,25 +116,26 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       SheetId: spreadsheetId,
     };
 
-     await axios
+    await axios
       .post(
         `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
-        body,{
-          headers: headers
+        body,
+        {
+          headers: headers,
         }
       )
-      .then((response) =>
-        {setGoogleSpreadDataSheetList([...response.data.Sheets])
-        setSheetName(response.data.Sheets[0])}
-      )
-      .catch((error) => {console.log(error.response); });
+      .then((response) => {
+        setGoogleSpreadDataSheetList([...response.data.Sheets]);
+        setSheetName(response.data.Sheets[0]);
+      })
+      .catch((error) => {
+        console.log(error.response);
+      });
   };
 
   const handleNameChange = (e) => {
     setWorkflowName(e.target.value);
   };
-  
-
 
   useEffect(() => {
     gettingSpreadsheetList();
@@ -124,22 +143,17 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   }, []);
 
   useEffect(() => {
-    if(spreadsheetId)
-    {
+    if (spreadsheetId) {
       gettingSpreadsheetSheetList();
     }
-    
   }, [spreadsheetId]);
-
-
-  
 
   return (
     <div className="automation-card">
       <ToastContainer autoClose={3000} />
 
       <div className="input-group card-head">
-      <div className="name-div ">
+        <div className="name-div ">
           {" "}
           <label htmlFor="name">Name </label>
           <input
@@ -148,23 +162,28 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
             onChange={handleNameChange}
             placeholder="Enter workflow name"
           />
-        </ div>
-        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
-        <TfiClose />
-        </div>  
+        </div>
+        <div
+          className="close-card"
+          onClick={() => setShowAutomationCard(!ShowAutomationCard)}
+        >
+          <TfiClose />
+        </div>
       </div>
 
-      
       <div className="input-group">
         <label htmlFor="spreadsheetId"> Select Operation</label>
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
           <option value={1}>Google Sheet --- Sendy</option>
+          <option value={2}>Google Sheet --- Sendy(Delete subscribers)</option>
         </select>
       </div>
 
       <div className="input-group">
-        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
+        <label htmlFor="spreadsheetId">
+          <b>Source :</b> Spreadsheet
+        </label>
 
         <select
           id="aweberList"
@@ -194,21 +213,22 @@ function SendyAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList"><b>Destination:</b> List ID</label>
+        <label htmlFor="aweberList">
+          <b>Destination:</b> List ID
+        </label>
         <input
           value={listId}
           className="NameInput"
           placeholder="Enter the list id"
           onChange={handleListId}
-          />
+        />
       </div>
       <div className="buttons">
         <button className="start-button" onClick={handleStartAutomation}>
-        <TbSettingsAutomation className="start-icon" />
+          <TbSettingsAutomation className="start-icon" />
           Start
         </button>
       </div>
-
     </div>
   );
 }

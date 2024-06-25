@@ -5,7 +5,10 @@ import { ToastContainer, toast } from "react-toastify";
 import { TbSettingsAutomation } from "react-icons/tb";
 import { TfiClose } from "react-icons/tfi";
 
-function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function GetResponseAutomationCard({
+  setShowAutomationCard,
+  ShowAutomationCard,
+}) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [campaignListId, setCampaignListId] = useState("");
@@ -16,7 +19,6 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
   );
   const [workflowName, setWorkflowName] = useState("");
   const [operation, setOperation] = useState(1);
-
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const divRef = useRef(null);
@@ -34,7 +36,6 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
     setOperation(event.target.value);
   };
 
-
   const handleSheetNameChange = (event) => {
     setSheetName(event.target.value);
   };
@@ -46,7 +47,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
   const handleStartAutomation = async () => {
     // Your logic to start automation goes here
     // For demo purposes, update lastTriggered with current time
-  
+
     if (!workflowName) {
       return toast.error("Please fill the workflow name");
     }
@@ -57,20 +58,40 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
       SheetName: sheetName,
       CampaignId: campaignListId,
     };
-    
 
-      console.log(body)
-    const response = await axios
-      .post(`http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${user.email}`, body, {
-        headers: headers,
-      })
+    if (operation == 1) {
+      const response = await axios
+        .post(
+          `http://connectsyncdata.com:5000/getresponse/api/start/automation?email=${user.email}`,
+          body,
+          {
+            headers: headers,
+          }
+        )
+        .then((response) => window.location.reload());
+
+      return toast.error(response.data.message);
+    }
+   else if(operation == 2)
+    {
+      const response = await axios
+      .post(
+        `http://connectsyncdata.com:5000/getresponse/api/start/del/automation?email=${user.email}`,
+        body,
+        {
+          headers: headers,
+        }
+      )
       .then((response) => window.location.reload());
 
     return toast.error(response.data.message);
+
+    }
+
   };
 
   const gettingCampaignLists = async () => {
-   await axios
+    await axios
       .get(
         `http://connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
         {
@@ -78,9 +99,9 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
         }
       )
       .then((response) => {
-        console.log(response.data)
-         setCampaignaLists([...response.data.data]);
-         setCampaignListId(response.data[0].id);
+        console.log(response.data);
+        setCampaignaLists([...response.data.data]);
+        setCampaignListId(response.data[0].id);
       })
       .catch((error) => console.log(error));
   };
@@ -134,8 +155,7 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
     gettingSpreadsheetSheetList();
   }, [spreadsheetId]);
 
-
-  console.log(CampaignLists)
+  console.log(CampaignLists);
 
   return (
     <div className="automation-card" tabIndex={0} ref={divRef}>
@@ -149,24 +169,30 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
             onChange={handleNameChange}
             placeholder="Enter workflow name"
           />
-        </ div>
-        <div className="close-card" onClick={()=>setShowAutomationCard(!ShowAutomationCard)}>
-        <TfiClose />
-        </div>  
-
+        </div>
+        <div
+          className="close-card"
+          onClick={() => setShowAutomationCard(!ShowAutomationCard)}
+        >
+          <TfiClose />
+        </div>
       </div>
-      
+
       <div className="input-group">
         <label htmlFor="spreadsheetId"> Select Operation</label>
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
           <option value={1}>Google Sheet --- Get Response</option>
+          <option value={2}>
+            Google Sheet --- Get Response(Delete contacts)
+          </option>
         </select>
       </div>
 
-
       <div className="input-group">
-        <label htmlFor="spreadsheetId"><b>Source :</b> Spreadsheet</label>
+        <label htmlFor="spreadsheetId">
+          <b>Source :</b> Spreadsheet
+        </label>
 
         <select
           id="aweberList"
@@ -196,7 +222,10 @@ function GetResponseAutomationCard({ setShowAutomationCard, ShowAutomationCard }
         </select>
       </div>
       <div className="input-group">
-        <label htmlFor="aweberList"> <b>Destination:</b> Campaign List</label>
+        <label htmlFor="aweberList">
+          {" "}
+          <b>Destination:</b> Campaign List
+        </label>
         <select
           id="aweberList"
           value={campaignListId}

@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const GTWRegistrantSchemaInDB = new Schema({
   UserEmail: String,
-  RegistrantRecords: [{ FirstName: String, LastName: String, Email: String }],
+  RegistrantRecords: [{ FirstName: String, LastName: String, Email: String ,registrantKey : Number}],
 });
 
 const GTWUserTokenSchema = new Schema({
