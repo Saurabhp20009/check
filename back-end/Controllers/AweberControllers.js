@@ -25,10 +25,14 @@ const {
   BigmarkerAutomationData,
   BigmarkerToAppAutomationData,
 } = require("../Models/BigMarkerModel.js");
+const {
+  ActiveCampaignApiRecordModel,
+} = require("../Models/ActiveCampaignModel.js");
 
 const CLIENT_ID = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const CLIENT_SECRET = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI =
+  "http://connectsyndata.com:5000/goauth/api/auth/google/callback";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -133,7 +137,10 @@ const gettingAweberLists = async (req, res) => {
     const tokenInfo = await ModelAweberTokenData.findOne({ email: email });
 
     if (!tokenInfo) {
-      return res.status(400).json({ message: "Aweber account token can't be accessed,please connect the account" });;
+      return res.status(400).json({
+        message:
+          "Aweber account token can't be accessed,please connect the account",
+      });
     }
 
     const { Account_id, access_token } = tokenInfo;
@@ -290,6 +297,98 @@ const startAutomation = async (req, res) => {
   }
 };
 
+const StartAutomationAweberToApp = async (req, res) => {
+  const { sheetId, sheetName, listId, email, name  } = req.body;
+
+  if (!name || !sheetId || !sheetName || !listId || !email) {
+    return res.status(400).json({ message: "fields are missing" });
+  }
+
+  const checkingAutomation = await ModelAweberAutomationData.find({
+    Email: email,
+    Status: "Running",
+  });
+
+  if (checkingAutomation.length > 0) {
+    return res.status(501).json({
+      message:
+        "Already automation running in background please wait till finished!!",
+    });
+  }
+
+
+
+  await revokeAweberToken(email);
+  try {
+    //saving the automation data in db
+
+    //deleting all records before proceding
+
+    const SubscriberDetailsInDB = await gettingSheetDataAndStoringInDB(
+      email,
+      sheetId,
+      sheetName
+    );
+
+    const automationInstance = new ModelAweberAutomationData({
+      Name: name,
+      AppName: "AweberToActiveCampaign",
+      AppId: 1,
+      Email: email,
+      SheetId: sheetId,
+      SheetName: sheetName,
+      AweberListId: listId,
+      Status: "Running",
+      Operation: 3,
+      DataInDB: SubscriberDetailsInDB._id,
+      ErrorDatas: [],
+    });
+
+    const workflow = await automationInstance.save();
+    console.log("automation data is created in db...");
+
+    if (!workflow) {
+      return res.status(500).json({
+        message: "Unable to save automation data in DB!",
+      });
+    }
+
+    const task = cron.schedule("* * * * *", async () => {
+      console.log("cron-jobs started...");
+      await fetchDataFromDBAndSendToAppAPI(
+        workflow,
+        email,
+        SubscriberDetailsInDB
+      );
+    });
+
+    const interval = setInterval(
+      async () => {
+        const workflowCheck = await ModelAweberAutomationData.findOne({
+          _id: workflow._id,
+        });
+
+        if (!workflowCheck || workflowCheck.Status === "Finished") {
+          task.stop();
+          console.log("cron-jobs stopped...");
+          StopInterval();
+        }
+      },
+
+      1000
+    );
+
+    const StopInterval = () => {
+      clearInterval(interval);
+    };
+
+    res.status(200).json({ message: `Automation started ${workflow.Name} ` });
+  } catch (error) {
+    //console.log(error);
+    res.status(500).json({ message: `Automation failed ${error}` });
+  }
+};
+
 const revokeAweberToken = async (email) => {
   const tokenData = await ModelAweberTokenData.findOne({ email: email });
 
@@ -311,7 +410,7 @@ const revokeAweberToken = async (email) => {
     clientSecret: clientSecret,
     accessTokenUri: TOKEN_URL,
     authorizationUri: `${OAUTH_URL}/authorize`,
-    redirectUri: "https://connectsyncdata.com/callback/aweber",
+    redirectUri: "https://connectsyndata.com/callback/aweber",
     scopes,
   });
 
@@ -584,6 +683,49 @@ async function gettingSheetDataAndStoringInDB(Email, SpreadSheetId, SheetName) {
   }
 }
 
+
+async function gettingAweberDataAndStoringInDB(email,listId) {
+  console.log("Fetching documents from aweber...");
+
+  try {
+
+    const SubscriberList= gettingAweberListsSubscriber(email,listId)
+
+    const DocumentInstance = new ModelAweberSubscriberList({
+      UserEmail: Email,
+      SubscriberRecords: [],
+    });
+
+    const SubscriberDetailsInDB = await DocumentInstance.save();
+
+    let tempRegistrant = [];
+
+    //getting all data from sheet (first time)
+    {
+      //looping for accessing every elements of rows
+      for (let i = 1; i <= rows.length - 1; i++) {
+        tempRegistrant.push({
+          FirstName: rows[i][0],
+          LastName: rows[i][1],
+          Email: rows[i][2],
+        });
+      }
+      const updateCheck = await ModelAweberSubscriberList.updateOne(
+        {
+          _id: SubscriberDetailsInDB._id,
+        },
+        {
+          $set: { SubscriberRecords: tempRegistrant },
+        }
+      );
+      // //Getting only updated data from the sheet
+      return SubscriberDetailsInDB;
+    }
+  } catch (error) {
+    console.log("Unable to fetch data", error);
+  }
+}
+
 async function fetchDataFromDBAndSendToAPI(
   Workflow,
   email,
@@ -654,6 +796,51 @@ async function fetchDataFromDBAndSendToAPI(
     console.log("Automation is finished...");
   }
 }
+
+async function gettingAweberListsSubscriber(email,listId)
+{
+  try {
+    await revokeAweberToken(email);
+    const tokenInfo = await ModelAweberTokenData.findOne({ email: email });
+
+    if (!tokenInfo) {
+      return res.status(400).json({
+        message:
+          "Aweber account token can't be accessed,please connect the account",
+      });
+    }
+
+    const { Account_id, access_token } = tokenInfo;
+
+    const headers = {
+      Accept: "application/json",
+      "User-Agent": "AWeber-Node-code-sample/1.0",
+      Authorization: `Bearer ${access_token}`,
+    };
+
+    const url = `https://api.aweber.com/1.0/accounts/${Account_id}/lists/${listId}/subscribers`;
+    fetch(url, { headers: headers })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.entries) {
+          // res.status(200).json({
+          //   total_list: data.total_size,
+          //   list_data: data.entries,
+          // });
+        } else {
+          //console.log(data);
+          // res.status(401).json({
+          //   message: "Aweber token has been expired token",
+          // });
+        }
+      });
+  } catch (err) {
+    console.error("The API returned an error:", err);
+    // return res.status(400).json({ SheetsData: err });
+  }
+}
+
+
 
 async function deletingSubscribers(
   data,
@@ -862,6 +1049,118 @@ async function BigmarkerToAweberSync(
   }
 }
 
+async function fetchDataFromDBAndSendToAppAPI(
+  Workflow,
+  email,
+  SubscriberDetailsInDB
+) {
+  console.log("Sending data to API...");
+  //fetching 100 data from db
+
+  const Record = await ModelAweberSubscriberList.findById(
+    SubscriberDetailsInDB._id
+  );
+
+  const userTokenData = await ActiveCampaignApiRecordModel.findOne({
+    email: email,
+  });
+  const { ApiKey, AccountName } = userTokenData;
+  const dataInDB = Record.SubscriberRecords.slice(0, 100);
+
+  // console.log(dataInDB);
+
+  for (let i = 0; i <= dataInDB.length - 1; i++) {
+    const response = await addingContacts(dataInDB[i], ApiKey, AccountName);
+    let record = {
+      firstName: dataInDB[i].FirstName,
+      lastName: dataInDB[i].LastName,
+      email: dataInDB[i].Email,
+    };
+
+    if (!response) {
+      const check = await ModelAweberAutomationData.updateOne(
+        {
+          _id: Workflow._id,
+        },
+        { $push: { ErrorRecords: record } }
+      );
+      console.log("Aweber Error Record updated...");
+    }
+  }
+
+  //getting document to remove data
+  const document = await ModelAweberSubscriberList.findById(
+    SubscriberDetailsInDB._id
+  );
+
+  //removing 100 records from db
+  document.SubscriberRecords.splice(0, 100);
+
+  // Save the modified document back to the database
+  const result = await document.save();
+
+  const dataCheck = await ModelAweberSubscriberList.findById(
+    SubscriberDetailsInDB._id
+  );
+
+  if (dataCheck.SubscriberRecords.length <= 0) {
+    await ModelAweberAutomationData.updateOne(
+      { _id: Workflow._id },
+      { $set: { Status: "Finished" } }
+    );
+
+    await ModelAweberSubscriberList.findByIdAndDelete(
+      SubscriberDetailsInDB._id
+    );
+    console.log("Automation is finished...");
+  }
+}
+
+
+
+
+
+//adding contacts for active campaign
+async function addingContacts(data, ApiKey, AccountName) {
+  // console.log(data, Account_id, AweberListId, access_token);
+
+  const apiUrl = `https://${AccountName}.api-us1.com/api/3/contacts`;
+
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "Api-Token": `${ApiKey}`,
+  };
+  const body = JSON.stringify({
+    contact: {
+      email: data.Email,
+      firstName: data.FirstName,
+      lastName: data.LastName,
+    },
+  });
+
+  console.log(body);
+
+  const response = await fetch(apiUrl, {
+    headers: headers,
+    method: "POST",
+    body: body,
+  });
+
+  if (response.status === 201) {
+    // console.log(`Subscriber created for email ${data.Email}`, response.status);
+    return true;
+  } else {
+    console.log(
+      `Subscriber not created for email ${data.Email}`,
+      response.status,
+      response
+    );
+
+    return false;
+  }
+}
+
 const handleEditAutomation = async (req, res) => {
   const { dataInDB, name, email, sheetId, sheetName, listId, item, operation } =
     req.body;
@@ -906,7 +1205,7 @@ const handleEditAutomation = async (req, res) => {
 
       if (operation == 1) {
         const response = await axios
-          .post("http://connectsyncdata.com:5000/aweber/api/startautomation", body, {
+          .post("http://connectsyndata.com:5000/aweber/api/startautomation", body, {
             headers: headers,
           })
           .then(async (response) => {
@@ -921,7 +1220,7 @@ const handleEditAutomation = async (req, res) => {
           });
       } else {
         const response = await axios
-          .post("http://connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
+          .post("http://connectsyndata.com:5000/aweber/api/start/del/automation", body, {
             headers: headers,
           })
           .then(async (response) => {
@@ -953,4 +1252,5 @@ module.exports = {
   GTWToAweberSync,
   BigmarkerToAweberSync,
   handleDeleteSubscribers,
+  StartAutomationAweberToApp
 };

@@ -13,6 +13,7 @@ import GetResponseAutomationCard from "../AutomationCard/GetResponse/GetResponse
 import BigmarkerAutomationCard from "../AutomationCard/Bigmarker/BigmarkerAutomationCard";
 import SendyAutomationCard from "../AutomationCard/Sendy/SendyAutomationCard";
 import { ImArrowUp } from "react-icons/im";
+import JvzooAutomationCard from "../AutomationCard/Jvzoo/JvzooAutomationCard";
 
 const Dashboard = () => {
   const [automationLimit, setAutomationLimit] = useState([]);
@@ -49,6 +50,10 @@ const Dashboard = () => {
       setShowAutomationCard={setShowAutomationCard}
       ShowAutomationCard={ShowAutomationCard}
     />,
+    <JvzooAutomationCard
+    setShowAutomationCard={setShowAutomationCard}
+    ShowAutomationCard={ShowAutomationCard}
+    />
   ];
 
   const navigate = useNavigate();
@@ -72,7 +77,7 @@ const Dashboard = () => {
 
   const getWorkFlows = async () => {
     await axios
-      .get(`http://connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://connectsyndata.com:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then(async (response) => {
@@ -148,6 +153,9 @@ const Dashboard = () => {
                   <li onClick={() => handleList(3)}>GetResponse</li>
                   <li onClick={() => handleList(4)}>GoToWebinar</li>
                   <li onClick={() => handleList(5)}>Sendy</li>
+                  <li onClick={() => handleList(6
+                  )}>Jvzoo</li>
+
                 </ul>
               </div>
             )}

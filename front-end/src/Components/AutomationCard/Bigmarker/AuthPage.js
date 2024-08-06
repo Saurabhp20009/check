@@ -24,7 +24,7 @@ const BigmarkerAuthPage = () => {
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/bigmarker/api/create/account?email=${user.email}`,
+        `http://connectsyndata.com:5000/bigmarker/api/create/account?email=${user.email}`,
         body,
         {
           headers: headers,

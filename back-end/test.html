@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Website</title>
+  
+  <!-- Google Tag Manager -->
+  <script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MB9SX8ST');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Data Layer Initialization -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      'event': 'pageview',
+      'pageType': 'localTestPage',
+      'userId': 'localUser123'
+    });
+  </script>
+
+  <!-- Script to Capture URL Parameters and Push to Data Layer -->
+  <script>
+    function getUrlParams(url) {
+      let params = {};
+      let parser = new URL(url);
+      let query = parser.search.substring(1);
+      let vars = query.split('&');
+      for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=');
+        params[pair[0]] = decodeURIComponent(pair[1]);
+      }
+      return params;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      let params = getUrlParams(window.location.href);
+
+      // Capture current time
+      let currentTime = new Date().toISOString();
+      
+      // Push purchase event with URL parameters and current time to data layer
+      window.dataLayer.push({
+        'event': 'purchase',
+        'name': params['name'],
+        'prodId': params['prod-id'],
+        'timestamp': currentTime
+      });
+
+      // Optional: Display the parameters on the web page
+      if (params['name']) {
+        document.getElementById('name').textContent = params['name'];
+      }
+      if (params['prod-id']) {
+        document.getElementById('prod-id').textContent = params['prod-id'];
+      }
+
+      console.log('Purchase event data pushed to data layer', params, currentTime);
+    });
+  </script>
+</head>
+<body>
+  <h1>Hello, Local Website!</h1>
+  <p>Name: <span id="name"></span></p>
+  <p>Product ID: <span id="prod-id"></span></p>
+</body>
+</html>

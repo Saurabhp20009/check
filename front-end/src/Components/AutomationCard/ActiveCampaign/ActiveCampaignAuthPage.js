@@ -4,24 +4,26 @@ import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
-const GetResponseAuthPage = () => {
+const ActiveCampaignAuthPage = () => {
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const [connect, setConnect] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [accountName, setAccountName] = useState("");
 
   const headers = {
     Authorization: `Bearer ${user.token}`,
     "Content-Type": "application/json",
   };
 
-  const body = {
-    apiKey: apiKey,
-  };
-
   const handleConnect = async () => {
+    const body = {
+      apiKey: apiKey,
+      accountName: accountName,
+    };
+
     await axios
       .post(
-        `http://connectsyndata.com:5000/getresponse/api/create/account?email=${user.email}`,
+        `http://connectsyndata.com:5000/bigmarker/api/create/account?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -29,12 +31,12 @@ const GetResponseAuthPage = () => {
       )
       .then((response) => {
         console.log(response);
-        toast.success("Get Response account connected");
+        toast.success("ActiveCampaign account connected");
         setConnect(true);
       })
       .catch((error) => {
         console.log("e", error.response.data.error);
-        toast.error("Invalid Api Key , unauthorized");
+        toast.error("Invalid api key or account name , unauthorized");
       });
   };
 
@@ -55,19 +57,16 @@ const GetResponseAuthPage = () => {
         }}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
-          {/* <SiBrevo
-            style={{ color: "#0b996f", height: "40px", width: "40px" }}
-          />{" "} */}
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5i_7FxYoqMQp_vaNNTz2EU7aQyLHaaf_yLw8YDhZPWA&s"
+            src="https://play-lh.googleusercontent.com/3Ll5PntDCYMEyb1n6ty67SAtuW77SkTLTGFlsDlGBhqUUnf9IhHr37wY1wonbBlq0rvK"
             alt="getresponse-icon"
-            style={{ color: "#0b996f", height: "40px", width: "40px" }}
+            style={{ color: "#0b996f", height: "40px", width: "40px" , marginRight: "2vh" }}
           />
-          <h1>GetResponse AuthPage</h1>
+          <h1>ActiveCampaign AuthPage</h1>
         </div>
 
         {connect ? (
-          <h1>GetResponse Account connected successfully!!</h1>
+          <h1>ActiveCampaign Account connected successfully!!</h1>
         ) : (
           <div style={{ width: "20%" }}>
             <div
@@ -84,11 +83,18 @@ const GetResponseAuthPage = () => {
                 onChange={handleKeyChange}
                 placeholder="API KEY"
               ></input>
+              <label style={{ fontWeight: "bolder" }}>Enter Account name</label>
+              <input
+                value={apiKey}
+                style={{ marginTop: "2vh" }}
+                onChange={(e)=>setAccountName(e.target.value)}
+                placeholder="Account name"
+              ></input>
             </div>
 
             <button
               style={{
-                backgroundColor: "#04adee",
+                backgroundColor: "#004cff",
                 border: "none",
                 padding: "2vh",
                 borderRadius: "25px",
@@ -108,4 +114,4 @@ const GetResponseAuthPage = () => {
   );
 };
 
-export default GetResponseAuthPage;
+export default ActiveCampaignAuthPage;

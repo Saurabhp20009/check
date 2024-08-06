@@ -19,7 +19,7 @@ const Settings = () => {
   const getUserInfo = async () => {
     await axios
       .post(
-        "http://connectsyncdata.com:5000/user/api/gettinguser",
+        "http://connectsyndata.com:5000/user/api/gettinguser",
         {
           email: user.email,
         },
@@ -36,7 +36,7 @@ const Settings = () => {
 
   const handleAweberButton = async () => {
     await axios
-      .get("http://connectsyncdata.com:5000/aweber/api/buildauthurl", {
+      .get("http://connectsyndata.com:5000/aweber/api/buildauthurl", {
         headers: headers,
       })
       .then((response) => {
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleGoogleLink = async () => {
     console.log(headers);
     await axios
-      .get(`http://connectsyncdata.com:5000/goauth/api/link?email=${user.email}`, {
+      .get(`http://connectsyndata.com:5000/goauth/api/link?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => {
@@ -66,7 +66,7 @@ const Settings = () => {
   const handleUnlinkGTWAccount = async () => {
     await axios
       .delete(
-        `http://connectsyncdata.com:5000/gotowebinar/api/remove/account?email=${user.email}`,
+        `http://connectsyndata.com:5000/gotowebinar/api/remove/account?email=${user.email}`,
         {
           headers: headers,
         }
@@ -78,7 +78,7 @@ const Settings = () => {
   const handleUnlinkGoogleAccount = async () => {
     await axios
       .delete(
-        `http://connectsyncdata.com:5000/goauth/api/unlink/googleaccount?email=${user.email}`,
+        `http://connectsyndata.com:5000/goauth/api/unlink/googleaccount?email=${user.email}`,
         {
           headers: headers,
         }
@@ -94,7 +94,7 @@ const Settings = () => {
   const handleBrevoAccountRemove = async () => {
     await axios
       .delete(
-        `http://connectsyncdata.com:5000/brevo/api/delete/account?email=${user.email}`,
+        `http://connectsyndata.com:5000/brevo/api/delete/account?email=${user.email}`,
         {
           headers: headers,
         }
@@ -113,7 +113,7 @@ const Settings = () => {
   const handleRemoveGetResponseAccount = async () => {
     const r = await axios
       .delete(
-        `http://connectsyncdata.com:5000/getresponse/api/remove/account?id=${displayLinked.GetResponse._id}`,
+        `http://connectsyndata.com:5000/getresponse/api/remove/account?id=${displayLinked.GetResponse._id}`,
         {
           headers: headers,
         }
@@ -125,7 +125,7 @@ const Settings = () => {
   const handleAweberRemove = async () => {
     const r = await axios
       .delete(
-        `http://connectsyncdata.com:5000/aweber/api/remove/account?id=${displayLinked.Aweber._id}`,
+        `http://connectsyndata.com:5000/aweber/api/remove/account?id=${displayLinked.Aweber._id}`,
         {
           headers: headers,
         }
@@ -141,7 +141,7 @@ const Settings = () => {
   const handleBigmarkerAccountRemove = async () => {
     const r = await axios
       .delete(
-        `http://connectsyncdata.com:5000/bigmarker/api/remove/account?id=${displayLinked.Bigmarker._id}`,
+        `http://connectsyndata.com:5000/bigmarker/api/remove/account?id=${displayLinked.Bigmarker._id}`,
         {
           headers: headers,
         }
@@ -153,7 +153,7 @@ const Settings = () => {
   const handleSendyAccountRemove = async () => {
     const r = await axios
       .delete(
-        `http://connectsyncdata.com:5000/sendy/api/remove/account?id=${displayLinked.Sendy._id}`,
+        `http://connectsyndata.com:5000/sendy/api/remove/account?id=${displayLinked.Sendy._id}`,
         {
           headers: headers,
         }
@@ -165,6 +165,23 @@ const Settings = () => {
   const handleSendyConnect = () => {
     window.open("auth/sendy");
   };
+ 
+  const handleActiveCampaignDisconnect=async()=>{
+    const r = await axios
+    .delete(
+      `http://connectsyndata.com:5000/active/api/unlink/active/account?id=${displayLinked.ActiveCampaign._id}`,
+      {
+        headers: headers,
+      }
+    )
+    .then((response) => window.location.reload())
+    .catch((error) => console.log(error));
+
+  }
+  const handleActiveCampaignConnect = () => {
+    window.open("auth/active");
+  };
+  
 
   useEffect(() => {
     getUserInfo();
@@ -394,6 +411,61 @@ const Settings = () => {
               )}
             </div>
           </div>
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://play-lh.googleusercontent.com/3Ll5PntDCYMEyb1n6ty67SAtuW77SkTLTGFlsDlGBhqUUnf9IhHr37wY1wonbBlq0rvK"
+                Bigmarker
+                alt="sendy-icon"
+                className="bigmarker-img"
+              />{" "}
+              Active Campaign
+            </div>
+
+            <div>
+              {!displayLinked.ActiveCampaign ? (
+                <button className="Connect-button" onClick={handleActiveCampaignConnect}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleActiveCampaignDisconnect}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="google-sign-in-button button-margin">
+            <div className="google-button-div">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVcwl5RlZ9ooNVwU2C3zkLLKdhGHQk1mvLcQ&s"
+                Bigmarker
+                alt="sendy-icon"
+                className="bigmarker-img"
+              />{" "}
+              JvZoo
+            </div>
+
+            <div>
+              {!displayLinked.Jvzoo ? (
+                <button className="Connect-button" onClick={handleActiveCampaignConnect}>
+                  Connect
+                </button>
+              ) : (
+                <button
+                  className="Connect-button"
+                  onClick={handleActiveCampaignDisconnect}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+       
+
         </div>
       </div>
       <ToastContainer autoClose={3000} />

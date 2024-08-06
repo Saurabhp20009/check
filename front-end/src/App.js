@@ -15,6 +15,8 @@ import GetResponseAuthPage from "./Components/AutomationCard/GetResponse/AuthPag
 import BigmarkerAuthPage from "./Components/AutomationCard/Bigmarker/AuthPage";
 import SendyAuthPage from "./Components/AutomationCard/Sendy/AuthPage";
 import Training from "./Components/TraningPage/Training";
+import ActiveCampaignAuthPage from "./Components/AutomationCard/ActiveCampaign/ActiveCampaignAuthPage";
+import JvzooAuthPage from "./Components/AutomationCard/Jvzoo/JvzooAuthPage";
 
 function App() {
   const [checkUserLogin, setCheckUserLogin] = useState(false);
@@ -48,12 +50,14 @@ function App() {
             <Route path="/training" element={<Training />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
+        <Route path="/auth/active" element={<ActiveCampaignAuthPage />} />
         <Route path="/aweberauth" element={<AweberAuthLinkPage />} />
         <Route path="/auth/brevo" element={<BrevoAuthPage />} />
         <Route path="/auth/gtw" element={<GoToWebinarAuthPage />} />
         <Route path="/auth/get/response" element={<GetResponseAuthPage />} />
         <Route path="/auth/bigmarker" element={<BigmarkerAuthPage />} />
         <Route path="/auth/sendy" element={<SendyAuthPage />} />
+        <Route path="/auth/jvzoo" element={<JvzooAuthPage />} />
 
       </Routes>
     </>

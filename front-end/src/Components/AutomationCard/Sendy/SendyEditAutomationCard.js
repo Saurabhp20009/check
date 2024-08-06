@@ -62,7 +62,7 @@ function SendyEditAutomationCard({
     console.log(body);
     await axios
       .post(
-        `http://connectsyncdata.com:5000/sendy/api/edit/automation?email=${user.email}`,
+        `http://connectsyndata.com:5000/sendy/api/edit/automation?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -81,7 +81,7 @@ function SendyEditAutomationCard({
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://connectsyndata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -101,7 +101,7 @@ function SendyEditAutomationCard({
 
     await axios
       .post(
-        `http://connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://connectsyndata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

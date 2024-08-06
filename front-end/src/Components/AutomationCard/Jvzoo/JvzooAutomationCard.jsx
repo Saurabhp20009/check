@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { TbSettingsAutomation } from "react-icons/tb";
 import { TfiClose } from "react-icons/tfi";
 
-function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
+function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [aweberListId, setAweberListId] = useState("");
@@ -15,6 +15,8 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     []
   );
   const [operation, setOperation] = useState(1);
+  const [jvzooAccount, setJvzooAccount] = useState(1);
+
   const [workflowName, setWorkflowName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("userInfo"));
@@ -65,7 +67,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         .then((response) => window.location.reload());
 
       return toast.error(response.data.message);
-    } else if(operation ==2) {
+    } else {
       const body = {
         name: workflowName,
         email: user.email,
@@ -75,22 +77,6 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       };
       const response = await axios
         .post("http://connectsyndata.com:5000/aweber/api/start/del/automation", body, {
-          headers: headers,
-        })
-        .then((response) => window.location.reload());
-
-      return toast.error(response.data.message);
-    }
-    else  {
-      const body = {
-        name: workflowName,
-        email: user.email,
-        sheetId: spreadsheetId,
-        sheetName: sheetName,
-        listId: aweberListId,
-      };
-      const response = await axios
-        .post("http://connectsyndata.com:5000/aweber/api/start/app/automation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -120,6 +106,12 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         // toast.error(error?.response?.data?.message);
       });
   };
+
+ 
+  const handleJvzooAccountSelect=(event)=>{
+    setJvzooAccount(event.target.value); 
+  }
+
 
 
 
@@ -208,20 +200,28 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         <label htmlFor="spreadsheetId"> Select Operation</label>
 
         <select id="aweberList" value={operation} onChange={handleOperation}>
-          <option value={1}>Google Sheet --- Aweber</option>
+          <option value={1}>Jvzoo(New sale) --- Google tag manager</option>
+          <option value={2}>Jvzoo(New sale) --- Facebook Conversion</option>
+          <option value={3}>Jvzoo(New sale) --- Google Analytics GA4</option>
 
-          <option value={2}>
-            Google Sheet --- Aweber (Delete subscribers)
-          </option>
-        
-          <option value={3}>
-            Aweber --- Active Campaign(Create contacts) 
-          </option>
 
         </select>
       </div>
 
       <div className="input-group">
+        <label htmlFor="spreadsheetId"> Select Jvzoo Account</label>
+
+        <select id="aweberList" value={operation} onChange={handleJvzooAccountSelect}>
+          <option value={1}></option>
+          <option value={2}></option>
+          <option value={3}></option>
+
+
+        </select>
+      </div>
+        
+
+      {/* <div className="input-group">
         <label htmlFor="spreadsheetId">
           <b>Source:</b> Spreadsheet
         </label>
@@ -246,7 +246,6 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
           id="aweberList"
           value={sheetName}
           onChange={handleSheetNameChange}
-
         >
           {googleSpreadDataSheetList.length > 0 &&
             googleSpreadDataSheetList.map((item, index) => (
@@ -255,7 +254,10 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
               </option>
             ))}
         </select>
-      </div>
+      </div> */}
+
+
+      
       <div className="input-group">
         <label htmlFor="aweberList">
           <b>Destination:</b> Aweber List:
@@ -284,4 +286,4 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   );
 }
 
-export default AweberAutomationCard;
+export default JvzooAutomationCard;

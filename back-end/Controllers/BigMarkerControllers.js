@@ -16,7 +16,7 @@ const { BigmarkerToGetResponse } = require("./GetResponseControllers");
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "http://connectsyndata.com:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -300,18 +300,16 @@ const handleStartAutomationWebinarToSheet = async (req, res) => {
     }
 
     const { ApiKey } = user;
-    
+
     const registrantData = await GetOnlyRegistrants(ApiKey, ConferenceId);
 
-    if(!registrantData || registrantData.length<=0)
-      {
-        return res
+    if (!registrantData || registrantData.length <= 0) {
+      return res
         .status(500)
-        .json({ message: "No registrants found in webinar or webinar is invalid`" });
-      }
-
-
-
+        .json({
+          message: "No registrants found in webinar or webinar is invalid`",
+        });
+    }
 
     const DocumentInstance = new BigmarkerToGoogleSheetAutomationData({
       Name: Name,
@@ -352,8 +350,6 @@ const handleStartAutomationWebinarToSheet = async (req, res) => {
 
     //getting registrant data
 
-    
-
     console.log(registrantData, registrantData.length);
 
     registrantData.forEach((obj) => {
@@ -393,14 +389,17 @@ const GetOnlyRegistrants = async (ApiKey, ConferenceId) => {
     };
 
     const response = await axios.request(options);
-   
 
     const registrantData = [];
 
     response.data.registrations.forEach((obj) => {
       // Extract firstname, lastname, and email from the object
       const { first_name, last_name, email } = obj;
-      registrantData.push({first_name : first_name, last_name:last_name, email: email});
+      registrantData.push({
+        first_name: first_name,
+        last_name: last_name,
+        email: email,
+      });
     });
     return registrantData;
   } catch (error) {
@@ -503,13 +502,7 @@ const handleEditAutomation = async (req, res) => {
   } = req.body;
 
   const { email } = req.query;
-  if (
-    !Name ||
-    !ConferenceId ||
-    !email ||
-    !Item ||
-    !Operation
-  ) {
+  if (!Name || !ConferenceId || !email || !Item || !Operation) {
     return res.status(400).json({ message: "fields are invalid" });
   }
 
@@ -542,7 +535,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -568,7 +561,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -596,7 +589,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -624,7 +617,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -652,7 +645,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -669,9 +662,7 @@ const handleEditAutomation = async (req, res) => {
           console.log(error);
           console.log(error.response);
         });
-    }
-   else if(Operation == 6)
-    {
+    } else if (Operation == 6) {
       const body = {
         Name: Name,
         SpreadSheetId: SpreadSheetId,
@@ -681,7 +672,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `http://connectsyncdata.com:5000/bigmarker/api/start/del/automation?email=${email}`,
+          `http://connectsyndata.com:5000/bigmarker/api/start/del/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -698,7 +689,6 @@ const handleEditAutomation = async (req, res) => {
           console.log(error);
         });
     }
-
   } catch (error) {
     res.status(500).json({ message: `Automation failed to start.${error}` });
     console.log(error);
@@ -736,21 +726,18 @@ const StartAutomationBigmarkerToApp = async (req, res) => {
       const { AweberListId } = req.body;
       AppName = "Aweber";
       ListId = AweberListId;
-      Operation=3
+      Operation = 3;
     } else if (req.body.BrevoListId) {
       const { BrevoListId } = req.body;
       AppName = "Brevo";
       ListId = BrevoListId;
-      Operation=4
-
+      Operation = 4;
     } else if (req.body.CampaignId) {
       const { CampaignId } = req.body;
       AppName = "Getresponse";
       ListId = CampaignId;
-      Operation=5
-
-    }
-    else {
+      Operation = 5;
+    } else {
       return res
         .status(401)
         .json({ message: "Fields are missing..bad request" });
@@ -897,7 +884,6 @@ const StartAutomationBigmarkerToApp = async (req, res) => {
   }
 };
 
-
 const handleSheetDataToBigMarkerDeleterRegistrants = async (
   SubscriberDetailsInDB,
   email,
@@ -959,11 +945,27 @@ const handleSheetDataToBigMarkerDeleterRegistrants = async (
   }
 };
 
+const GetAllRegistrants = async (ApiKey, ConferenceId) => {
+  try {
+    var options = {
+      method: "GET",
+      url: `https://www.bigmarker.com/api/v1/conferences/registrations/${ConferenceId}?per_page=30000`,
+      headers: { "Api-Key": ApiKey },
+    };
 
+    const response = await axios.request(options);
 
+    return response.data.registrations;
+  } catch (error) {
+    // Handle any errors that occurred during the database operation
+    console.error("Error while retrieving Bigmarker  data:", error);
+  }
+};
 
-const handleStartAutomationSheetToBigmarkerDeleteRegistrants=async(req,res)=>{
-  
+const handleStartAutomationSheetToBigmarkerDeleteRegistrants = async (
+  req,
+  res
+) => {
   const { Name, SpreadSheetId, SheetName, ConferenceId } = req.body;
 
   const { email } = req.query;
@@ -983,7 +985,6 @@ const handleStartAutomationSheetToBigmarkerDeleteRegistrants=async(req,res)=>{
       SheetName,
       email
     );
-
 
     const DocumentInstance = await new BigmarkerAutomationData({
       Name: Name,
@@ -1010,13 +1011,12 @@ const handleStartAutomationSheetToBigmarkerDeleteRegistrants=async(req,res)=>{
     //starting cron jobs
     const task = cron.schedule("* * * * *", async () => {
       console.log("cron jobs running...");
-      await handleSheetDataToBigMarkerDeleterRegistrants (
+      await handleSheetDataToBigMarkerDeleterRegistrants(
         SubscriberDetailsInDB,
         email,
         workflow.ConferenceId,
         workflow._id
       );
-      
     });
 
     const interval = setInterval(
@@ -1043,11 +1043,7 @@ const handleStartAutomationSheetToBigmarkerDeleteRegistrants=async(req,res)=>{
   } catch (error) {
     return res.status(502).json({ message: error.message });
   }
-
-
-} 
-
-
+};
 
 module.exports = {
   handleCreateAccount,
@@ -1056,5 +1052,5 @@ module.exports = {
   handleStartAutomationWebinarToSheet,
   handleEditAutomation,
   StartAutomationBigmarkerToApp,
-  handleStartAutomationSheetToBigmarkerDeleteRegistrants
+  handleStartAutomationSheetToBigmarkerDeleteRegistrants,
 };

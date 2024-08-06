@@ -1,26 +1,34 @@
-const cluster = require('node:cluster');
-const http = require('node:http');
-const numCPUs = require('node:os').availableParallelism();
-const process = require('node:process');
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
 
-if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
+const app = express();
+const port = 3000;
 
-  // Fork workers.
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`worker ${worker.process.pid} died`);
-  });
-} else {
-  // Workers can share any TCP connection
-  // In this case it is an HTTP server
-  http.createServer((req, res) => {
-    res.writeHead(200);
-    res.end('hello world\n');
-  }).listen(8000);
+// Route to handle JVZoo IPN
+app.post('/jvzoo-webhook', (req, res) => {
+    const transactionType = req.body.ctransaction;
+    
+    // Log sale transactions
+    if (transactionType === 'SALE') {
+        console.log('JVZoo SALE transaction received:', req.body);
+        
+        // // Append the sale transaction to a log file
+        // fs.appendFile('jvzoo_sales.log', JSON.stringify(req.body) + '\n', (err) => {
+        //     if (err) throw err;
+        // });
 
-  console.log(`Worker ${process.pid} started`);
-}
+        res.status(200).send('SALE transaction logged');
+    } else {
+        res.status(200).send('Not a SALE transaction');
+    }
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});

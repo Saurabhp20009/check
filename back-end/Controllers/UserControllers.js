@@ -37,6 +37,10 @@ const {
   SendyAutomationData,
   SendyRegistrants,
 } = require("../Models/SendyModel");
+const {
+  ActiveCampaignApiRecordModel,
+} = require("../Models/ActiveCampaignModel");
+const { JVZooAccount } = require("../Models/JvzooModel");
 
 const createHash = async (password) => {
   const saltRounds = 10;
@@ -161,6 +165,17 @@ const handleGettingUserInfo = async (req, res) => {
     UserEmail: email,
   });
 
+  const checkActiveCampaignAccountLinked =
+    await ActiveCampaignApiRecordModel.findOne({
+      Email: email,
+    });
+  
+    const checkJvzooAccountLinked =
+    await JVZooAccount.findOne({
+      Email: email,
+    });
+
+
   res.status(200).json({
     Google: checkGoogleAcountLinked,
     GTW: checkGoToWebinarAccountLinked,
@@ -169,6 +184,8 @@ const handleGettingUserInfo = async (req, res) => {
     GetResponse: checkGetResponseAccountLinked,
     Bigmarker: checkBigmarkerAccountLinked,
     Sendy: checkSendyAccountLinked,
+    ActiveCampaign: checkActiveCampaignAccountLinked,
+    Jvzoo: checkJvzooAccountLinked
   });
 };
 
@@ -199,15 +216,14 @@ const handleGetAutomationData = async (req, res) => {
       Email: email,
     });
 
-   const GTWToAppWorkflows=  await GoToWebinarToAppAutomationData.find({
-    Email: email,
-  });
+    const GTWToAppWorkflows = await GoToWebinarToAppAutomationData.find({
+      Email: email,
+    });
 
-  const BigmarkerToAppWorkflows=  await BigmarkerToAppAutomationData.find({
-    Email: email,
-  });
+    const BigmarkerToAppWorkflows = await BigmarkerToAppAutomationData.find({
+      Email: email,
+    });
 
-     
     const BigmarkerToSheetWorkflows =
       await BigmarkerToGoogleSheetAutomationData.find({ Email: email });
 
@@ -235,7 +251,6 @@ const handleGetAutomationData = async (req, res) => {
 };
 
 const handleDeleteWorkflow = async (req, res) => {
-
   const { id } = req.query;
   const { RecordInDBId } = req.body;
 
@@ -258,10 +273,14 @@ const handleDeleteWorkflow = async (req, res) => {
       { Automation: GoToWebinarAutomationData, DataModel: GotoWebinerListInDB },
       { Automation: GoToWebinarToGoogleSheetAutomationData, DataModel: null },
       { Automation: SendyAutomationData, DataModel: SendyRegistrants },
-      { Automation: GoToWebinarToAppAutomationData, DataModel: GotoWebinerListInDB },
-      { Automation: BigmarkerToAppAutomationData, DataModel: BigmarkerRegistrantsInDb }
-
-
+      {
+        Automation: GoToWebinarToAppAutomationData,
+        DataModel: GotoWebinerListInDB,
+      },
+      {
+        Automation: BigmarkerToAppAutomationData,
+        DataModel: BigmarkerRegistrantsInDb,
+      },
     ];
 
     let workflowDeleted = false;
@@ -284,11 +303,9 @@ const handleDeleteWorkflow = async (req, res) => {
     if (!workflowDeleted) {
       res.status(404).json({ message: "Workflow not found..." });
     } else {
-      res
-        .status(200)
-        .json({
-          message: "Workflow deleted successfully, and DB record cleared.",
-        });
+      res.status(200).json({
+        message: "Workflow deleted successfully, and DB record cleared.",
+      });
     }
   } catch (error) {
     console.error("Error querying documents:", error);

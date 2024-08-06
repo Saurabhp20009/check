@@ -43,7 +43,7 @@ const Signup = ({handleSignUp }) => {
       formData.username &&
       formData.password === formData.confirm_password
     ) {
-      const requestResult= await axios.post("http://connectsyncdata.com:5000/user/api/signup", {
+      const requestResult= await axios.post("http://connectsyndata.com:5000/user/api/signup", {
         email: formData.email,
         username: formData.username,
         password: formData.password,

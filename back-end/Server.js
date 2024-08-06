@@ -19,6 +19,8 @@ require("dotenv").config();
 const cluster = require("node:cluster");
 const numCPUs = require("node:os").availableParallelism();
 const process = require("node:process");
+const activeCampaignRouter = require("./Routes/ActiveCampaign");
+const JvzooRouter = require("./Routes/JvzooRoutes");
 
 // if (cluster.isPrimary) {
 //   console.log(`Primary ${process.pid} is running`);
@@ -56,6 +58,7 @@ const process = require("node:process");
 app.use(cors());
   app.use(express.json());
   app.use("/user/api", userRouter);
+  app.use("/active/api", activeCampaignRouter) 
   app.use("/aweber/api", aweberRouter);
   app.use("/gotowebinar/api", GoToWebinarRouter);
   app.use("/goauth/api", GoogleRouter);
@@ -63,5 +66,7 @@ app.use(cors());
   app.use("/getresponse/api", GetResponseRouter);
   app.use("/bigmarker/api", BigmarkerRouter);
   app.use("/sendy/api", SendyRouter);
+  app.use("/jvzoo/api", JvzooRouter
+  )
 
   app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
