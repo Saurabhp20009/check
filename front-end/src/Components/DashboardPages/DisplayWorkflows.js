@@ -17,7 +17,7 @@ const DisplayWorkflows = () => {
 
   const getWorkFlows = async () => {
     await axios
-      .get(`http://connectsyndata.com:5000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://backend.connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then((response) => {

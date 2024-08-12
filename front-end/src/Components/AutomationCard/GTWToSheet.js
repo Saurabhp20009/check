@@ -55,7 +55,7 @@ function GTWToSheetAutomationCard({ setShowAutomationCard, ShowAutomationCard })
     console.log(body);
     await axios
       .post(
-        `http://connectsyndata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
         body,{
           headers: headers
         }
@@ -73,7 +73,7 @@ function GTWToSheetAutomationCard({ setShowAutomationCard, ShowAutomationCard })
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyndata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
+        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,{
           headers: headers
         }
       )
@@ -91,7 +91,7 @@ function GTWToSheetAutomationCard({ setShowAutomationCard, ShowAutomationCard })
 
      await axios
       .post(
-        `http://connectsyndata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,{
           headers: headers
         }

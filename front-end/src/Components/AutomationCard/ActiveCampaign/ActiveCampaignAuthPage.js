@@ -23,7 +23,7 @@ const ActiveCampaignAuthPage = () => {
 
     await axios
       .post(
-        `http://connectsyndata.com:5000/bigmarker/api/create/account?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/bigmarker/api/create/account?email=${user.email}`,
         body,
         {
           headers: headers,

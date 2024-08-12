@@ -61,7 +61,7 @@ function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       };
 
       const response = await axios
-        .post("http://connectsyndata.com:5000/aweber/api/startautomation", body, {
+        .post("http://backend.connectsyncdata.com:5000/aweber/api/startautomation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -76,7 +76,7 @@ function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         listId: aweberListId,
       };
       const response = await axios
-        .post("http://connectsyndata.com:5000/aweber/api/start/del/automation", body, {
+        .post("http://backend.connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -88,7 +88,7 @@ function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingAweberList = async () => {
     await axios
       .post(
-        "http://connectsyndata.com:5000/aweber/api/gettinglists",
+        "http://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -118,7 +118,7 @@ function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://connectsyndata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -146,7 +146,7 @@ function JvzooAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     const response = await axios
       .post(
-        `http://connectsyndata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

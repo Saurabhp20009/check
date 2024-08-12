@@ -25,7 +25,7 @@ const GoToWebinarAuthPage = () => {
     setSpinner(true);
     await axios
       .post(
-        `http://connectsyndata.com:5000/gotowebinar/api/login?email=${user.email}`,
+        `http://backend.connectsyncdata.com:5000/gotowebinar/api/login?email=${user.email}`,
         body,
         {
           headers: headers,

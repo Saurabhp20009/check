@@ -86,7 +86,7 @@ const ExistingWorkFlows = ({ item, workflowId }) => {
 
     await axios
       .post(
-        `http://connectsyndata.com:5000/user/api/delete/workflow?id=${item._id}`,
+        `http://backend.connectsyncdata.com:5000/user/api/delete/workflow?id=${item._id}`,
         body,
         {
           headers: headers,
