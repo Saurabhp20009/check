@@ -14,13 +14,14 @@ const GetResponseRouter = require("./Routes/GetResponseRoutes");
 const BigmarkerRouter = require("./Routes/BigmarkerRoutes");
 const SendyRouter = require("./Routes/SendyRoutes");
 require("dotenv").config();
-
+var os = require("os");
 
 const cluster = require("node:cluster");
 const numCPUs = require("node:os").availableParallelism();
 const process = require("node:process");
 const activeCampaignRouter = require("./Routes/ActiveCampaign");
 const JvzooRouter = require("./Routes/JvzooRoutes");
+var hostname = os.hostname();
 
 // if (cluster.isPrimary) {
 //   console.log(`Primary ${process.pid} is running`);
@@ -53,20 +54,28 @@ const JvzooRouter = require("./Routes/JvzooRoutes");
 //   console.log(`Worker ${process.pid} started`);
 // }
 
+var networkInterfaces = os.networkInterfaces();
 
+//console.log(networkInterfaces);
 
 app.use(cors());
-  app.use(express.json());
-  app.use("/user/api", userRouter);
-  app.use("/active/api", activeCampaignRouter) 
-  app.use("/aweber/api", aweberRouter);
-  app.use("/gotowebinar/api", GoToWebinarRouter);
-  app.use("/goauth/api", GoogleRouter);
-  app.use("/brevo/api", BrevoRouter);
-  app.use("/getresponse/api", GetResponseRouter);
-  app.use("/bigmarker/api", BigmarkerRouter);
-  app.use("/sendy/api", SendyRouter);
-  app.use("/jvzoo/api", JvzooRouter
-  )
+app.use(express.json());
+app.use("/user/api", userRouter);
+app.use("/active/api", activeCampaignRouter);
+app.use("/aweber/api", aweberRouter);
+app.use("/gotowebinar/api", GoToWebinarRouter);
+app.use("/goauth/api", GoogleRouter);
+app.use("/brevo/api", BrevoRouter);
+app.use("/getresponse/api", GetResponseRouter);
+app.use("/bigmarker/api", BigmarkerRouter);
+app.use("/sendy/api", SendyRouter);
+app.use("/jvzoo/api", JvzooRouter);
 
-  app.listen(PORT, () => console.log(`Server is active at port ${PORT}`));
+const Server= app.listen(PORT,'0.0.0.0' ,() => {
+
+  const address= Server.address();
+  const host = address.address === "::" ? 'localhost': address.address;
+  console.log(
+    `Server is active at ${host}  port ${PORT}`
+  );
+});
