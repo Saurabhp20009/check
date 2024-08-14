@@ -56,7 +56,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/brevo/api/start/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/brevo/api/start/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -83,7 +83,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   
         await axios
           .post(
-            `http://backend.connectsyncdata.com:5000/brevo/api/start/del/automation?email=${user.email}`,
+            `https://backend.connectsyncdata.com:5000/brevo/api/start/del/automation?email=${user.email}`,
             body,
             {
               headers: headers,
@@ -104,7 +104,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -125,7 +125,7 @@ function BrevoAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

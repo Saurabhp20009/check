@@ -41,7 +41,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
    const gettingAweberList = async () => {
     await axios
       .post(
-        "http://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
+        "https://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -63,7 +63,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
   const gettingCampaignLists = async () => {
     await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
         {
           headers: headers,
         }
@@ -125,7 +125,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
 
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/gotowebinar/api/edit/automation?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/gotowebinar/api/edit/automation?email=${user.email}`,
         body,
         {
           headers: headers,
@@ -144,7 +144,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -163,7 +163,7 @@ function GTWEditAutomationCard({ setShowAutomationCard, item }) {
 
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

@@ -38,7 +38,7 @@ function BigmarkerAutomationCard({
   const gettingAweberList = async () => {
     await axios
       .post(
-        "http://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
+        "https://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -65,7 +65,7 @@ function BigmarkerAutomationCard({
   const gettingCampaignLists = async () => {
     await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
         {
           headers: headers,
         }
@@ -359,7 +359,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertosheet/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -385,7 +385,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -408,7 +408,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -431,7 +431,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -454,7 +454,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/bigmarkertoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -478,7 +478,7 @@ function BigmarkerAutomationCard({
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/bigmarker/api/start/del/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/bigmarker/api/start/del/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -498,7 +498,7 @@ function BigmarkerAutomationCard({
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -517,7 +517,7 @@ function BigmarkerAutomationCard({
 
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

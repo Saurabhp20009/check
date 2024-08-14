@@ -21,7 +21,7 @@ const GetResponseAuthPage = () => {
   const handleConnect = async () => {
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/getresponse/api/create/account?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/getresponse/api/create/account?email=${user.email}`,
         body,
         {
           headers: headers,

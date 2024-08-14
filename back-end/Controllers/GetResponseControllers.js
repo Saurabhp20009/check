@@ -16,7 +16,7 @@ const {
 
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
-const REDIRECT_URI = "http://backend.connectsyncdata.com:5000/goauth/api/auth/google/callback";
+const REDIRECT_URI = "https://backend.connectsyncdata.com:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -597,7 +597,7 @@ const handleEditAutomation = async (req, res) => {
     if (Operation == 1) {
       const response = await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
+          `https://backend.connectsyncdata.com:5000/getresponse/api/start/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -616,7 +616,7 @@ const handleEditAutomation = async (req, res) => {
     } else if (Operation == 2) {
       const response = await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/getresponse/api/start/del/automation?email=${email}`,
+          `https://backend.connectsyncdata.com:5000/getresponse/api/start/del/automation?email=${email}`,
           body,
           {
             headers: headers,

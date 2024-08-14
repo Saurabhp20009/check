@@ -35,7 +35,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingAweberList = async () => {
     await axios
       .post(
-        "http://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
+        "https://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -64,7 +64,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingCampaignLists = async () => {
     await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/getresponse/api/get/campaign?email=${user.email}`,
         {
           headers: headers,
         }
@@ -324,7 +324,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     if (operation == 2) {
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -345,7 +345,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
     } else if (operation == 1) {
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -368,7 +368,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -391,7 +391,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -414,7 +414,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -439,7 +439,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
       await axios
         .post(
-          `http://backend.connectsyncdata.com:5000/gotowebinar/api/start/del/automation?email=${user.email}`,
+          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/del/automation?email=${user.email}`,
           body,
           {
             headers: headers,
@@ -461,7 +461,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -480,7 +480,7 @@ function GTWAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     await axios
       .post(
-        `http://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `https://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

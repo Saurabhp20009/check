@@ -32,7 +32,7 @@ const {
 const CLIENT_ID = "zoL6mwfjdAiMsF8wVRVWVpAZ40S0H0Pt";
 const CLIENT_SECRET = "F1HeE25IpnwU5WoGWm3uMEK7ji6A0SO2";
 const REDIRECT_URI =
-  "http://backend.connectsyncdata.com:5000/goauth/api/auth/google/callback";
+  "https://backend.connectsyncdata.com:5000/goauth/api/auth/google/callback";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -1205,7 +1205,7 @@ const handleEditAutomation = async (req, res) => {
 
       if (operation == 1) {
         const response = await axios
-          .post("http://backend.connectsyncdata.com:5000/aweber/api/startautomation", body, {
+          .post("https://backend.connectsyncdata.com:5000/aweber/api/startautomation", body, {
             headers: headers,
           })
           .then(async (response) => {
@@ -1220,7 +1220,7 @@ const handleEditAutomation = async (req, res) => {
           });
       } else {
         const response = await axios
-          .post("http://backend.connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
+          .post("https://backend.connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
             headers: headers,
           })
           .then(async (response) => {
