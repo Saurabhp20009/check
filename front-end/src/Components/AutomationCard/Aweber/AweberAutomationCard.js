@@ -59,7 +59,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
       };
 
       const response = await axios
-        .post("https://backend.connectsyncdata.com:5000/aweber/api/startautomation", body, {
+        .post("http://24.199.76.74:5000/aweber/api/startautomation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -74,7 +74,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         listId: aweberListId,
       };
       const response = await axios
-        .post("https://backend.connectsyncdata.com:5000/aweber/api/start/del/automation", body, {
+        .post("http://24.199.76.74:5000/aweber/api/start/del/automation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -90,7 +90,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
         listId: aweberListId,
       };
       const response = await axios
-        .post("https://backend.connectsyncdata.com:5000/aweber/api/start/app/automation", body, {
+        .post("http://24.199.76.74:5000/aweber/api/start/app/automation", body, {
           headers: headers,
         })
         .then((response) => window.location.reload());
@@ -102,7 +102,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingAweberList = async () => {
     await axios
       .post(
-        "https://backend.connectsyncdata.com:5000/aweber/api/gettinglists",
+        "http://24.199.76.74:5000/aweber/api/gettinglists",
         {
           email: user.email,
         },
@@ -126,7 +126,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
   const gettingSpreadsheetList = async () => {
     const response = await axios
       .get(
-        `https://backend.connectsyncdata.com:5000/goauth/api/get/spreadsheets?email=${user.email}`,
+        `http://24.199.76.74:5000/goauth/api/get/spreadsheets?email=${user.email}`,
         {
           headers: headers,
         }
@@ -154,7 +154,7 @@ function AweberAutomationCard({ setShowAutomationCard, ShowAutomationCard }) {
 
     const response = await axios
       .post(
-        `https://backend.connectsyncdata.com:5000/goauth/api/get/sheetsnames?email=${user.email}`,
+        `http://24.199.76.74:5000/goauth/api/get/sheetsnames?email=${user.email}`,
         body,
         {
           headers: headers,

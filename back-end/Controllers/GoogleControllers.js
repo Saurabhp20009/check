@@ -8,7 +8,7 @@ const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
 const REDIRECT_URI =
-  "http://localhost:5000/goauth/api/auth/google/callback";
+  "http://24.199.76.74:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -31,7 +31,7 @@ const LinkGoogleAccount = async (req, res) => {
   res.header(
     "Access-Control-Allow-Origin",
     "https://connectsyndata.com:3000",
-    "http://localhost:3000"
+    "http://24.199.76.74:3000"
   );
   res.header("Referrer-Policy", "no-referrer-when-downgrade");
 

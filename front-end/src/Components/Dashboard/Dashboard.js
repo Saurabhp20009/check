@@ -77,7 +77,7 @@ const Dashboard = () => {
 
   const getWorkFlows = async () => {
     await axios
-      .get(`https://backend.connectsyncdata.com:5000/user/api/get/workflows?email=${user.email}`, {
+      .get(`http://24.199.76.74:5000/user/api/get/workflows?email=${user.email}`, {
         headers: headers,
       })
       .then(async (response) => {

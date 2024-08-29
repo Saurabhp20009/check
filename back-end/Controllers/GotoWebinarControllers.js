@@ -27,7 +27,7 @@ let Email;
 const GTWUrls = {
   OAUTH_SERVICE_URL: "https://authentication.logmeininc.com",
   OAUTH_REDIRECT_URI:
-    "https://backend.connectsyncdata.com:5000/gotowebinar/api/login/oauth2/code/goto",
+    "http://24.199.76.74:5000/gotowebinar/api/login/oauth2/code/goto",
 };
 
 let oauthConfig = {
@@ -819,7 +819,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -845,7 +845,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtosheet/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/gtwtosheet/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -872,7 +872,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -899,7 +899,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -927,7 +927,7 @@ const handleEditAutomation = async (req, res) => {
 
       await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/gtwtoapp/automation?email=${email}`,
           body,
           {
             headers: headers,
@@ -955,7 +955,7 @@ const handleEditAutomation = async (req, res) => {
 
       const response = await axios
         .post(
-          `https://backend.connectsyncdata.com:5000/gotowebinar/api/start/del/automation?email=${email}`,
+          `http://24.199.76.74:5000/gotowebinar/api/start/del/automation?email=${email}`,
           body,
           {
             headers: headers,

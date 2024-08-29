@@ -17,7 +17,7 @@ const AweberAuthLinkPage = () => {
 
     // You can perform actions here with the aweberLink state
    await axios
-      .post("https://backend.connectsyncdata.com:5000/aweber/api/createtoken", {
+      .post("http://24.199.76.74:5000/aweber/api/createtoken", {
         authorizationResponse: aweberLink,
         email: user.email,
       },{

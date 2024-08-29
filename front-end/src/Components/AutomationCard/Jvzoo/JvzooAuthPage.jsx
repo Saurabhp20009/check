@@ -24,7 +24,7 @@ const JvzooAuthPage = () => {
 
     await axios
       .post(
-        `https://backend.connectsyncdata.com:5000/jvzoo/api/link/active/account`,
+        `http://24.199.76.74:5000/jvzoo/api/link/active/account`,
         body,
         {
           headers: headers,
