@@ -23,6 +23,10 @@ const Signup = ({handleSignUp }) => {
   const [showSubmitErrors, setShowSubmitErrors] = useState(false);
   const [displaySubmitError, setDisplaySubmitError] = useState("");
 
+  const API_URL = process.env.REACT_APP_APIURL;
+  console.log(API_URL);
+
+
   const handleSubmit = async () => {
     if (
       !formData.email ||
@@ -43,7 +47,7 @@ const Signup = ({handleSignUp }) => {
       formData.username &&
       formData.password === formData.confirm_password
     ) {
-      const requestResult= await axios.post("http://24.199.76.74:5000/user/api/signup", {
+      const requestResult= await axios.post("http://localhost:5000/user/api/signup", {
         email: formData.email,
         username: formData.username,
         password: formData.password,

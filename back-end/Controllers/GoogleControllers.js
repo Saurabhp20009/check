@@ -8,7 +8,7 @@ const { GotoWebinerListInDB } = require("../Models/GoToWebinarModel");
 const CLIENT_ID =
   "682751091317-vsefliu7rhk0ndf2p7dqpc9k8bsjvjp4.apps.googleusercontent.com";
 const REDIRECT_URI =
-  "http://24.199.76.74:5000/goauth/api/auth/google/callback";
+  "http://localhost:5000/goauth/api/auth/google/callback";
 const CLIENT_SECRET = "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";
 
 const SCOPE = [
@@ -22,6 +22,8 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
+
+
 var Email = null;
 
 const LinkGoogleAccount = async (req, res) => {
@@ -31,8 +33,10 @@ const LinkGoogleAccount = async (req, res) => {
   res.header(
     "Access-Control-Allow-Origin",
     "https://connectsyndata.com:3000",
-    "http://24.199.76.74:3000"
+    "http://localhost:3000"
   );
+
+  
   res.header("Referrer-Policy", "no-referrer-when-downgrade");
 
   const url = oauth2Client.generateAuthUrl({
@@ -44,11 +48,12 @@ const LinkGoogleAccount = async (req, res) => {
   res.status(200).json({ AuthUrl: url });
 };
 
+
+//Google OAuth callback handler
 const GoogleOAuthCallBackHandle = async (req, res) => {
   const code = req.query.code;
   try {
     const { tokens } = await oauth2Client.getToken(code);
-    // console.log(tokens);
     const accessToken = tokens.access_token;
     const refreshToken = tokens.refresh_token; // This will contain the refresh token
 
@@ -59,6 +64,7 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
     });
 
     DocumentInstance.save();
+    
     res.status(200).json({
       AccessToken: `${accessToken}`,
       RefreshToken: `${refreshToken}`,
@@ -70,6 +76,8 @@ const GoogleOAuthCallBackHandle = async (req, res) => {
     res.status(500).send("Failed to authenticate with Google.");
   }
 };
+
+
 
 const GetSpreadSheetRecords = async (req, res) => {
   const { email } = req.query;
@@ -108,6 +116,8 @@ const GetSpreadSheetRecords = async (req, res) => {
     return res.status(401).json({ message: error });
   }
 };
+
+
 
 const GetSheetNames = async (req, res) => {
   const { SheetId } = req.body;

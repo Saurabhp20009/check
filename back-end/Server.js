@@ -14,6 +14,9 @@ const GetResponseRouter = require("./Routes/GetResponseRoutes");
 const BigmarkerRouter = require("./Routes/BigmarkerRoutes");
 const SendyRouter = require("./Routes/SendyRoutes");
 require("dotenv").config();
+const path = require('path');
+
+
 var os = require("os");
 
 const cluster = require("node:cluster");
@@ -70,6 +73,17 @@ app.use("/getresponse/api", GetResponseRouter);
 app.use("/bigmarker/api", BigmarkerRouter);
 app.use("/sendy/api", SendyRouter);
 app.use("/jvzoo/api", JvzooRouter);
+
+
+// app.use(express.static(path.join(__dirname, '../front-end/build')));
+
+//running frontend react build  on backend server
+// app.get("*", (req, res) => {
+
+//   res.sendFile(path.join(__dirname, '../front-end/build', 'index.html'))
+// })
+
+
 
 const Server= app.listen(PORT,'0.0.0.0' ,() => {
 

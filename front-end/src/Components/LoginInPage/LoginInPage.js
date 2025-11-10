@@ -11,11 +11,15 @@ import "react-toastify/dist/ReactToastify.css";
 const LoginInPage = ({ handleLogin, handleSignUp }) => {
   //hooks
   const [passwordVisibility, setPasswordVisibilty] = useState(false);
-  const [formData, setFormData] = useState({ email:null, password: null });
+  const [formData, setFormData] = useState({ email: null, password: null });
   const [errors, setErrors] = useState({
     emailError: "Please Enter Your Email",
     passwordError: "Please Enter Your Password",
   });
+
+  const API_URL = process.env.REACT_APP_APIURL;
+  console.log(process.env.REACT_APP);
+
 
   const handlePasswordVisibility = () => {
     setPasswordVisibilty(!passwordVisibility);
@@ -31,42 +35,34 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
 
     if (emailValidationCheck) {
       const requestResult = await axios.post(
-        "http://24.199.76.74:5000/user/api/login",
+        "http://localhost:5000/user/api/login",
         {
           email: formData.email,
           password: formData.password,
         }
       );
 
-      console.log(requestResult)
+      console.log(requestResult);
       console.log(requestResult.data.message);
 
       if (requestResult.data.status !== 200) {
         toast.error(requestResult.data.message);
-        
-      }     
-      
-      else{
-      
-        const userInfo={
-           email : `${requestResult.data.checkUserExistInDB.email}`,
-           username :  `${requestResult.data.checkUserExistInDB.username}`,
-           token:  `${requestResult.data.token}`
-        }
+      } else {
+        const userInfo = {
+          email: `${requestResult.data.checkUserExistInDB.email}`,
+          username: `${requestResult.data.checkUserExistInDB.username}`,
+          token: `${requestResult.data.token}`,
+        };
 
-        localStorage.setItem("userInfo",JSON.stringify(userInfo))
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
         handleLogin();
       }
-
     } else {
       if (!emailValidationCheck) {
         toast.error("Invalid email");
       }
-
-
     }
   };
-
 
   return (
     <div className="container-login">
@@ -80,7 +76,9 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
           <div className="login-form">
             <label>Email</label>
             <input
-              className={`login-inputClass  ${!formData.email && formData.email!==null && "inputErrors"}`}
+              className={`login-inputClass  ${
+                !formData.email && formData.email !== null && "inputErrors"
+              }`}
               type="email"
               value={formData.email}
               name="email"
@@ -89,7 +87,7 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
               }
               placeholder="Enter email"
             />
-            {!formData.email && formData.email!=null && (
+            {!formData.email && formData.email != null && (
               <div className="errors">{errors.emailError}</div>
             )}
 
@@ -97,7 +95,11 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
 
             <div className="login-form-input-password">
               <input
-                className={`login-inputClass  ${!formData.password && formData.password!==null  && "login-inputErrors"}`}
+                className={`login-inputClass  ${
+                  !formData.password &&
+                  formData.password !== null &&
+                  "login-inputErrors"
+                }`}
                 type={!passwordVisibility ? "password" : "text"}
                 name="password"
                 value={formData.password}
@@ -114,7 +116,7 @@ const LoginInPage = ({ handleLogin, handleSignUp }) => {
                 )}
               </span>
             </div>
-            {!formData.password&& formData.password!=null && (
+            {!formData.password && formData.password != null && (
               <div className="login-errors"> {errors.passwordError}</div>
             )}
 

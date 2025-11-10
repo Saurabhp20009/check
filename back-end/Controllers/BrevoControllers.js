@@ -282,6 +282,8 @@ const StartAutomation = async (req, res) => {
       );
     });
 
+
+    //checking constantly the workflow status 
     const interval = setInterval(
       async () => {
         const workflowCheck = await BrevoAutomationData.findOne({
@@ -307,6 +309,8 @@ const StartAutomation = async (req, res) => {
     return res.status(502).json({ message: error.message });
   }
 };
+
+
 
 const handleEditAutomation = async (req, res) => {
   const { DataInDB, name, spreadSheetId, sheetName, listIds, Item, Operation } =
